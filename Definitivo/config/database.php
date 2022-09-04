@@ -46,12 +46,12 @@ return [
             'driver'   => 'firebird',
             'host'     => env('DB_HOST', 'localhost'),
             'port'     => env('DB_PORT', '3050'),
-            'database' => env('DB_DATABASE', 'C:\DB\EXE01.FDB'),
+            'database' => env('DB_DATABASE', 'c:\DRT\NOVO.FDB'),
             'username' => env('DB_USERNAME', 'SYSDBA'),
-            'password' => env('DB_PASSWORD', 'admin'),
+            'password' => env('DB_PASSWORD', 'masterkey'),
             'charset'  => env('DB_CHARSET', 'UTF8'),
             'role'     => 'RDB$ADMIN',
-            'engine_version' => '3.0.10',
+            'engine_version' => '3.0.4',
         ],
 
 

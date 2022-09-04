@@ -2,11 +2,12 @@
 
 namespace App;
 
-use Firebird\Eloquent\Model;
+
+use Illuminate\Database\Eloquent\Model;
 
 class User extends Model
 {
-    protected $table = 'TESTE';
+    protected $table = 'TEST';
 
 
     protected $primaryKey = 'NOME';

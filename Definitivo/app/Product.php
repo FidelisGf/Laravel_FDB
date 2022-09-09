@@ -13,9 +13,14 @@ class Product extends Model
     protected $primaryKey = 'ID_PRODUTO';
     protected $generator = 'GEN_PRODUCTS_ID';
     protected $keyType = 'integer';
-
+    public function Category(){
+        return $this->belongsTo(Category::class, 'ID_CATEGORIA');
+    }
     public $timestamps = false;
 
+    protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA'];
 
-    protected $fillable = ['NOME', 'DESC', 'VALOR'];
+
+
+
 }

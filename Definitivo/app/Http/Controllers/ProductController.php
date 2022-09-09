@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
+use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Product;
 use Illuminate\Http\Request;
@@ -15,19 +17,8 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $PRODUCTS = Product::get()->toJson(JSON_PRETTY_PRINT);
-        return response($PRODUCTS, 200);
-        
-    }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+        $PRODUCTS = Product::paginate(15);
+        return ProductResource::collection($PRODUCTS);
     }
 
     /**
@@ -38,7 +29,20 @@ class ProductController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try{
+            Product::create($request->all());
+            return response()->json(
+                [
+                    "message" => "Produto criado com sucesso"
+                ],200
+                );
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
     }
 
     /**
@@ -49,7 +53,16 @@ class ProductController extends Controller
      */
     public function show($id)
     {
-        //
+        try{
+            $PRODUCT = Product::findOrFail($id);
+            return new ProductResource($PRODUCT);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
     }
 
     /**
@@ -58,10 +71,6 @@ class ProductController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function edit($id)
-    {
-        //
-    }
 
     /**
      * Update the specified resource in storage.
@@ -72,7 +81,23 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+
+        try{
+            $PRODUCT = Product::findOrFail($id);
+            $PRODUCT->update($request->all());
+            return response()->json(
+                [
+                    "message" => "Produto editado com sucesso"
+                ]
+                );
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+                );
+        }
+
     }
 
     /**
@@ -83,6 +108,98 @@ class ProductController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try{
+            $PRODUCT = Product::findOrFail($id);
+            $PRODUCT->delete();
+            return response()->json(
+                [
+                    "message" => "Produto excluido com sucesso !"
+                ]
+                );
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+                );
+        }
     }
+
+    public function filterByLowestValue(){
+        try{
+            $PRODUCT = Product::orderBy('VALOR', 'asc')->paginate(15);
+            return ProductResource::collection($PRODUCT);
+
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+                );
+        }
+    }
+    public function filterByExpansiveValue(){
+        try{
+            $PRODUCTS = Product::orderBy('VALOR', 'desc')->paginate(15);
+            return ProductResource::collection($PRODUCTS);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+            );
+        }
+    }
+    //%{$searchTerm}%
+    public function search(Request $request){
+        try{
+            $search = $request->search;
+            $search = ucwords($search);
+            $PRODUCTS = Product::query()->where('NOME', 'LIKE', '%'. $search.'%')
+                                ->orWhere('DESC', 'LIKE', '%'.$search.'%')->paginate(15);
+            return ProductResource::collection($PRODUCTS);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+                );
+        }
+    }
+
+    public function bringAllProductsFromCategory(Request $request){
+        try{
+            $NOME = $request->input('NOME');
+            $CATEGORY = Category::where('NOME', '=', $NOME)->first();
+            if($CATEGORY->isEmpty()){
+               return response()->json(
+                [
+                    "message" => "Não foi possivel encontrar uma Categoria com esse Nome"
+                ],404
+               ) ;
+            }else{
+                $PRODUCTS = Product::where('ID_CATEGORIA', '=', $CATEGORY->ID_CATEGORIA)->paginate(15);
+                return ProductResource::collection($PRODUCTS);
+            }
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
+
+    public function filters(Request $request){
+        switch (true){
+            case $request->has('lower'):
+                return $this->filterByLowestValue();
+                break;
+
+            case $request->has('expansive'):
+                return $this->filterByExpansiveValue();
+                break;
+        }
+    }
+
 }

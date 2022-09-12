@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 class Product extends Model
 {
     protected $table = 'PRODUCTS';
+    const CREATED_AT = 'CREATED_AT';
+    const UPDATED_AT = 'UPDATED_AT';
 
 
     protected $primaryKey = 'ID_PRODUTO';
@@ -16,7 +18,10 @@ class Product extends Model
     public function Category(){
         return $this->belongsTo(Category::class, 'ID_CATEGORIA');
     }
-    public $timestamps = false;
+    public $timestamps = true;
+
+
+
 
     protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA'];
 

@@ -88,7 +88,7 @@ class ProductController extends Controller
             return response()->json(
                 [
                     "message" => "Produto editado com sucesso"
-                ]
+                ],200
                 );
         }catch(\Exception $e){
             return response()->json(
@@ -114,13 +114,13 @@ class ProductController extends Controller
             return response()->json(
                 [
                     "message" => "Produto excluido com sucesso !"
-                ]
+                ],200
                 );
         }catch(\Exception $e){
             return response()->json(
                 [
                     "message" => $e->getMessage()
-                ]
+                ],400
                 );
         }
     }
@@ -134,7 +134,7 @@ class ProductController extends Controller
             return response()->json(
                 [
                     "message" => $e->getMessage()
-                ]
+                ],400
                 );
         }
     }
@@ -146,7 +146,7 @@ class ProductController extends Controller
             return response()->json(
                 [
                     "message" => $e->getMessage()
-                ]
+                ],400
             );
         }
     }
@@ -162,7 +162,7 @@ class ProductController extends Controller
             return response()->json(
                 [
                     "message" => $e->getMessage()
-                ]
+                ],400
                 );
         }
     }

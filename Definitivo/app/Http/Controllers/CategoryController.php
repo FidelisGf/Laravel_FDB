@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Http\Resources\CategoryResource;
+use App\Http\Resources\ProductResource;
+use App\Product;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -26,16 +28,18 @@ class CategoryController extends Controller
         }
 
     }
-
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
+    public function findAllProductByCategory($id){
+        try{
+            return CategoryResource::collection(Category::with(['product'])->findOrFail($id)->paginate(15));
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+            );
+        }
     }
+
 
     /**
      * Store a newly created resource in storage.
@@ -67,9 +71,16 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show(Category $category)
+    public function show($id)
     {
-        //
+        try{
+            $category = Category::findOrFail($id);
+            return new CategoryResource($category);
+        }catch(\Exception $e){
+            return response()->json([
+                "message" => $e->getMessage()
+            ],400);
+        }
     }
 
     /**
@@ -78,11 +89,6 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function edit(Category $category)
-    {
-        //
-    }
-
     /**
      * Update the specified resource in storage.
      *
@@ -92,7 +98,21 @@ class CategoryController extends Controller
      */
     public function update(Request $request, Category $category)
     {
-        //
+        try{
+            $Category = Category::findOrFail($category->ID_CATEGORIA);
+            $Category->update($request->all());
+            return response()->json(
+                [
+                    "message" => "Categoria editada com sucesso"
+                ]
+                );
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+                );
+        }
     }
 
     /**

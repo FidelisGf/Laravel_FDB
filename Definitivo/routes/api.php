@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ProductController;
 use App\Product;
 use Illuminate\Http\Request;
@@ -20,12 +22,20 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
 });
 
-Route::post('/findAllProductsByCategory', [ProductController::class, 'bringAllProductsFromCategory']);
+Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
+
+
+
 Route::post('/search', [ProductController::class, 'search']);
 Route::post('/filterBy', [ProductController::class, 'filters']);
 
 
+
+Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsAndCategoryFromEmpresa']);
+Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
+Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCategoryFromEmpresa']);
+
+
 Route::resource('products', 'ProductController');
-
-
+Route::resource('empresas', 'EmpresaController');
 Route::resource('categorys', 'CategoryController');

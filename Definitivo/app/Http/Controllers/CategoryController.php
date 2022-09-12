@@ -30,7 +30,7 @@ class CategoryController extends Controller
     }
     public function findAllProductByCategory($id){
         try{
-            return CategoryResource::collection(Category::with(['product'])->findOrFail($id)->paginate(15));
+            return new CategoryResource(Category::with(['product'])->findOrFail($id)->first());
         }catch(\Exception $e){
             return response()->json(
                 [

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
 use App\Empresa;
 use App\Http\Resources\EmpresaResource;
 use Illuminate\Http\Request;
@@ -27,15 +28,7 @@ class EmpresaController extends Controller
         }
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function create()
-    {
-        //
-    }
+
 
     /**
      * Store a newly created resource in storage.
@@ -64,8 +57,7 @@ class EmpresaController extends Controller
 
     public function allProductsAndCategoryFromEmpresa($id){
         try{
-            $PRODUCTS = Empresa::with(['category.product'])->findOrFail($id)->paginate(15);
-            return EmpresaResource::collection($PRODUCTS);
+            return EmpresaResource::collection(Empresa::with('category')->findOrFail($id)->paginate(15));
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -77,8 +69,8 @@ class EmpresaController extends Controller
 
     public function allCategoryFromEmpresa($id){
         try{
-            return EmpresaResource::collection(Empresa::with(['category:ID_EMPRESA,NOME'])->findOrFail($id)->paginate(15));
-            //return EmpresaResource::collection($CATEGORYS);
+            $CATEGORYS = Empresa::with('category')->findOrFail($id)->first();
+            return new EmpresaResource($CATEGORYS);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -103,6 +95,9 @@ class EmpresaController extends Controller
 
     }
 
+
+
+
     /**
      * Display the specified resource.
      *
@@ -111,7 +106,15 @@ class EmpresaController extends Controller
      */
     public function show(Empresa $empresa)
     {
-        //
+        try{
+            return Empresa::findOrFail($empresa->ID_EMPRESA)->get();
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
     }
 
     /**

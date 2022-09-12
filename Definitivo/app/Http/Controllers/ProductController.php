@@ -167,28 +167,6 @@ class ProductController extends Controller
         }
     }
     //ucwords($bar);
-    public function bringAllProductsFromCategory(Request $request){
-        try{
-            $NOME = $request->input('NOME');
-            $NOME = ucwords($NOME);
-            $CATEGORY = Category::where('NOME', '=', $NOME)->first();
-            if($CATEGORY != null){
-                $PRODUCTS = Product::where('ID_CATEGORIA', '=', $CATEGORY->ID_CATEGORIA)->paginate(15);
-                return ProductResource::collection($PRODUCTS);
-
-            }else{
-                return response()->json([
-                    "message" => "Não foi possivel encontrar uma Categoria com esse nome"
-                ],404);
-            }
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
 
     public function filters(Request $request){
         switch (true){

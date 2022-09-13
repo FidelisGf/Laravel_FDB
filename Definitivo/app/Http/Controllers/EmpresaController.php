@@ -17,8 +17,10 @@ class EmpresaController extends Controller
     public function index()
     {
         try{
-            $empresas = Empresa::paginate(15);
+            $empresas = Empresa::paginate(3);
             return EmpresaResource::collection($empresas);
+
+            //return response()->json(Empresa::all());
         }catch(\Exception $e){
             return response()->json(
                 [

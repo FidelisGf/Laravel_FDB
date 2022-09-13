@@ -57,7 +57,7 @@ class EmpresaController extends Controller
 
     public function allProductsAndCategoryFromEmpresa($id){
         try{
-            return EmpresaResource::collection(Empresa::with('category')->findOrFail($id)->paginate(15));
+            return Empresa::findOrFail($id)->product->first()->paginate(15);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -69,8 +69,7 @@ class EmpresaController extends Controller
 
     public function allCategoryFromEmpresa($id){
         try{
-            $CATEGORYS = Empresa::with('category')->findOrFail($id)->first();
-            return new EmpresaResource($CATEGORYS);
+            return Empresa::findOrFail($id)->category->first()->paginate(15);
         }catch(\Exception $e){
             return response()->json(
                 [

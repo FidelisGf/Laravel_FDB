@@ -6,6 +6,7 @@ use App\Category;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Product;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 
 class CategoryController extends Controller
@@ -30,7 +31,7 @@ class CategoryController extends Controller
     }
     public function findAllProductByCategory($id){
         try{
-            return new CategoryResource(Category::with(['product'])->findOrFail($id)->first());
+            return Category::findOrFail($id)->product->first()->paginate(15);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -38,6 +39,13 @@ class CategoryController extends Controller
                 ]
             );
         }
+    }
+
+
+    public function findProductFromCategoryWithInputedValue(Request $request){
+        return Category::whereHas('product', function(Builder $query){
+            $query->where('VALOR', '>=', 9000);
+        })->paginate(15);
     }
 
 

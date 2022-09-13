@@ -23,7 +23,7 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
-
+Route::post('/findByInputedValue', [CategoryController::class, 'findProductFromCategoryWithInputedValue']);
 
 
 Route::post('/search', [ProductController::class, 'search']);
@@ -31,7 +31,7 @@ Route::post('/filterBy', [ProductController::class, 'filters']);
 
 
 
-Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsAndCategoryFromEmpresa']);
+Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsFromEmpresa']);
 Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
 Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCategoryFromEmpresa']);
 

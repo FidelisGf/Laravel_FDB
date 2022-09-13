@@ -19,7 +19,6 @@ class EmpresaResource extends JsonResource
             'ID' => $this->ID_EMPRESA,
             'NOME' => $this->NOME,
             'CNPJ' => $this->CNPJ,
-            'CATEGORYS' => $this->category
         ];
     }
 }

@@ -23,7 +23,7 @@ class Empresa extends Model
     }
 
     public function product(){
-        return $this->hasManyThrough(Product::class, Category::class, "ID_CATEGORIA", "ID_EMPRESA", "ID_EMPRESA");
+        return $this->hasManyThrough(Product::class, Category::class, "ID_EMPRESA", "ID_CATEGORIA", "ID_EMPRESA");
     }
 
 }

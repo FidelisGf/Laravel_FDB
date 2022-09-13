@@ -21,6 +21,9 @@ class ProductResource extends JsonResource
             'NOME' => $this->NOME,
             'DESC' => $this->DESC,
             'VALOR' => $this->VALOR,
+            'CREATED_AT' => $this->CREATED_AT,
+            'UPDATED_AT' => $this->UPDATED_AT,
+            'DELETED_AT' => $this->DELETED_AT
         ];
     }
 }

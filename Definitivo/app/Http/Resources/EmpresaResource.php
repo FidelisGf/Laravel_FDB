@@ -18,7 +18,10 @@ class EmpresaResource extends JsonResource
         return [
             'ID' => $this->ID_EMPRESA,
             'NOME' => $this->NOME,
-            'CNPJ' => $this->CNPJ
+            'CNPJ' => $this->CNPJ,
+            'CREATED_AT' => $this->CREATED_AT,
+            'UPDATED_AT' => $this->UPDATED_AT,
+            'DELETED_AT' => $this->DELETED_AT
         ];
     }
 }

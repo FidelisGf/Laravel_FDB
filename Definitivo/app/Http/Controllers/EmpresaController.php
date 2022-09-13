@@ -111,7 +111,18 @@ class EmpresaController extends Controller
      */
     public function destroy($id)
     {
-        //
+        try{
+            Empresa::findOrFail($id)->delete();
+            return response()->json([
+                "message" => "Empresa Deletada com sucesso !"
+            ]);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],200
+            );
+        }
     }
     public function allProductsFromEmpresa($id){
         try{

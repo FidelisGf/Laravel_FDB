@@ -23,7 +23,9 @@ Route::middleware('auth:api')->get('/user', function (Request $request) {
 });
 
 Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
-Route::post('/findByInputedValue', [CategoryController::class, 'findProductFromCategoryWithInputedValue']);
+Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);
+Route::get('/mostExpansiveProduct/{id}', [CategoryController::class, 'CategoryMostExpansiveProduct']);
+Route::get('/avgFromCategorysProducts/{id}', [CategoryController::class, 'CategoryAVGProductPrice']);
 
 
 Route::post('/search', [ProductController::class, 'search']);
@@ -35,7 +37,6 @@ Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProducts
 Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
 Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCategoryFromEmpresa']);
 
-
-Route::resource('products', 'ProductController');
 Route::resource('empresas', 'EmpresaController');
+Route::resource('products', 'ProductController');
 Route::resource('categorys', 'CategoryController');

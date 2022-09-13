@@ -42,11 +42,18 @@ class CategoryController extends Controller
     }
 
 
-    public function findProductFromCategoryWithInputedValue(Request $request){
-        return Category::whereHas('product', function(Builder $query){
-            $query->where('VALOR', '>=', 9000);
-        })->paginate(15);
+    public function findCategoryWithProductsIn(){
+        try{
+            return Category::whereHas('product')->paginate(15);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+            );
+        }
     }
+
 
 
     /**
@@ -120,6 +127,30 @@ class CategoryController extends Controller
                     "message" => $e->getMessage()
                 ],400
                 );
+        }
+    }
+    public function CategoryMostExpansiveProduct($id){
+        try{
+            $PRODUCTS = Category::findOrFail($id)->product->max('VALOR');
+            return response()->json($PRODUCTS);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
+    public function CategoryAVGProductPrice($id){
+        try{
+            $PRODUCTS = Category::findOrFail($id)->product->avg('VALOR');
+            return response()->json($PRODUCTS);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
         }
     }
 

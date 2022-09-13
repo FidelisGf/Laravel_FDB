@@ -153,6 +153,18 @@ class CategoryController extends Controller
             );
         }
     }
+    public function CategoryMinProductPrice($id){
+        try{
+            $PRODUCTS = Category::findOrFail($id)->product->min('VALOR');
+            return response()->json($PRODUCTS);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+                );
+        }
+    }
 
     /**
      * Remove the specified resource from storage.

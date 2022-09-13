@@ -3,17 +3,20 @@
 namespace App;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Category extends Model
 {
     protected $table = 'CATEGORIAS';
-
-
+    const CREATED_AT = 'CREATED_AT';
+    const UPDATED_AT = 'UPDATED_AT';
+    const DELETED_AT = 'DELETED_AT';
+    use SoftDeletes;
     protected $primaryKey = 'ID_CATEGORIA';
     protected $generator = 'GEN_CATEGORIAS_ID';
     protected $keyType = 'integer';
 
-    public $timestamps = false;
+    public $timestamps = true;
 
     public function product(){
         return $this->hasMany(Product::class, 'ID_CATEGORIA', 'ID_CATEGORIA');
@@ -24,5 +27,5 @@ class Category extends Model
     }
 
     protected $fillable = ['NOME', 'ID_EMPRESA'];
-
+    protected $dates = ['DELETED_AT'];
 }

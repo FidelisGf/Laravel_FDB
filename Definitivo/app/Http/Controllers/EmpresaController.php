@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Category;
 use App\Empresa;
 use App\Http\Resources\EmpresaResource;
 use Illuminate\Http\Request;
@@ -45,7 +46,18 @@ class EmpresaController extends Controller
      */
     public function store(Request $request)
     {
-        //
+        try{
+            Empresa::create($request->all());
+            return response()->json([
+                "message" => "Empresa criada com sucesso"
+            ],200);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
     }
 
     /**
@@ -139,4 +151,7 @@ class EmpresaController extends Controller
         }
 
     }
+
+
+
 }

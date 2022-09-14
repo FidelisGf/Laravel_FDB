@@ -17,9 +17,8 @@ class EmpresaController extends Controller
     public function index()
     {
         try{
-            $empresas = Empresa::paginate(3);
-            return EmpresaResource::collection($empresas);
-
+            $EMPRESAS = Empresa::paginate(3)->toArray();
+            return $EMPRESAS;
             //return response()->json(Empresa::all());
         }catch(\Exception $e){
             return response()->json(
@@ -104,6 +103,17 @@ class EmpresaController extends Controller
     {
 
     }
+    public function filterByAscName(Empresa $empresa){
+        try{
+            return $empresa::orderBy('NOME', 'asc')->paginate(3)->toArray();
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
 
     /**
      * Remove the specified resource from storage.
@@ -163,6 +173,39 @@ class EmpresaController extends Controller
             );
         }
 
+    }
+
+    public function applyFilter(Empresa $empresa, $filtro){
+        try{
+            switch($filtro){
+                case 'ASC':
+                    $this->filterByAscName($empresa);
+                    break;
+            }
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
+    public function search(Request $request){
+        try{
+            $search = $request->search;
+            $search = ucwords($search);
+            $Empresa = Empresa::query()->where('NOME', 'LIKE', '%'. $search.'%')
+                                ->orWhere('CNPJ', 'LIKE', '%'.$search.'%')->paginate(3);
+            if($request->filled('selected')){
+
+            }
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+                );
+        }
     }
 
 

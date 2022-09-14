@@ -89,7 +89,15 @@ class EmpresaController extends Controller
      */
     public function edit($id)
     {
-        //
+        try{
+            return Empresa::where('ID_EMPRESA',$id)->first();
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
     }
 
     /**
@@ -101,6 +109,21 @@ class EmpresaController extends Controller
      */
     public function update(Request $request, $id)
     {
+        try{
+            $Empresa = Empresa::findOrFail($id);
+            $Empresa->update($request->all());
+            return response()->json(
+                [
+                    "message" => "Empresa editada com sucesso"
+                ],200
+                );
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+                );
+        }
 
     }
     public function filterByAscName(Empresa $empresa){
@@ -179,7 +202,7 @@ class EmpresaController extends Controller
         try{
             switch($filtro){
                 case 'ASC':
-                    $this->filterByAscName($empresa);
+                    return $this->filterByAscName($empresa);
                     break;
             }
         }catch(\Exception $e){
@@ -194,11 +217,9 @@ class EmpresaController extends Controller
         try{
             $search = $request->search;
             $search = ucwords($search);
-            $Empresa = Empresa::query()->where('NOME', 'LIKE', '%'. $search.'%')
-                                ->orWhere('CNPJ', 'LIKE', '%'.$search.'%')->paginate(3);
-            if($request->filled('selected')){
+            return Empresa::where('NOME', 'LIKE', "%{$search}%")
+            ->orWhere('CNPJ', 'LIKE', "%{$search}%")->paginate(3);
 
-            }
         }catch(\Exception $e){
             return response()->json(
                 [

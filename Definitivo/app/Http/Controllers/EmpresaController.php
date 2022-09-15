@@ -198,13 +198,24 @@ class EmpresaController extends Controller
 
     }
 
-    public function applyFilter(Empresa $empresa, $filtro){
+    public function applyFilter(Request $request){
         try{
-            switch($filtro){
-                case 'ASC':
-                    return $this->filterByAscName($empresa);
-                    break;
+            $query = Empresa::query();
+            if($request->filled('search')){
+                $search = $request->search;
+                $search = ucwords($search);
+                $query->where('NOME', 'LIKE', "%{$search}%")->orWhere('CNPJ', 'LIKE', "%{$search}%");
             }
+
+            if($request->filled('selected')){
+                $selected = $request->selected;
+                switch($selected){
+                    case 'BYNAME':
+                        $query->orderBy('NOME', 'asc');
+                        break;
+                }
+            }
+            return $query->paginate(3);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -213,19 +224,19 @@ class EmpresaController extends Controller
             );
         }
     }
-    public function search(Request $request){
+    public function autoCompleteEmpresa(Request $request){
         try{
             $search = $request->search;
             $search = ucwords($search);
-            return Empresa::where('NOME', 'LIKE', "%{$search}%")
-            ->orWhere('CNPJ', 'LIKE', "%{$search}%")->paginate(3);
+            $Empresas = Empresa::where('NOME', 'LIKE', "%{$search}%")->get();
+            return response()->json($Empresas);
 
         }catch(\Exception $e){
             return response()->json(
                 [
                     "message" => $e->getMessage()
                 ],400
-                );
+            );
         }
     }
 

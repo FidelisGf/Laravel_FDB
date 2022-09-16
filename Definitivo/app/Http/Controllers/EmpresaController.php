@@ -200,9 +200,13 @@ class EmpresaController extends Controller
 
     public function applyFilter(Request $request){
         try{
-            $query = Empresa::query();
-            if($request->filled('search')){
+           $query = Empresa::query();
+            if($request->filled('search')){ 
                 $search = $request->search;
+                $validateIfIsCompleteSearch = Empresa::where('NOME', $search)->get();
+                if($validateIfIsCompleteSearch){
+                    return response()->json($validateIfIsCompleteSearch);
+                }
                 $search = ucwords($search);
                 $query->where('NOME', 'LIKE', "%{$search}%")->orWhere('CNPJ', 'LIKE', "%{$search}%");
             }
@@ -216,6 +220,8 @@ class EmpresaController extends Controller
                 }
             }
             return $query->paginate(3);
+            
+          
         }catch(\Exception $e){
             return response()->json(
                 [

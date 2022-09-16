@@ -6,6 +6,7 @@ use App\Category;
 use App\Empresa;
 use App\Http\Resources\EmpresaResource;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class EmpresaController extends Controller
 {
@@ -48,10 +49,23 @@ class EmpresaController extends Controller
     public function store(Request $request)
     {
         try{
-            Empresa::create($request->all());
-            return response()->json([
-                "message" => "Empresa criada com sucesso"
-            ],200);
+            $Empresa = new Empresa();
+            $validatedData = $request->validate([
+                'NOME' => ['required', 'unique:EMPRESAS', 'max:50', 'min:2'],
+                'CNPJ' => ['required', 'unique:EMPRESAS', 'max:14', 'min:14']
+            ]);
+            if($validatedData){
+                $Empresa->NOME = $request->NOME;
+                $Empresa->CNPJ = $request->CNPJ;
+                if($Empresa->save()){
+                    return response()->json([
+                        "message" => "Empresa criada com sucesso"
+                    ],200);
+                }else{
+                    return false;
+
+                }
+            }
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -200,13 +214,9 @@ class EmpresaController extends Controller
 
     public function applyFilter(Request $request){
         try{
-           $query = Empresa::query();
-            if($request->filled('search')){ 
+            $query = Empresa::query();
+            if($request->filled('search')){
                 $search = $request->search;
-                $validateIfIsCompleteSearch = Empresa::where('NOME', $search)->get();
-                if($validateIfIsCompleteSearch){
-                    return response()->json($validateIfIsCompleteSearch);
-                }
                 $search = ucwords($search);
                 $query->where('NOME', 'LIKE', "%{$search}%")->orWhere('CNPJ', 'LIKE', "%{$search}%");
             }
@@ -220,8 +230,6 @@ class EmpresaController extends Controller
                 }
             }
             return $query->paginate(3);
-            
-          
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -236,7 +244,6 @@ class EmpresaController extends Controller
             $search = ucwords($search);
             $Empresas = Empresa::where('NOME', 'LIKE', "%{$search}%")->get();
             return response()->json($Empresas);
-
         }catch(\Exception $e){
             return response()->json(
                 [

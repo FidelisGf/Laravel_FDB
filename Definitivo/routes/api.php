@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ProductController;
@@ -20,6 +21,18 @@ use Illuminate\Support\Facades\Route;
 
 Route::middleware('auth:api')->get('/user', function (Request $request) {
     return $request->user();
+});
+Route::group([
+    'middleware' => 'api',
+    'prefix' => 'auth'
+], function ($router) {
+
+    Route::post('logout', 'AuthController@logout');
+    Route::post('refresh', 'AuthController@refresh');
+    Route::post('login', [AuthController::class, 'login']);
+    Route::post('register', [AuthController::class, 'register']);
+    Route::post('me', [AuthController::class, 'me']);
+
 });
 
 Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
@@ -42,3 +55,4 @@ Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCatego
 Route::resource('empresas', 'EmpresaController');
 Route::resource('products', 'ProductController');
 Route::resource('categorys', 'CategoryController');
+

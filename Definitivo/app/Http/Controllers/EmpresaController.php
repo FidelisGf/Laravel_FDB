@@ -84,7 +84,7 @@ class EmpresaController extends Controller
     public function show($id)
     {
         try{
-            return Empresa::where('ID_EMPRESA',$id)->first();
+            return Empresa::where('ID',$id)->first();
 
         }catch(\Exception $e){
             return response()->json(
@@ -104,7 +104,7 @@ class EmpresaController extends Controller
     public function edit($id)
     {
         try{
-            return Empresa::where('ID_EMPRESA',$id)->first();
+            return Empresa::where('ID',$id)->first();
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -187,7 +187,7 @@ class EmpresaController extends Controller
 
     public function allCategoryFromEmpresa($id){
         try{
-            return Empresa::where('ID_EMPRESA',$id)->with(['category'])->first();
+            return Empresa::where('ID',$id)->with(['category'])->first();
         }catch(\Exception $e){
             return response()->json(
                 [

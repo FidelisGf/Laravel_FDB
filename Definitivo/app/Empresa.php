@@ -13,7 +13,7 @@ class Empresa extends Model
     const DELETED_AT = 'DELETED_AT';
     use SoftDeletes;
 
-    protected $primaryKey = 'ID_EMPRESA';
+    protected $primaryKey = 'ID';
     protected $generator = 'GEN_EMPRESAS_ID';
     protected $keyType = 'integer';
 

@@ -20,7 +20,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register', 'profile', 'logout']]);
+        $this->middleware('auth:api', ['except' => ['login','register', 'profile', 'logout', 'validateTokn']]);
     }
     public function register(Request $request){
 
@@ -61,11 +61,11 @@ class AuthController extends Controller
     public function profile(Request $request) {
         return response()->json(Auth::user());
     }
-    /**
-     * Log the user out (Invalidate the token).
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
+
+    public function validateTokn(){
+        return response()->json([ 'valid' => auth()->check()]);
+    }
+
     public function logout()
     {
         Auth::logout();

@@ -27,13 +27,14 @@ Route::group([
     'prefix' => 'auth'
 ], function ($router) {
 
-    Route::post('logout', 'AuthController@logout');
+    Route::post('logout', [AuthController::class, 'logout']);
     Route::post('refresh', 'AuthController@refresh');
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
-    Route::post('me', [AuthController::class, 'me']);
-
+    Route::get('profile', [AuthController::class, 'profile']);
 });
+
+
 
 Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
 Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);

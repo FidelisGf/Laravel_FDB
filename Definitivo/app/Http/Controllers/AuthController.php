@@ -8,6 +8,8 @@ use App\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Tymon\JWTAuth\Contracts\Providers\Auth as ProvidersAuth;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
 {
@@ -18,7 +20,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register']]);
+        $this->middleware('auth:api', ['except' => ['login','register', 'profile', 'logout']]);
     }
     public function register(Request $request){
 
@@ -56,16 +58,9 @@ class AuthController extends Controller
         }
 
     }
-    /**
-     * Get the authenticated User.
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function me()
-    {
-        return response()->json(auth()->user());
+    public function profile(Request $request) {
+        return response()->json(Auth::user());
     }
-
     /**
      * Log the user out (Invalidate the token).
      *
@@ -73,8 +68,7 @@ class AuthController extends Controller
      */
     public function logout()
     {
-        auth()->logout();
-
+        Auth::logout();
         return response()->json(['message' => 'Successfully logged out']);
     }
     /**

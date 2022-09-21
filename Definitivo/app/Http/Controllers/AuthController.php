@@ -59,7 +59,8 @@ class AuthController extends Controller
 
     }
     public function profile(Request $request) {
-        return response()->json(Auth::user());
+        $user = Auth::user();
+        return response()->json($user);
     }
 
     public function validateTokn(){

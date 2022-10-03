@@ -13,16 +13,16 @@ class Usuario extends Authenticatable implements JWTSubject
     protected $table = 'USERS';
     const CREATED_AT = 'CREATED_AT';
     const UPDATED_AT = 'UPDATED_AT';
-    protected $fillable = ['NAME', 'EMAIL', 'PASSWORD'];
+    protected $fillable = ['NAME', 'EMAIL', 'PASSWORD', 'EMPRESA_ID'];
     protected $rememberTokenName = 'REMEMBER_TOKEN';
     protected $hidden = ['PASSWORD', 'REMEMBER_TOKEN'];
     protected $primaryKey = 'ID';
     protected $generator = 'GEN_USERS_ID';
     protected $keyType = 'integer';
     public $timestamps = true;
-
-
-
+    public function Empresa(){
+        return $this->belongsTo(Empresa::class, 'EMPRESA_ID', 'ID');
+    }
     public function getJWTCustomClaims()
     {
         return [];

@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\UsuarioController;
 use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -32,7 +33,7 @@ Route::group([
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('profile', [AuthController::class, 'profile']);
-    Route::get('validateTkn', [AuthController::class, 'validateTokn']);
+    Route::get('validateTkn', [AuthController::class, 'getAuthenticatedUser']);
 });
 
 
@@ -52,6 +53,9 @@ Route::get('/autoCompleteEmpresa' ,[EmpresaController::class, 'autoCompleteEmpre
 Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsFromEmpresa']);
 Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
 Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCategoryFromEmpresa']);
+
+Route::get('/checaEmpUser', [UsuarioController::class, 'checkIfUserHasEmpresa'] );
+Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'] );
 
 
 Route::resource('empresas', 'EmpresaController');

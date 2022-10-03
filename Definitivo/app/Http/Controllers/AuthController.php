@@ -4,11 +4,14 @@ namespace App\Http\Controllers;
 
 
 use App\Usuario;
-
+use Hamcrest\Type\IsObject;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Tymon\JWTAuth\Contracts\Providers\Auth as ProvidersAuth;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class AuthController extends Controller
@@ -20,7 +23,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register', 'profile', 'logout', 'validateTokn']]);
+        $this->middleware('auth:api', ['except' => ['login','register', 'profile', 'logout', 'getAuthenticatedUser']]);
     }
     public function register(Request $request){
 
@@ -33,6 +36,8 @@ class AuthController extends Controller
             'Usuario' => $user
         ]);
     }
+
+
     /**
      * Get a JWT via given credentials.
      *
@@ -56,17 +61,26 @@ class AuthController extends Controller
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],404);
         }
-
     }
     public function profile(Request $request) {
         $user = Auth::user();
         return response()->json($user);
     }
-
-    public function validateTokn(){
-        return response()->json([ 'valid' => auth()->check()]);
-    }
-
+    public function getAuthenticatedUser()
+            {
+                try {
+                    if (! $user = JWTAuth::parseToken()->authenticate()) {
+                        return response()->json(['user_not_found'], 401);
+                    }else{
+                        return response()->json(['message' => 'sucess'],200);
+                    }
+                }catch (TokenInvalidException $e) {
+                    return response()->json(['token_invalid'],401);
+                }
+                catch (TokenExpiredException $e) {
+                    return response()->json(['token_expired'],400);
+                }
+        }
     public function logout()
     {
         Auth::logout();
@@ -96,4 +110,6 @@ class AuthController extends Controller
             'expires_in' => auth()->guard('api')->factory()->getTTL() * 60
         ]);
     }
+
+
 }

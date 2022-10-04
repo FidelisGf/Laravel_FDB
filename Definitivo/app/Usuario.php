@@ -20,7 +20,7 @@ class Usuario extends Authenticatable implements JWTSubject
     protected $generator = 'GEN_USERS_ID';
     protected $keyType = 'integer';
     public $timestamps = true;
-    public function Empresa(){
+    public function empresa(){
         return $this->belongsTo(Empresa::class, 'EMPRESA_ID', 'ID');
     }
     public function getJWTCustomClaims()

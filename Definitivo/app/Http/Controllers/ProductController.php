@@ -7,6 +7,8 @@ use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Product;
 use Illuminate\Http\Request;
+use App\Http\Controllers\EstoqueController;
+use Illuminate\Support\Facades\App;
 
 class ProductController extends Controller
 {
@@ -30,7 +32,10 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try{
-            Product::create($request->all());
+            $produto = Product::create($request->all());
+            $quantidade = $request->quantidade_inicial;
+            $estoque = new EstoqueController();
+            $estoque->storeProdutoInEstoque($produto->ID_PRODUTO, $quantidade, $produto);
             return response()->json(
                 [
                     "message" => "Produto criado com sucesso"

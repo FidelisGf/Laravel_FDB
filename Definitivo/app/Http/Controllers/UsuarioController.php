@@ -35,15 +35,13 @@ class UsuarioController extends Controller
 
     public function vinculaUsuarioEmpresa(Request $request){
         try{
-
             $Empresa = Empresa::create($request->all());
             $EmpresaId = $Empresa->ID;
-            $auth = Auth::ID();
-            $USER = Usuario::findOrFail($auth);
+            $auth = FacadesJWTAuth::parseToken()->authenticate();
+            $USER = $auth;
             $USER->EMPRESA_ID = $EmpresaId;
             $USER->save();
             return response()->json([$USER]);
-
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }
@@ -56,6 +54,14 @@ class UsuarioController extends Controller
             }else{
                 return response()->json([0]);
             }
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
+    public function getEmpresaByUser(){
+        try{
+            $user = FacadesJWTAuth::parseToken()->authenticate();
+            return response()->json([$user->empresa]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }

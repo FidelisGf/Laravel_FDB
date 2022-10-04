@@ -24,8 +24,10 @@ class Empresa extends Model
     public function product(){
         return $this->hasManyThrough(Product::class, Category::class, "ID_EMPRESA", "ID_CATEGORIA", "ID");
     }
-    public function Usuario(){
+    public function usuario(){
         return $this->hasMany(Usuario::class, 'EMPRESA_ID', 'ID');
     }
-
+    public function estoque(){
+        return $this->hasMany(Estoque::class, 'EMPRESA_ID', 'ID');
+    }
 }

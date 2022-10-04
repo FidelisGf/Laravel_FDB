@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EmpresaController;
+use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UsuarioController;
 use App\Product;
@@ -37,7 +38,7 @@ Route::group([
 });
 
 Route::group(['middleware' => ['jwt.verify']], function() {
-    
+
 
     Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
     Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);
@@ -57,11 +58,14 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::get('/checaEmpUser', [UsuarioController::class, 'checkIfUserHasEmpresa'] );
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'] );
+    Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'] );
 
+    Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
 
     Route::resource('empresas', 'EmpresaController');
     Route::resource('products', 'ProductController');
     Route::resource('categorys', 'CategoryController');
+    Route::resource('estoques', 'EstoqueController');
 });
 
 

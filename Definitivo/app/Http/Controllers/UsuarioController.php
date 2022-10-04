@@ -7,6 +7,8 @@ use App\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth as FacadesJWTAuth;
+use Tymon\JWTAuth\JWT;
 use Tymon\JWTAuth\JWTAuth;
 
 class UsuarioController extends Controller
@@ -48,9 +50,8 @@ class UsuarioController extends Controller
     }
     public function checkIfUserHasEmpresa(){
         try{
-            $auth = Auth::ID();
-            $Usuario = Usuario::findOrFail($auth)->first();
-            if($Usuario->EMPRESA_ID != null ){
+            $user = FacadesJWTAuth::parseToken()->authenticate();
+            if($user->EMPRESA_ID != null ){
                 return response()->json([1]);
             }else{
                 return response()->json([0]);

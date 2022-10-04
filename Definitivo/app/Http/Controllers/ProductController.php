@@ -19,8 +19,10 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $PRODUCTS = Product::paginate(15);
-        return ProductResource::collection($PRODUCTS);
+        $PRODUCT = Product::query()->with(['category' => function ($query){
+            $query->select('ID_CATEGORIA','NOME');
+        }])->paginate(15);
+        return $PRODUCT;
     }
 
     /**

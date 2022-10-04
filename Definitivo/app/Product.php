@@ -16,8 +16,9 @@ class Product extends Model
     protected $primaryKey = 'ID_PRODUTO';
     protected $generator = 'GEN_PRODUCTS_ID';
     protected $keyType = 'integer';
-    public function Category(){
-        return $this->belongsTo(Category::class, 'ID_CATEGORIA', 'ID_PRODUTO');
+
+    public function category(){
+        return $this->belongsTo(Category::class, 'ID_CATEGORIA', 'ID_CATEGORIA');
     }
 
 

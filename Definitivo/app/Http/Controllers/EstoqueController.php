@@ -25,7 +25,7 @@ class EstoqueController extends Controller
      */
     public function create()
     {
-        //
+
     }
 
     /**
@@ -34,18 +34,18 @@ class EstoqueController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function storeProdutoInEstoque($product_id, $quantidade, $produto)
+    public function storeProdutoInEstoque($product_id, $quantidade)
     {
         try{
-            $product_id = $product_id;
-            $quantidade = $quantidade;
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
             $Estoque = new Estoque();
             $Estoque->PRODUCT_ID = $product_id;
             $Estoque->EMPRESA_ID = $empresa->ID;
             $Estoque->QUANTIDADE = $quantidade;
-            $Estoque->save();
+            if($Estoque->save()){
+                return response()->json(['message' => 'Produto criado e adicionado ao estoque da empresa'],200);
+            }
         }catch(\Exception $e){
             return response()->json([
                 "message" => $e->getMessage()

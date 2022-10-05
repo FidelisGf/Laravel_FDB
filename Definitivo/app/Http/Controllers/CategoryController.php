@@ -8,6 +8,7 @@ use App\Http\Resources\ProductResource;
 use App\Product;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class CategoryController extends Controller
 {
@@ -19,7 +20,10 @@ class CategoryController extends Controller
     public function index()
     {
         try{
-            return CategoryResource::collection(Category::paginate(15));
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $Category = Category::where('ID_EMPRESA', $empresa->ID)->paginate(15);
+            return $Category;
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -53,9 +57,6 @@ class CategoryController extends Controller
             );
         }
     }
-
-
-
     /**
      * Store a newly created resource in storage.
      *
@@ -65,12 +66,20 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         try{
-            Category::create($request->all());
-            return response()->json(
-                [
-                    "message" => "Categoria Criada com sucesso"
-                ],200
-            );
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $Category = new Category();
+            $NOME_REAL = "$request->NOME _ $empresa->ID";
+            $Category->ID_EMPRESA = $empresa->ID;
+            $Category->NOME = $request->NOME;
+            $Category->NOME_REAL = $NOME_REAL;
+            if($Category->save()){
+                return response()->json(
+                    [
+                        "message" => "Categoria Criada com sucesso"
+                    ],200
+                );
+            }
         }catch(\Exception $e){
            return response()->json(
             [
@@ -79,7 +88,6 @@ class CategoryController extends Controller
             );
         }
     }
-
     /**
      * Display the specified resource.
      *
@@ -97,7 +105,6 @@ class CategoryController extends Controller
             ],400);
         }
     }
-
     /**
      * Show the form for editing the specified resource.
      *

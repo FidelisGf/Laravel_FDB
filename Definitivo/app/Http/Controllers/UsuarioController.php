@@ -7,6 +7,7 @@ use App\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth as FacadesJWTAuth;
 use Tymon\JWTAuth\JWT;
 use Tymon\JWTAuth\JWTAuth;
@@ -35,13 +36,27 @@ class UsuarioController extends Controller
 
     public function vinculaUsuarioEmpresa(Request $request){
         try{
-            $Empresa = Empresa::create($request->all());
-            $EmpresaId = $Empresa->ID;
-            $auth = FacadesJWTAuth::parseToken()->authenticate();
-            $USER = $auth;
-            $USER->EMPRESA_ID = $EmpresaId;
-            $USER->save();
-            return response()->json([$USER]);
+            $validator = Validator::make($request->all(), [
+                'NOME' => 'required|unique:EMPRESAS|max:50|min:2',
+                'CNPJ' => 'required|unique:EMPRESAS|max:14|min:14',
+                'EMAIL'=> 'required|unique:EMPRESAS|email|max:120|min:5',
+                'NOME_FANTASIA' => 'required|max:60|min:2',
+                'ENDERECO' => 'required|max:255|min:2',
+                'INC_ESTADUAL' => 'required|unique:EMPRESAS|max:12|min:9',
+            ]);
+            if(!$validator->fails()){
+                $Empresa = Empresa::create($request->all());
+                if($Empresa){
+                    $auth = FacadesJWTAuth::parseToken()->authenticate();
+                    $USER = $auth;
+                    $USER->EMPRESA_ID = $Empresa->ID;
+                    if($USER->save()){
+                        return response()->json(['message' => 'Usuario e Empresa vinculados com sucesso !' + $USER]);
+                    }else{
+                        return response()->json(['message' => 'Falha ao vincular Usuario e Empresa']);
+                    }
+                }
+            }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }

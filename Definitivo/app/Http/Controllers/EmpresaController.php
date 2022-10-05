@@ -4,9 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Empresa;
+use App\Http\Requests\EmpresaRequest;
 use App\Http\Resources\EmpresaResource;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Validator as FacadesValidator;
+use Illuminate\Validation\Validator;
 
 class EmpresaController extends Controller
 {
@@ -40,32 +43,26 @@ class EmpresaController extends Controller
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
     public function store(Request $request)
     {
         try{
-            $Empresa = new Empresa();
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'unique:EMPRESAS', 'max:50', 'min:2'],
-                'CNPJ' => ['required', 'unique:EMPRESAS', 'max:14', 'min:14']
-            ]);
-            if($validatedData){
-                $Empresa->NOME = $request->NOME;
-                $Empresa->CNPJ = $request->CNPJ;
-                if($Empresa->save()){
-                    return response()->json([
-                        "message" => "Empresa criada com sucesso"
-                    ],200);
-                }else{
-                    return false;
-
+                $validator = FacadesValidator::make($request->all(), [
+                    'NOME' => 'required|unique:EMPRESAS|max:50|min:2',
+                    'CNPJ' => 'required|unique:EMPRESAS|max:14|min:14',
+                    'EMAIL'=> 'required|unique:EMPRESAS|email|max:120|min:5',
+                    'NOME_FANTASIA' => 'required|max:60|min:2',
+                    'ENDERECO' => 'required|max:255|min:2',
+                    'INC_ESTADUAL' => 'required|unique:EMPRESAS|max:12|min:9',
+                ]);
+                if(!$validator->fails()){
+                    if(Empresa::create($request->all())){
+                        return response()->json([
+                            "message" => "Empresa criada com sucesso"
+                        ],200);
+                    }else{
+                        return false;
+                    }
                 }
-            }
         }catch(\Exception $e){
             return response()->json(
                 [

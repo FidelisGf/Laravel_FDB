@@ -40,7 +40,7 @@ Route::group([
 Route::group(['middleware' => ['jwt.verify']], function() {
 
 
-    Route::get('/allByCategory/{id}', [CategoryController::class, 'findAllProductByCategory']);
+    Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);
     Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);
     Route::get('/mostExpansiveProduct/{id}', [CategoryController::class, 'CategoryMostExpansiveProduct']);
     Route::get('/avgFromCategorysProducts/{id}', [CategoryController::class, 'CategoryAVGProductPrice']);

@@ -3,12 +3,16 @@
 namespace App\Http\Controllers;
 
 use App\Category;
+use App\Empresa;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Requests\ProductRequest;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
 {
@@ -19,10 +23,37 @@ class ProductController extends Controller
      */
     public function index()
     {
-        $PRODUCT = Product::query()->with(['category' => function ($query){
-            $query->select('ID_CATEGORIA','NOME');
-        }])->paginate(15);
-        return $PRODUCT;
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
+                'category' => function($query){
+                    $query->select('ID_CATEGORIA', 'NOME');
+                }
+            ])->paginate(15);
+            return $PRODUCTS;
+        }catch(\Exception $e){
+
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+
+    }
+    public function findAllProductByCategory($id){
+        try{
+            return Product::with(['category' => function($query){
+                $query->select('ID_CATEGORIA', 'NOME');
+            }])->where('ID_CATEGORIA', '=', $id)->paginate(15);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ]
+            );
+        }
     }
 
     /**
@@ -34,15 +65,29 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try{
-            $produto = Product::create($request->all());
-            $quantidade = $request->quantidade_inicial;
-            $estoque = new EstoqueController();
-            $estoque->storeProdutoInEstoque($produto->ID_PRODUTO, $quantidade, $produto);
-            return response()->json(
-                [
-                    "message" => "Produto criado com sucesso"
-                ],200
-                );
+
+            $validatedData = $request->validate([
+                'NOME' => ['required', 'unique:PRODUCTS', 'max:60', 'min:2'],
+                'DESC' => ['required', 'max:120', 'min:4'],
+                'VALOR'=> ['required', 'min:0'],
+                'ID_CATEGORIA' => ['required'],
+                'quantidade_inicial' => ['required', 'min:0']
+            ]);
+            if($validatedData){
+                $produto = Product::create($request->all());
+                if($produto){
+                    $quantidade = $request->quantidade_inicial;
+                    $estoque = new EstoqueController();
+                    $estoque->storeProdutoInEstoque($produto->ID_PRODUTO, $quantidade);
+                    return response()->json(
+                        [
+                            "message" => "Produto criado com sucesso"
+                        ],200
+                    );
+                }
+            }
+
+
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -61,7 +106,7 @@ class ProductController extends Controller
     public function show($id)
     {
         try{
-            $PRODUCT = Product::findOrFail($id);
+            $PRODUCT = Product::findOrFail($id)->first();
             return new ProductResource($PRODUCT);
         }catch(\Exception $e){
             return response()->json(
@@ -90,7 +135,7 @@ class ProductController extends Controller
     {
 
         try{
-            $PRODUCT = Product::findOrFail($id);
+            $PRODUCT = Product::findOrFail($id)->first();
             $PRODUCT->update($request->all());
             return response()->json(
                 [
@@ -116,7 +161,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try{
-            $PRODUCT = Product::findOrFail($id);
+            $PRODUCT = Product::findOrFail($id)->first();
             $PRODUCT->delete();
             return response()->json(
                 [

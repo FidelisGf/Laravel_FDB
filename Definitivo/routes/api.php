@@ -39,12 +39,13 @@ Route::group([
 
 Route::group(['middleware' => ['jwt.verify']], function() {
 
-
+    Route::get('getQuantidadeProduct/{id}', [EstoqueController::class, 'getQuantidadeProduct']);
     Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);
     Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);
     Route::get('/mostExpansiveProduct/{id}', [CategoryController::class, 'CategoryMostExpansiveProduct']);
     Route::get('/avgFromCategorysProducts/{id}', [CategoryController::class, 'CategoryAVGProductPrice']);
     Route::get('minFromCategorysProducts/{id}', [CategoryController::class, 'CategoryMinProductPrice']);
+
 
     Route::get('/searchEmp', [EmpresaController::class, 'applyFilter']);
     Route::post('/search', [ProductController::class, 'search']);
@@ -61,6 +62,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'] );
 
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
+
 
     Route::resource('empresas', 'EmpresaController');
     Route::resource('products', 'ProductController');

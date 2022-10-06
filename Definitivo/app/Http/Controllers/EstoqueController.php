@@ -69,6 +69,14 @@ class EstoqueController extends Controller
             ]);
         }
     }
+    public function getQuantidadeProduct($id){
+        try{
+            $estoque = Estoque::where('PRODUCT_ID', $id)->first()->only('QUANTIDADE');
+            return $estoque;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
 
     /**
      * Display the specified resource.

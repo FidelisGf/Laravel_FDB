@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Empresa;
+use App\Estoque;
 use App\Http\Resources\CategoryResource;
 use App\Http\Resources\ProductResource;
 use App\Product;
@@ -30,7 +31,7 @@ class ProductController extends Controller
                 'category' => function($query){
                     $query->select('ID_CATEGORIA', 'NOME');
                 }
-            ])->paginate(15);
+            ])->paginate(6);
             return $PRODUCTS;
         }catch(\Exception $e){
 
@@ -46,7 +47,7 @@ class ProductController extends Controller
         try{
             return Product::with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME');
-            }])->where('ID_CATEGORIA', '=', $id)->paginate(15);
+            }])->where('ID_CATEGORIA', '=', $id)->paginate(5);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -55,7 +56,6 @@ class ProductController extends Controller
             );
         }
     }
-
     /**
      * Store a newly created resource in storage.
      *
@@ -106,8 +106,12 @@ class ProductController extends Controller
     public function show($id)
     {
         try{
-            $PRODUCT = Product::findOrFail($id)->first();
-            return new ProductResource($PRODUCT);
+            $user = JWTAuth::parseToken()->authenticate();
+            $PRODUCTS = Product::where('ID_PRODUTO',$id)->with(['category' => function($query){
+                $query->select('ID_CATEGORIA', 'NOME');
+                }
+            ])->first();
+            return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -135,13 +139,22 @@ class ProductController extends Controller
     {
 
         try{
-            $PRODUCT = Product::findOrFail($id)->first();
-            $PRODUCT->update($request->all());
-            return response()->json(
-                [
-                    "message" => "Produto editado com sucesso"
-                ],200
-                );
+            $validatedData = $request->validate([
+                'NOME' => ['required', 'unique:PRODUCTS', 'max:60', 'min:2'],
+                'DESC' => ['required', 'max:120', 'min:4'],
+                'VALOR'=> ['required', 'min:0'],
+                'ID_CATEGORIA' => ['required'],
+            ]);
+            if($validatedData){
+                $PRODUCT = Product::where('ID_PRODUTO', $id)->first();
+                $PRODUCT->update($request->all());
+                return response()->json(
+                    [
+                        "message" => "Produto editado com sucesso"
+                    ],200
+                    );
+            }
+
         }catch(\Exception $e){
             return response()->json(
                 [

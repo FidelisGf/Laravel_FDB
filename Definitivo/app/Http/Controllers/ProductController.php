@@ -80,9 +80,7 @@ class ProductController extends Controller
                     $estoque = new EstoqueController();
                     $estoque->storeProdutoInEstoque($produto->ID_PRODUTO, $quantidade);
                     return response()->json(
-                        [
-                            "message" => "Produto criado com sucesso"
-                        ],200
+                        $produto
                     );
                 }
             }
@@ -174,7 +172,10 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try{
-            $PRODUCT = Product::findOrFail($id)->first();
+            $user = JWTAuth::parseToken()->authenticate();
+            $estoque = Estoque::where('EMPRESA_ID', $user->empresa->ID)->where('PRODUCT_ID', $id);
+            $estoque->delete();
+            $PRODUCT = Product::where('ID_PRODUTO',$id)->first();
             $PRODUCT->delete();
             return response()->json(
                 [

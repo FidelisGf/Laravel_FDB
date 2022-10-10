@@ -65,7 +65,6 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try{
-
             $validatedData = $request->validate([
                 'NOME' => ['required', 'unique:PRODUCTS', 'max:60', 'min:2'],
                 'DESC' => ['required', 'max:120', 'min:4'],
@@ -204,9 +203,15 @@ class ProductController extends Controller
                 );
         }
     }
-    public function filterByExpansiveValue(){
+    public function filterByExpansiveValue($number_of_page){
         try{
-            $PRODUCTS = Product::orderBy('VALOR', 'desc')->paginate(15);
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
+                'category' => function($query){
+                    $query->select('ID_CATEGORIA', 'NOME');
+                }
+            ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate($number_of_page);
             return ProductResource::collection($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
@@ -235,13 +240,15 @@ class ProductController extends Controller
     //ucwords($bar);
 
     public function filters(Request $request){
-        switch (true){
-            case $request->has('lower'):
+        $op = $request->opcao;
+        $number_of_page = $request->pages;
+        switch ($op){
+            case "produto mais barato":
                 return $this->filterByLowestValue();
                 break;
 
-            case $request->has('expansive'):
-                return $this->filterByExpansiveValue();
+            case "Produtos mais caros":
+                return $this->filterByExpansiveValue($number_of_page);
                 break;
         }
     }

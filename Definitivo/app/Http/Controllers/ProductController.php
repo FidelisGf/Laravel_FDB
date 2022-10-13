@@ -192,9 +192,14 @@ class ProductController extends Controller
 
     public function filterByLowestValue(){
         try{
-            $PRODUCT = Product::orderBy('VALOR', 'asc')->paginate(15);
-            return ProductResource::collection($PRODUCT);
-
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
+                'category' => function($query){
+                    $query->select('ID_CATEGORIA', 'NOME');
+                }
+            ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(5);
+            return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -203,7 +208,8 @@ class ProductController extends Controller
                 );
         }
     }
-    public function filterByExpansiveValue($number_of_page){
+
+    public function filterByExpansiveValue(){
         try{
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
@@ -211,8 +217,8 @@ class ProductController extends Controller
                 'category' => function($query){
                     $query->select('ID_CATEGORIA', 'NOME');
                 }
-            ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate($number_of_page);
-            return ProductResource::collection($PRODUCTS);
+            ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(5);
+            return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -241,14 +247,13 @@ class ProductController extends Controller
 
     public function filters(Request $request){
         $op = $request->opcao;
-        $number_of_page = $request->pages;
         switch ($op){
-            case "produto mais barato":
+            case "Produtos mais baratos":
                 return $this->filterByLowestValue();
                 break;
 
             case "Produtos mais caros":
-                return $this->filterByExpansiveValue($number_of_page);
+                return $this->filterByExpansiveValue();
                 break;
         }
     }

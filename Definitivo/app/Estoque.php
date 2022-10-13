@@ -18,4 +18,7 @@ class Estoque extends Model
     public function empresa(){
         return $this->belongsTo(Empresa::class, 'EMPRESA_ID', 'ID');
     }
+    public function product(){
+        return $this->hasMany(Product::class, 'ID_PRODUTO', 'PRODUCT_ID');
+    }
 }

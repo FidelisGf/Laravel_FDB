@@ -49,7 +49,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::get('/searchEmp', [EmpresaController::class, 'applyFilter']);
     Route::post('/search', [ProductController::class, 'search']);
-    Route::post('/filterBy', [ProductController::class, 'filters']);
+    Route::get('/filterBy', [ProductController::class, 'filters']);
 
 
     Route::get('/autoCompleteEmpresa' ,[EmpresaController::class, 'autoCompleteEmpresa']);
@@ -62,7 +62,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'] );
 
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
-
+    Route::get('/filterEstoque', [EstoqueController::class, 'filters']);
 
     Route::resource('empresas', 'EmpresaController');
     Route::resource('products', 'ProductController');

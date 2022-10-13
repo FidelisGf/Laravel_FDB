@@ -15,7 +15,18 @@ class EstoqueController extends Controller
      */
     public function index()
     {
-        //
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
+                'product' => function($query){
+                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                }
+            ])->paginate(5);
+            return response()->json([$PRODUCTS]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e]);
+        }
     }
 
     /**
@@ -67,6 +78,59 @@ class EstoqueController extends Controller
             return response()->json([
                 "message" => $e->getMessage()
             ]);
+        }
+    }
+    public function removeEstoque($product_id, $quantidade){
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+            $Estoque->QUANTIDADE -= $quantidade;
+            $Estoque->save();
+            return response()->json(['Produto atual no estoque' => $Estoque]);
+        }catch(\Exception $e){
+            return response()->json([
+                "message" => $e->getMessage()
+            ]);
+        }
+    }
+    public function filterByBiggerEstoque(){
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
+                'product' => function($query){
+                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                }
+            ])->paginate(5);
+            return $PRODUCTS;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e]);
+        }
+    }
+    public function filterByLowerEstoque(){
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'asc')->with([
+                'product' => function($query){
+                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                }
+            ])->paginate(5);
+            return $PRODUCTS;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e]);
+        }
+    }
+    public function filters(Request $request){
+        $opcao = $request->opcao;
+        switch($opcao){
+            case "Produtos com mais estoque":
+                return $this->filterByBiggerEstoque();
+                break;
+            case "Produtos com pouco estoque":
+                return $this->filterByLowerEstoque();
+                break;
         }
     }
     public function getQuantidadeProduct($id){

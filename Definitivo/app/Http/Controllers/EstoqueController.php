@@ -86,6 +86,7 @@ class EstoqueController extends Controller
             $empresa = $user->empresa;
             $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
             $Estoque->QUANTIDADE -= $quantidade;
+            $Estoque->SAIDAS += $quantidade;
             $Estoque->save();
             return response()->json(['Produto atual no estoque' => $Estoque]);
         }catch(\Exception $e){

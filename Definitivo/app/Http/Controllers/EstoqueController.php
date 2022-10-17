@@ -18,12 +18,12 @@ class EstoqueController extends Controller
         try{
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
-            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
                 'product' => function($query){
                     $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
                 }
-            ])->paginate(5);
-            return response()->json([$PRODUCTS]);
+            ])->paginate(6);
+            return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(['message' => $e]);
         }
@@ -82,14 +82,18 @@ class EstoqueController extends Controller
     }
     public function removeEstoque($product_id, $quantidade){
         try{
+            $helper = new Help();
+            $helper->startTransaction();
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
             $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
             $Estoque->QUANTIDADE -= $quantidade;
             $Estoque->SAIDAS += $quantidade;
             $Estoque->save();
+            $helper->commit();
             return response()->json(['Produto atual no estoque' => $Estoque]);
         }catch(\Exception $e){
+            $helper->rollbackTransaction();
             return response()->json([
                 "message" => $e->getMessage()
             ]);

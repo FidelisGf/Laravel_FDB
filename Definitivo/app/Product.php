@@ -23,13 +23,7 @@ class Product extends Model
     public function estoque(){
         return $this->belongsTo(Estoque::class, 'PRODUCT_ID', 'ID_PRODUTO');
     }
-
-
-
     public $timestamps = true;
-
-
-
 
     protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA'];
     protected $dates = ['DELETED_AT'];

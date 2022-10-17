@@ -33,17 +33,7 @@ class CategoryController extends Controller
         }
 
     }
-    public function findAllProductByCategory($id){
-        try{
-            return Category::findOrFail($id)->product->first()->paginate(15);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ]
-            );
-        }
-    }
+
 
 
     public function findCategoryWithProductsIn(){
@@ -74,7 +64,11 @@ class CategoryController extends Controller
             $Category->NOME = $request->NOME;
             $Category->NOME_REAL = $NOME_REAL;
             if($Category->save()){
-                return $Category;
+                return response()->json(
+                    [
+                        "message" => "Categoria Criada com sucesso"
+                    ],200
+                );
             }
         }catch(\Exception $e){
            return response()->json(

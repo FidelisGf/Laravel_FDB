@@ -2,8 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App\FakeProduct;
+use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
+use App\Http\Resources\ProductResource;
 use App\Pedidos;
+use App\Product;
 use Illuminate\Http\Request;
+use League\CommonMark\Util\ArrayCollection;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class PedidosController extends Controller
@@ -36,24 +41,46 @@ class PedidosController extends Controller
      */
     public function store(Request $request)
     {
-        $nomesProdutos = '';
-        $valor_total = 0;
-        $metodo_pagamento = $request->METODO_PAGAMENTO;
-        $user = JWTAuth::parseToken()->authenticate();
-        $empresa = $user->empresa;
-        $pedido = new Pedidos();
-        $estoque = new EstoqueController();
-        $produtos = $request->produtos;
-        foreach($produtos as $produto){
-            $estoque->removeEstoque($produto->id, $produto->quantidade);
-            $nomesProdutos += "$produto->quantidade | $produto->nome, ";
-            $valor_total += $produto->valor;
+
+        try{
+            $helper = new Help();
+
+            $validatedData = $request->validate([
+                'METODO_PAGAMENTO' => ['required'],
+                'produtos' => ['required'],
+                'valor_total'=> ['required', 'min:0.01'],
+                'aprovado' => ['required'],
+            ]);
+            if($validatedData){
+                    $metodo_pagamento = $request->METODO_PAGAMENTO;
+                    $user = JWTAuth::parseToken()->authenticate();
+                    $empresa = $user->empresa;
+                    $pedido = new Pedidos();
+                    $estoque = new EstoqueController();
+                    $FakeProducts = collect(new FakeProduct());
+                    $PRODUCTS = collect(new FakeProduct());
+                    foreach($request->produtos as $produto){
+                        $FakeProduct = new ResourcesFakeProduct((object) $produto);
+                        $FakeProducts->push($FakeProduct);
+                    }
+                    foreach($FakeProducts as $produto){
+                        $PRODUCTS->push($produto);
+                        $estoque->removeEstoque($produto->id, $produto->quantidade);
+                    }
+                    $pedido->PRODUTOS = $PRODUCTS;
+                    $pedido->METODO_PAGAMENTO = $metodo_pagamento;
+                    $pedido->ID_EMPRESA = $empresa->ID;
+                    $pedido->VALOR_TOTAL = $request->valor_total;
+                    $pedido->APROVADO = $request->aprovado;
+                    $helper->startTransaction();
+                    $pedido->save();
+                    $helper->commit();
+                    return $pedido;
+            }
+        }catch(\Exception $e){
+            $helper->rollbackTransaction();
+            return response()->json(['message' => $e->getMessage()]);
         }
-        $pedido->PRODUTOS = $nomesProdutos;
-        $pedido->METODO_PAGAMENTO = $metodo_pagamento;
-        $pedido->ID_EMPRESA = $empresa->ID;
-        $pedido->VALOR_TOTAL = $valor_total;
-        $pedido->APROVADO = $request->aprovado;
     }
     /**
      * Display the specified resource.
@@ -65,7 +92,6 @@ class PedidosController extends Controller
     {
         //
     }
-
     /**
      * Show the form for editing the specified resource.
      *

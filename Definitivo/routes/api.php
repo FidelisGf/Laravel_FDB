@@ -4,6 +4,7 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UsuarioController;
 use App\Product;
@@ -64,6 +65,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
     Route::get('/filterEstoque', [EstoqueController::class, 'filters']);
 
+    Route::resource('pedidos', 'PedidosController');
     Route::resource('empresas', 'EmpresaController');
     Route::resource('products', 'ProductController');
     Route::resource('categorys', 'CategoryController');

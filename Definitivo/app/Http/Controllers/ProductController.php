@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Requests\ProductRequest;
 use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
@@ -65,6 +64,8 @@ class ProductController extends Controller
     public function store(Request $request)
     {
         try{
+            $helper = new Help();
+            $helper->startTransaction();
             $validatedData = $request->validate([
                 'NOME' => ['required', 'unique:PRODUCTS', 'max:60', 'min:2'],
                 'DESC' => ['required', 'max:120', 'min:4'],
@@ -74,18 +75,19 @@ class ProductController extends Controller
             ]);
             if($validatedData){
                 $produto = Product::create($request->all());
+
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
                     $estoque = new EstoqueController();
                     $estoque->storeProdutoInEstoque($produto->ID_PRODUTO, $quantidade);
+                    $helper->commit();
                     return response()->json(
                         $produto
                     );
                 }
             }
-
-
         }catch(\Exception $e){
+            $helper->rollbackTransaction();
             return response()->json(
                 [
                     "message" => $e->getMessage()

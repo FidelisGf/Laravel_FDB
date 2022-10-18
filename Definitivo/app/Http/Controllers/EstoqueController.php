@@ -13,12 +13,26 @@ class EstoqueController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         try{
+            if($request->filled('opcao')){
+                $opcao = $request->opcao;
+                switch($opcao){
+                    case "Produtos com mais estoque":
+                        return $this->filterByBiggerEstoque();
+                        break;
+                    case "Produtos com pouco estoque":
+                        return $this->filterByLowerEstoque();
+                        break;
+                    case "Produtos com mais saidas":
+                        return $this->filterByProductWithMostSaidas();
+                        break;
+                }
+            }
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
-            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
                 'product' => function($query){
                     $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
                 }
@@ -129,14 +143,7 @@ class EstoqueController extends Controller
     }
     public function filters(Request $request){
         $opcao = $request->opcao;
-        switch($opcao){
-            case "Produtos com mais estoque":
-                return $this->filterByBiggerEstoque();
-                break;
-            case "Produtos com pouco estoque":
-                return $this->filterByLowerEstoque();
-                break;
-        }
+
     }
     public function getQuantidadeProduct($id){
         try{
@@ -147,6 +154,21 @@ class EstoqueController extends Controller
         }
     }
 
+    public function filterByProductWithMostSaidas(){
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->whereNotNull('SAIDAS')->
+            orderBy('SAIDAS', 'desc')->with([
+                'product' => function($query){
+                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                }
+            ])->paginate(6);
+            return $produtos;
+        }catch(\Exception $e){
+            return response()->json(['message', $e->getMessage()],400);
+        }
+    }
     /**
      * Display the specified resource.
      *

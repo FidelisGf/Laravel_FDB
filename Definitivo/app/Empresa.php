@@ -30,4 +30,7 @@ class Empresa extends Model
     public function estoque(){
         return $this->hasMany(Estoque::class, 'EMPRESA_ID', 'ID');
     }
+    public function pedidos(){
+        return $this->hasMany(Pedidos::class, 'ID_EMPRESA', 'ID');
+    }
 }

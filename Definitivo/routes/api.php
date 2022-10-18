@@ -52,7 +52,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/search', [ProductController::class, 'search']);
     Route::get('/filterBy', [ProductController::class, 'filters']);
 
-
     Route::get('/autoCompleteEmpresa' ,[EmpresaController::class, 'autoCompleteEmpresa']);
     Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsFromEmpresa']);
     Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
@@ -64,10 +63,9 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
     Route::get('/filterEstoque', [EstoqueController::class, 'filters']);
-
+    Route::resource('products', 'ProductController');
     Route::resource('pedidos', 'PedidosController');
     Route::resource('empresas', 'EmpresaController');
-    Route::resource('products', 'ProductController');
     Route::resource('categorys', 'CategoryController');
     Route::resource('estoques', 'EstoqueController');
 });

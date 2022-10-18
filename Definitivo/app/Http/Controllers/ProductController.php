@@ -21,19 +21,30 @@ class ProductController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
-            $empresa = $user->empresa;
-            $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
-                'category' => function($query){
-                    $query->select('ID_CATEGORIA', 'NOME');
+            if($request->filled('opcao')){
+                $op = $request->opcao;
+                switch ($op){
+                    case "Produtos mais baratos":
+                        return $this->filterByLowestValue();
+                        break;
+                    case "Produtos mais caros":
+                        return $this->filterByExpansiveValue();
+                        break;
                 }
-            ])->paginate(6);
-            return $PRODUCTS;
+            }else{
+                $user = JWTAuth::parseToken()->authenticate();
+                $empresa = $user->empresa;
+                $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
+                    'category' => function($query){
+                        $query->select('ID_CATEGORIA', 'NOME');
+                    }
+                ])->paginate(6);
+                return $PRODUCTS;
+            }
         }catch(\Exception $e){
-
             return response()->json(
                 [
                     "message" => $e->getMessage()
@@ -109,13 +120,11 @@ class ProductController extends Controller
             $PRODUCTS = Product::where('ID_PRODUTO',$id)->with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME');
                 }
-            ])->first();
+            ])->firstOrFail();
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
+                $e->getMessage(), 400
             );
         }
     }
@@ -200,7 +209,7 @@ class ProductController extends Controller
                 'category' => function($query){
                     $query->select('ID_CATEGORIA', 'NOME');
                 }
-            ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(5);
+            ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(6);
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
@@ -219,7 +228,7 @@ class ProductController extends Controller
                 'category' => function($query){
                     $query->select('ID_CATEGORIA', 'NOME');
                 }
-            ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(5);
+            ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(6);
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(

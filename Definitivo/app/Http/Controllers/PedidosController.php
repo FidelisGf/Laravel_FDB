@@ -7,6 +7,7 @@ use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
 use App\Http\Resources\ProductResource;
 use App\Pedidos;
 use App\Product;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use League\CommonMark\Util\ArrayCollection;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -18,9 +19,25 @@ class PedidosController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(Request $request)
     {
-        //
+        try{
+            if($request->filled('opcao')){
+                $opcao = $request->opcao;
+                switch($opcao){
+                    case 'Pedidos realizados entre duas datas' :
+                        return $this->pedidosPorPeriodo($request);
+                        break;
+                }
+            }else{
+                $user = JWTAuth::parseToken()->authenticate();
+                $empresa = $user->empresa;
+                $Pedidos = Pedidos::where('ID_EMPRESA', $empresa->ID)->paginate(6);
+                return $Pedidos;
+            }
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
     }
 
     /**
@@ -48,13 +65,13 @@ class PedidosController extends Controller
             $validatedData = $request->validate([
                 'METODO_PAGAMENTO' => ['required'],
                 'produtos' => ['required'],
-                'valor_total'=> ['required', 'min:0.01'],
                 'aprovado' => ['required'],
             ]);
             if($validatedData){
                     $metodo_pagamento = $request->METODO_PAGAMENTO;
                     $user = JWTAuth::parseToken()->authenticate();
                     $empresa = $user->empresa;
+                    $vlTotal = 0;
                     $pedido = new Pedidos();
                     $estoque = new EstoqueController();
                     $FakeProducts = collect(new FakeProduct());
@@ -64,14 +81,18 @@ class PedidosController extends Controller
                         $FakeProducts->push($FakeProduct);
                     }
                     foreach($FakeProducts as $produto){
+                        $vlTotal += $produto->valor;
                         $PRODUCTS->push($produto);
                         $estoque->removeEstoque($produto->id, $produto->quantidade);
                     }
                     $pedido->PRODUTOS = $PRODUCTS;
                     $pedido->METODO_PAGAMENTO = $metodo_pagamento;
                     $pedido->ID_EMPRESA = $empresa->ID;
-                    $pedido->VALOR_TOTAL = $request->valor_total;
+                    $pedido->VALOR_TOTAL = $vlTotal;
                     $pedido->APROVADO = $request->aprovado;
+                    if($pedido->APROVADO = 'T'){
+                        $pedido->DT_PAGAMENTO = Carbon::now();
+                    }
                     $helper->startTransaction();
                     $pedido->save();
                     $helper->commit();
@@ -79,6 +100,31 @@ class PedidosController extends Controller
             }
         }catch(\Exception $e){
             $helper->rollbackTransaction();
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
+    public function aprovarPedido($id){
+        $helper = new Help();
+        try{
+            $Pedido = Pedidos::where('ID', $id)->firstOrFail();
+            $Pedido->APROVADO = 'T';
+            $Pedido->DT_PAGAMENTO = Carbon::now();
+            $helper->startTransaction();
+            $Pedido->save();
+            $helper->commit();
+            return $Pedido;
+        }catch(\Exception $e){
+            $helper->rollbackTransaction();
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
+    public function pedidosPorPeriodo(Request $request){
+        try{
+            $startData = $request->start;
+            $endData = $request->end;
+            $Pedidos = Pedidos::whereBetween('DT_PAGAMENTO', [$startData, $endData])->paginate(6);
+            return $Pedidos;
+        }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }
     }

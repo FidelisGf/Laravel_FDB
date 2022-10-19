@@ -64,11 +64,7 @@ class CategoryController extends Controller
             $Category->NOME = $request->NOME;
             $Category->NOME_REAL = $NOME_REAL;
             if($Category->save()){
-                return response()->json(
-                    [
-                        "message" => "Categoria Criada com sucesso"
-                    ],200
-                );
+                return $Category;
             }
         }catch(\Exception $e){
            return response()->json(

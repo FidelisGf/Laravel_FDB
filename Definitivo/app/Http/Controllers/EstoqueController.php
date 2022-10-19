@@ -28,6 +28,9 @@ class EstoqueController extends Controller
                     case "Produtos com mais saidas":
                         return $this->filterByProductWithMostSaidas();
                         break;
+                    case "Disponivel para venda" :
+                        return $this->filterByDisponivelParaVenda();
+                        break;
                 }
             }
             $user = JWTAuth::parseToken()->authenticate();
@@ -43,6 +46,20 @@ class EstoqueController extends Controller
         }
     }
 
+    public function filterByDisponivelParaVenda(){
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
+                'product' => function($query){
+                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                }
+            ])->where('QUANTIDADE', '>', 0)->paginate(6);
+            return $PRODUCTS;
+        }catch(\Exception $e){
+            return response()->json(['message'=>$e->getMessage()]);
+        }
+    }
     /**
      * Show the form for creating a new resource.
      *

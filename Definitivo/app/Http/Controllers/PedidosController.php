@@ -91,7 +91,7 @@ class PedidosController extends Controller
                     $pedido->VALOR_TOTAL = $vlTotal;
                     $pedido->APROVADO = $request->aprovado;
                     if($pedido->APROVADO = 'T'){
-                        $pedido->DT_PAGAMENTO = Carbon::now();
+                        $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }
                     $helper->startTransaction();
                     $pedido->save();
@@ -120,8 +120,8 @@ class PedidosController extends Controller
     }
     public function pedidosPorPeriodo(Request $request){
         try{
-            $startData = $request->start;
-            $endData = $request->end;
+            $startData = Carbon::parse($request->start);
+            $endData = Carbon::parse($request->end);
             $Pedidos = Pedidos::whereBetween('DT_PAGAMENTO', [$startData, $endData])->paginate(6);
             return $Pedidos;
         }catch(\Exception $e){

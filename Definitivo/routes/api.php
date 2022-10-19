@@ -52,8 +52,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('aprovarPedido/{id}', [PedidosController::class, 'aprovarPedido']);
     Route::get('pedidoPorData', [PedidosController::class, 'pedidosPorPeriodo']);
 
-
-
     Route::post('/search', [ProductController::class, 'search']);
     Route::get('/filterBy', [ProductController::class, 'filters']);
     Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);

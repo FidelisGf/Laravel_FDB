@@ -45,7 +45,6 @@ class EstoqueController extends Controller
             return response()->json(['message' => $e]);
         }
     }
-
     public function filterByDisponivelParaVenda(){
         try{
             $user = JWTAuth::parseToken()->authenticate();

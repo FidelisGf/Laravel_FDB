@@ -23,7 +23,7 @@ class Pedidos extends Model
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
     }
     public function vendas(){
-        return $this->hasOne(Venda::class, 'ID_PEDIDO', 'ID');
+        return $this->belongsTo(Venda::class, 'ID_PEDIDO', 'ID');
     }
     protected $dates = ['DELETED_AT'];
 }

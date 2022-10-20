@@ -41,7 +41,7 @@ class ProductController extends Controller
                     'category' => function($query){
                         $query->select('ID_CATEGORIA', 'NOME');
                     }
-                ])->paginate(6);
+                ])->paginate(7);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -147,22 +147,13 @@ class ProductController extends Controller
     {
 
         try{
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'unique:PRODUCTS', 'max:60', 'min:2'],
-                'DESC' => ['required', 'max:120', 'min:4'],
-                'VALOR'=> ['required', 'min:0'],
-                'ID_CATEGORIA' => ['required'],
-            ]);
-            if($validatedData){
-                $PRODUCT = Product::where('ID_PRODUTO', $id)->first();
-                $PRODUCT->update($request->all());
-                return response()->json(
-                    [
-                        "message" => "Produto editado com sucesso"
-                    ],200
-                    );
-            }
-
+            $PRODUCT = Product::where('ID_PRODUTO', $id)->firstOrFail();
+            $PRODUCT->update($request->all());
+            return response()->json(
+                [
+                    "message" => "Produto editado com sucesso"
+                ],200
+            );
         }catch(\Exception $e){
             return response()->json(
                 [

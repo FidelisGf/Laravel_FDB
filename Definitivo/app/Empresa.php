@@ -33,4 +33,7 @@ class Empresa extends Model
     public function pedidos(){
         return $this->hasMany(Pedidos::class, 'ID_EMPRESA', 'ID');
     }
+    public function vendas(){
+        return $this->hasMany(Venda::class, 'ID_EMPRESA', 'ID');
+    }
 }

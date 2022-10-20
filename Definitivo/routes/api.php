@@ -7,6 +7,7 @@ use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\UsuarioController;
+use App\Http\Controllers\VendaController;
 use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -66,7 +67,10 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'] );
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'] );
 
+    Route::get('getVendasByDate', [VendaController::class, 'getVendasByDate']);
 
+
+    Route::resource('vendas', 'VendaController');
     Route::resource('products', 'ProductController');
     Route::resource('pedidos', 'PedidosController');
     Route::resource('empresas', 'EmpresaController');

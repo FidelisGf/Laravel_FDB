@@ -85,18 +85,20 @@ class PedidosController extends Controller
                         $PRODUCTS->push($produto);
                         $estoque->removeEstoque($produto->id, $produto->quantidade);
                     }
-                    $pedido->PRODUTOS = $PRODUCTS;
+                    $pedido->PRODUTOS = json_encode($PRODUCTS); // manda em formato de json para o banco
                     $pedido->METODO_PAGAMENTO = $metodo_pagamento;
                     $pedido->ID_EMPRESA = $empresa->ID;
                     $pedido->VALOR_TOTAL = $vlTotal;
-                    $pedido->APROVADO = $request->aprovado;
-                    if($pedido->APROVADO = 'T'){
+                    $pedido->APROVADO = "$request->aprovado";
+                    if($pedido->APROVADO == 'T'){
                         $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }
                     $helper->startTransaction();
                     $pedido->save();
                     $helper->commit();
-                    return $pedido;
+                    return response()->json([
+                        'message' => $pedido
+                    ]);
             }
         }catch(\Exception $e){
             $helper->rollbackTransaction();
@@ -108,7 +110,7 @@ class PedidosController extends Controller
         try{
             $Pedido = Pedidos::where('ID', $id)->firstOrFail();
             $Pedido->APROVADO = 'T';
-            $Pedido->DT_PAGAMENTO = Carbon::now();
+            $Pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
             $helper->startTransaction();
             $Pedido->save();
             $helper->commit();
@@ -122,7 +124,11 @@ class PedidosController extends Controller
         try{
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
+            $tmp = null;
             $Pedidos = Pedidos::whereBetween('DT_PAGAMENTO', [$startData, $endData])->paginate(6);
+            foreach($Pedidos as $Pedido){
+                 $Pedido->PRODUTOS = json_decode($Pedido->PRODUTOS); // transforma o json em um objeto novamente
+            }
             return $Pedidos;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);

@@ -23,6 +23,9 @@ class VendaController extends Controller
                 case "Vendas por periodo de dias":
                     return $this->getVendasByDate($request);
                     break;
+                case "Vendas por Tipo de Pagamento":
+                    return $this->getVendasByTipoPagamento($request);
+                    break;
             }
         }
     }
@@ -38,7 +41,7 @@ class VendaController extends Controller
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
             ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO')->paginate(6);
             foreach($vendas as $venda){
-                $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d M Y H:i');
+                $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d m Y H:i');
             }
             return $vendas;
         }catch(\Exception $e){
@@ -48,16 +51,39 @@ class VendaController extends Controller
         }
     }
     public function getVendasByTipoPagamento(Request $request){
-        $startData = Carbon::parse($request->start);
-        $endData = Carbon::parse($request->end);
-        $user = JWTAuth::parseToken()->authenticate();
-        $empresa = $user->empresa;
-        $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
-            $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
-            ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
-        })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL')
-        ->where('METODO_PAGAMENTO', '=', 'DINHEIRO');
-        return $vendas;
+        try{
+            $startData = Carbon::parse($request->start);
+            $endData = Carbon::parse($request->end);
+            $vlPix = 0;
+            $vlDinheiro = 0;
+            $vlCartao = 0;
+            $vlTotal = 0;
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
+                $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
+                ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+            })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->paginate(8);
+            foreach($vendas as $venda){
+                if($venda->METODO_PAGAMENTO == 'Dinheiro'){
+                    $vlDinheiro += $venda->VALOR_TOTAL;
+                    $vlTotal += $vlDinheiro;
+                }else if($venda->METODO_PAGAMENTO == 'Cartao/Debito'){
+                    $vlCartao += $venda->VALOR_TOTAL;
+                    $vlTotal += $vlCartao;
+                }else if($venda->METODO_PAGAMENTO == 'Pix'){
+                    $vlPix += $venda->VALOR_TOTAL;
+                    $vlTotal += $venda->VALOR_TOTAL;
+                }
+            }
+            $vls = array($vlDinheiro, $vlCartao, $vlPix, $vlTotal);
+            $valores = json_encode($vls);
+            return $valores;
+        }catch(\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage()
+            ],400);
+        }
     }
     /**
      * Show the form for creating a new resource.

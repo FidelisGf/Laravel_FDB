@@ -41,7 +41,7 @@ class ProductController extends Controller
                     'category' => function($query){
                         $query->select('ID_CATEGORIA', 'NOME');
                     }
-                ])->paginate(7);
+                ])->orderBy('ID_PRODUTO', 'asc')->paginate(8);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){

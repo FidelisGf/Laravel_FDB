@@ -96,9 +96,7 @@ class PedidosController extends Controller
                     $helper->startTransaction();
                     $pedido->save();
                     $helper->commit();
-                    return response()->json([
-                        'message' => $pedido
-                    ]);
+                    return $pedido;
             }
         }catch(\Exception $e){
             $helper->rollbackTransaction();

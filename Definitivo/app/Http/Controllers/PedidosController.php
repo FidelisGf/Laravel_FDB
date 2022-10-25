@@ -140,7 +140,13 @@ class PedidosController extends Controller
      */
     public function show($id)
     {
-        //
+        try{
+            $pedido = Pedidos::where('ID', $id)->firstOrFail();
+            $pedido->PRODUTOS = json_decode($pedido->PRODUTOS); // transforma o json em um objeto novamente
+            return $pedido;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
     }
     /**
      * Show the form for editing the specified resource.
@@ -162,9 +168,45 @@ class PedidosController extends Controller
      */
     public function update(Request $request, $id)
     {
-        //
+        $helper = new Help();
+        try{
+            $estoque = new EstoqueController();
+            $pedido = Pedidos::where('ID', '=', $id)->firstOrFail();
+            $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
+            foreach($pedido->PRODUTOS as $produto){
+                $request->product_id = $produto->id;
+                $request->quantidade = $produto->quantidade;
+                $estoque->addEstoque($request);
+            }
+            $FakeProducts = collect(new FakeProduct());
+            $PRODUCTS = collect(new FakeProduct());
+            foreach($request->PRODUTOS as $produto){
+                $FakeProduct = new ResourcesFakeProduct((object) $produto);
+                $FakeProducts->push($FakeProduct);
+            }
+            $valor_total = 0;
+            foreach($FakeProducts as $produto){
+               $valor_total += $produto->valor * $produto->quantidade;
+               $PRODUCTS->push($produto);
+               $estoque->removeEstoque($produto->id, $produto->quantidade);
+            }
+            $pedido->METODO_PAGAMENTO = $request->METODO_PAGAMENTO;
+            $pedido->VALOR_TOTAL = $valor_total;
+            $pedido->APROVADO = "$request->APROVADO";
+            $pedido->PRODUTOS = json_encode($PRODUCTS);
+            if($pedido->APROVADO == 'T'){
+                $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
+            }
+            $helper->startTransaction();
+            $pedido->save();
+            $helper->commit();
+            $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
+            return $pedido;
+        }catch(\Exception $e){
+            $helper->rollbackTransaction();
+            return response()->json(['message' => $e->getMessage()]);
+        }
     }
-
     /**
      * Remove the specified resource from storage.
      *

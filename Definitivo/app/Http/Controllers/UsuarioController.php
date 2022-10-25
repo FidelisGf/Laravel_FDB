@@ -81,6 +81,14 @@ class UsuarioController extends Controller
             return response()->json(['message' => $e->getMessage()]);
         }
     }
+    public function profile(){
+        try{
+            $user = FacadesJWTAuth::parseToken()->authenticate();
+            return $user;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
 
     /**
      * Store a newly created resource in storage.

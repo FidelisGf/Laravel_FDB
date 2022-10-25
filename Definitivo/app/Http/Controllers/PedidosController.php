@@ -81,7 +81,7 @@ class PedidosController extends Controller
                         $FakeProducts->push($FakeProduct);
                     }
                     foreach($FakeProducts as $produto){
-                        $vlTotal += $produto->valor;
+                        $vlTotal += $produto->valor * $produto->quantidade;
                         $PRODUCTS->push($produto);
                         $estoque->removeEstoque($produto->id, $produto->quantidade);
                     }
@@ -100,7 +100,7 @@ class PedidosController extends Controller
             }
         }catch(\Exception $e){
             $helper->rollbackTransaction();
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
     public function aprovarPedido($id){
@@ -129,7 +129,7 @@ class PedidosController extends Controller
             }
             return $Pedidos;
         }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
     /**
@@ -145,7 +145,7 @@ class PedidosController extends Controller
             $pedido->PRODUTOS = json_decode($pedido->PRODUTOS); // transforma o json em um objeto novamente
             return $pedido;
         }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],404);
         }
     }
     /**
@@ -204,7 +204,7 @@ class PedidosController extends Controller
             return $pedido;
         }catch(\Exception $e){
             $helper->rollbackTransaction();
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
     /**

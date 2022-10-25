@@ -57,11 +57,14 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/filterBy', [ProductController::class, 'filters']);
     Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);
 
+    Route::get('/getEmpresaFromUser', [EmpresaController::class, 'getEmpresaFromUser']);
     Route::get('/searchEmp', [EmpresaController::class, 'applyFilter']);
     Route::get('/autoCompleteEmpresa' ,[EmpresaController::class, 'autoCompleteEmpresa']);
     Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsFromEmpresa']);
     Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
     Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCategoryFromEmpresa']);
+
+    Route::get('/profile', [UsuarioController::class, 'profile']);
 
     Route::get('/checaEmpUser', [UsuarioController::class, 'checkIfUserHasEmpresa'] );
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'] );

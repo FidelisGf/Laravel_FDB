@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
 use Illuminate\Validation\Validator;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EmpresaController extends Controller
 {
@@ -24,6 +25,20 @@ class EmpresaController extends Controller
             $EMPRESAS = Empresa::paginate(3)->toArray();
             return $EMPRESAS;
             //return response()->json(Empresa::all());
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
+
+    public function getEmpresaFromUser(){
+        try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            return $empresa;
         }catch(\Exception $e){
             return response()->json(
                 [

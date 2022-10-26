@@ -36,4 +36,7 @@ class Empresa extends Model
     public function vendas(){
         return $this->hasMany(Venda::class, 'ID_EMPRESA', 'ID');
     }
+    public function cliente(){
+        return $this->hasMany(Cliente::class, 'ID_EMPRESA', 'ID');
+    }
 }

@@ -18,12 +18,15 @@ class Pedidos extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = ['ID', 'PRODUTOS', 'METODO_PAGAMENTO',
-                          'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO'];
+                          'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO', 'ID_CLIENTE'];
     public function empresas(){
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
     }
     public function vendas(){
         return $this->belongsTo(Venda::class, 'ID_PEDIDO', 'ID');
+    }
+    public function cliente(){
+        return $this->hasOne(Cliente::class, 'ID_CLIENTE', 'ID');
     }
     protected $dates = ['DELETED_AT'];
 }

@@ -90,6 +90,9 @@ class PedidosController extends Controller
                     $pedido->ID_EMPRESA = $empresa->ID;
                     $pedido->VALOR_TOTAL = $vlTotal;
                     $pedido->APROVADO = "$request->aprovado";
+                    if($request->filled('ID_CLIENTE')){
+                        $pedido->ID_CLIENTE = $request->ID_CLIENTE;
+                    }
                     if($pedido->APROVADO == 'T'){
                         $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }

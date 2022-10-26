@@ -73,6 +73,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('getVendasByDate', [VendaController::class, 'getVendasByDate']);
     Route::get('getVendasByTipoPagamento', [VendaController::class, 'getVendasByTipoPagamento']);
 
+    Route::resource('clientes', 'ClienteController');
     Route::resource('vendas', 'VendaController');
     Route::resource('products', 'ProductController');
     Route::resource('pedidos', 'PedidosController');

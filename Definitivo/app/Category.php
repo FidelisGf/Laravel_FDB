@@ -26,6 +26,6 @@ class Category extends Model
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID_CATEGORIA');
     }
 
-    protected $fillable = ['NOME', 'ID_EMPRESA', 'NOME_REAL'];
+    protected $fillable = ['NOME_C', 'ID_EMPRESA', 'NOME_REAL'];
     protected $dates = ['DELETED_AT'];
 }

@@ -37,7 +37,7 @@ class EstoqueController extends Controller
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
                 'product' => function($query){
-                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
             ])->paginate(6);
             return $PRODUCTS;
@@ -51,7 +51,7 @@ class EstoqueController extends Controller
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
                 'product' => function($query){
-                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
             ])->where('QUANTIDADE', '>', 0)->paginate(6);
             return $PRODUCTS;
@@ -135,7 +135,7 @@ class EstoqueController extends Controller
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
                 'product' => function($query){
-                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
             ])->paginate(5);
             return $PRODUCTS;
@@ -149,7 +149,7 @@ class EstoqueController extends Controller
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'asc')->with([
                 'product' => function($query){
-                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
             ])->paginate(5);
             return $PRODUCTS;
@@ -177,7 +177,7 @@ class EstoqueController extends Controller
             $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->whereNotNull('SAIDAS')->
             orderBy('SAIDAS', 'desc')->with([
                 'product' => function($query){
-                    $query->select('ID_PRODUTO', 'NOME', 'VALOR', 'DESC');
+                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
             ])->paginate(6);
             return $produtos;

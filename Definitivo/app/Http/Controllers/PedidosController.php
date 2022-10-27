@@ -122,11 +122,14 @@ class PedidosController extends Controller
         }
     }
     public function pedidosPorPeriodo(Request $request){
+
         try{
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
             $tmp = null;
-            $Pedidos = Pedidos::whereBetween('DT_PAGAMENTO', [$startData, $endData])->paginate(6);
+            $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->paginate(6);
             foreach($Pedidos as $Pedido){
                  $Pedido->PRODUTOS = json_decode($Pedido->PRODUTOS); // transforma o json em um objeto novamente
             }

@@ -19,6 +19,6 @@ class Estoque extends Model
         return $this->belongsTo(Empresa::class, 'EMPRESA_ID', 'ID');
     }
     public function product(){
-        return $this->hasMany(Product::class, 'ID_PRODUTO', 'PRODUCT_ID');
+        return $this->hasMany(Product::class, 'ID', 'PRODUCT_ID');
     }
 }

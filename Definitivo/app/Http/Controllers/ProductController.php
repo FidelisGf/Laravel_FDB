@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Requests\ProductRequest;
 use Illuminate\Support\Facades\App;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ProductController extends Controller
@@ -37,11 +38,10 @@ class ProductController extends Controller
             }else{
                 $user = JWTAuth::parseToken()->authenticate();
                 $empresa = $user->empresa;
-                $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
-                    'category' => function($query){
-                        $query->select('ID_CATEGORIA', 'NOME');
-                    }
-                ])->orderBy('ID_PRODUTO', 'asc')->paginate(8);
+                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
+                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
+                    'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
+                )->paginate(8);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -55,9 +55,13 @@ class ProductController extends Controller
     }
     public function findAllProductByCategory($id){
         try{
-            return Product::with(['category' => function($query){
-                $query->select('ID_CATEGORIA', 'NOME');
-            }])->where('ID_CATEGORIA', '=', $id)->paginate(5);
+            $user = JWTAuth::parseToken()->authenticate();
+            $empresa = $user->empresa;
+            $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
+            join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
+                'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
+            )->where('CATEGORIAS.ID_CATEGORIA', $id)->paginate(8);
+            return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -90,7 +94,7 @@ class ProductController extends Controller
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
                     $estoque = new EstoqueController();
-                    $estoque->storeProdutoInEstoque($produto->ID_PRODUTO, $quantidade);
+                    $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
                     $helper->commit();
                     return response()->json(
                         $produto
@@ -117,8 +121,8 @@ class ProductController extends Controller
     {
         try{
             $user = JWTAuth::parseToken()->authenticate();
-            $PRODUCTS = Product::where('ID_PRODUTO',$id)->with(['category' => function($query){
-                $query->select('ID_CATEGORIA', 'NOME');
+            $PRODUCTS = Product::where('ID',$id)->with(['category' => function($query){
+                $query->select('ID_CATEGORIA', 'NOME_C');
                 }
             ])->firstOrFail();
             return $PRODUCTS;
@@ -147,7 +151,7 @@ class ProductController extends Controller
     {
 
         try{
-            $PRODUCT = Product::where('ID_PRODUTO', $id)->firstOrFail();
+            $PRODUCT = Product::where('ID', $id)->firstOrFail();
             $PRODUCT->update($request->all());
             return response()->json(
                 [
@@ -176,7 +180,7 @@ class ProductController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
             $estoque = Estoque::where('EMPRESA_ID', $user->empresa->ID)->where('PRODUCT_ID', $id);
             $estoque->delete();
-            $PRODUCT = Product::where('ID_PRODUTO',$id)->first();
+            $PRODUCT = Product::where('ID',$id)->first();
             $PRODUCT->delete();
             return response()->json(
                 [
@@ -198,7 +202,7 @@ class ProductController extends Controller
             $empresa = $user->empresa;
             $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
                 'category' => function($query){
-                    $query->select('ID_CATEGORIA', 'NOME');
+                    $query->select('ID_CATEGORIA', 'NOME_C');
                 }
             ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(6);
             return $PRODUCTS;
@@ -217,7 +221,7 @@ class ProductController extends Controller
             $empresa = $user->empresa;
             $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
                 'category' => function($query){
-                    $query->select('ID_CATEGORIA', 'NOME');
+                    $query->select('ID_CATEGORIA', 'NOME_C');
                 }
             ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(6);
             return $PRODUCTS;

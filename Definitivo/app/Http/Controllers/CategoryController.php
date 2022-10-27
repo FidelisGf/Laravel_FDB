@@ -59,9 +59,9 @@ class CategoryController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
             $Category = new Category();
-            $NOME_REAL = "$request->NOME _ $empresa->ID";
+            $NOME_REAL = "$request->NOME_C _ $empresa->ID";
             $Category->ID_EMPRESA = $empresa->ID;
-            $Category->NOME = $request->NOME;
+            $Category->NOME_C = $request->NOME_C;
             $Category->NOME_REAL = $NOME_REAL;
             if($Category->save()){
                 return $Category;

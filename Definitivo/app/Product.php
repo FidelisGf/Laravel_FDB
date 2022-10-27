@@ -13,7 +13,7 @@ class Product extends Model
     const UPDATED_AT = 'UPDATED_AT';
     const DELETED_AT = 'DELETED_AT';
     use SoftDeletes;
-    protected $primaryKey = 'ID_PRODUTO';
+    protected $primaryKey = 'ID';
     protected $generator = 'GEN_PRODUCTS_ID';
     protected $keyType = 'integer';
 
@@ -21,7 +21,7 @@ class Product extends Model
         return $this->belongsTo(Category::class, 'ID_CATEGORIA', 'ID_CATEGORIA');
     }
     public function estoque(){
-        return $this->belongsTo(Estoque::class, 'PRODUCT_ID', 'ID_PRODUTO');
+        return $this->belongsTo(Estoque::class, 'PRODUCT_ID', 'ID');
     }
     public $timestamps = true;
 

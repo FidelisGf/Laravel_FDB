@@ -19,6 +19,7 @@ class TagController extends Controller
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
             $tags = Tag::where('ID_EMPRESA', $empresa->ID)->get();
+            return $tags;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }

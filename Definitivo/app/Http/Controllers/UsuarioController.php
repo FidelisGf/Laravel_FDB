@@ -63,7 +63,7 @@ class UsuarioController extends Controller
     }
     public function checkIfUserHasEmpresa(){
         try{
-            $user = FacadesJWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             if($user->EMPRESA_ID != null ){
                 return response()->json([1]);
             }else{
@@ -75,7 +75,7 @@ class UsuarioController extends Controller
     }
     public function getEmpresaByUser(){
         try{
-            $user = FacadesJWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             return response()->json([$user->empresa]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
@@ -83,7 +83,7 @@ class UsuarioController extends Controller
     }
     public function profile(){
         try{
-            $user = FacadesJWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             return $user;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);

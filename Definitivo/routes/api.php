@@ -2,6 +2,8 @@
 
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
+use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\DespesaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\PedidosController;
@@ -73,6 +75,10 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('getVendasByDate', [VendaController::class, 'getVendasByDate']);
     Route::get('getVendasByTipoPagamento', [VendaController::class, 'getVendasByTipoPagamento']);
 
+    Route::get('despesasByTag/{id}', [DespesaController::class, 'despesasByTag']);
+
+    Route::post('test', [ClienteController::class, 'test']);
+
     Route::resource('despesas', 'DespesaController');
     Route::resource('tags', 'TagController');
     Route::resource('clientes', 'ClienteController');
@@ -83,6 +89,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('categorys', 'CategoryController');
     Route::resource('estoques', 'EstoqueController');
 });
+
 
 
 

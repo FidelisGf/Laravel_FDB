@@ -36,7 +36,7 @@ class ProductController extends Controller
                         break;
                 }
             }else{
-                $user = JWTAuth::parseToken()->authenticate();
+                $user = auth()->user();
                 $empresa = $user->empresa;
                 $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
                 join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
@@ -55,7 +55,7 @@ class ProductController extends Controller
     }
     public function findAllProductByCategory($id){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
             join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
@@ -120,11 +120,11 @@ class ProductController extends Controller
     public function show($id)
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
-            $PRODUCTS = Product::where('ID',$id)->with(['category' => function($query){
+            $user = auth()->user();
+            $PRODUCTS = Product::FindOrFail($id)->with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME_C');
                 }
-            ])->firstOrFail();
+            ])->first();
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
@@ -151,7 +151,7 @@ class ProductController extends Controller
     {
 
         try{
-            $PRODUCT = Product::where('ID', $id)->firstOrFail();
+            $PRODUCT = Product::FindOrFail($id);
             $PRODUCT->update($request->all());
             return response()->json(
                 [
@@ -177,7 +177,7 @@ class ProductController extends Controller
     public function destroy($id)
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $estoque = Estoque::where('EMPRESA_ID', $user->empresa->ID)->where('PRODUCT_ID', $id);
             $estoque->delete();
             $PRODUCT = Product::where('ID',$id)->first();
@@ -198,9 +198,9 @@ class ProductController extends Controller
 
     public function filterByLowestValue(){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
-            $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
+            $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
                 'category' => function($query){
                     $query->select('ID_CATEGORIA', 'NOME_C');
                 }
@@ -217,9 +217,9 @@ class ProductController extends Controller
 
     public function filterByExpansiveValue(){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
-            $PRODUCTS = Empresa::findOrFail($empresa->ID)->product()->with([
+            $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
                 'category' => function($query){
                     $query->select('ID_CATEGORIA', 'NOME_C');
                 }

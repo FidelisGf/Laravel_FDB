@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Cliente;
+use App\Mail\SendMailUser;
 use Facade\FlareClient\Http\Client;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class ClienteController extends Controller
@@ -17,7 +19,7 @@ class ClienteController extends Controller
     public function index()
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $clientes = Cliente::where('ID_EMPRESA', $empresa->ID)->paginate(8);
             return $clientes;
@@ -36,6 +38,11 @@ class ClienteController extends Controller
         //
     }
 
+    public function test(){
+        $to = "jpinformaticafoz@gmail.com";
+        Mail::to($to)->send(new SendMailUser(auth()->user()));
+    }
+
     /**
      * Store a newly created resource in storage.
      *
@@ -46,7 +53,7 @@ class ClienteController extends Controller
     {
         $helper = new Help();
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $validatedData = $request->validate([
                 'NOME' => ['required', 'max:60', 'min:2'],
@@ -85,7 +92,7 @@ class ClienteController extends Controller
         try{
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
-            $cliente = Cliente::where('ID', $id)->where('ID_EMPRESA', $empresa->ID)->firstOrFail();
+            $cliente = Cliente::FindOrFail($id);
             return $cliente;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);

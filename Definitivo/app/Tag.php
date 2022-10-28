@@ -13,7 +13,6 @@ class Tag extends Model
     public $timestamps = false;
     protected $fillable = ['ID', 'NOME', 'NOME_REAL', 'ID_EMPRESA'];
 
-
     public function despesas(){
         return $this->hasMany(Despesa::class, 'ID_TAG', 'ID');
     }

@@ -56,7 +56,7 @@ class CategoryController extends Controller
     public function store(Request $request)
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $Category = new Category();
             $NOME_REAL = "$request->NOME_C _ $empresa->ID";
@@ -83,7 +83,7 @@ class CategoryController extends Controller
     public function show($id)
     {
         try{
-            $category = Category::findOrFail($id);
+            $category = Category::FindOrFail($id);
             return new CategoryResource($category);
         }catch(\Exception $e){
             return response()->json([
@@ -107,7 +107,7 @@ class CategoryController extends Controller
     public function update(Request $request, Category $category)
     {
         try{
-            $Category = Category::findOrFail($category->ID_CATEGORIA);
+            $Category = Category::FindOrFail($category->ID_CATEGORIA);
             $Category->update($request->all());
             return response()->json(
                 [
@@ -124,7 +124,7 @@ class CategoryController extends Controller
     }
     public function CategoryMostExpansiveProduct($id){
         try{
-            $PRODUCTS = Category::findOrFail($id)->product->max('VALOR');
+            $PRODUCTS = Category::FindOrFail($id)->product->max('VALOR');
             return response()->json($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
@@ -136,7 +136,7 @@ class CategoryController extends Controller
     }
     public function CategoryAVGProductPrice($id){
         try{
-            $PRODUCTS = Category::findOrFail($id)->product->avg('VALOR');
+            $PRODUCTS = Category::FindOrFail($id)->product->avg('VALOR');
             return response()->json($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
@@ -148,7 +148,7 @@ class CategoryController extends Controller
     }
     public function CategoryMinProductPrice($id){
         try{
-            $PRODUCTS = Category::findOrFail($id)->product->min('VALOR');
+            $PRODUCTS = Category::FindOrFail($id)->product->min('VALOR');
             return response()->json($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(

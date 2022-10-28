@@ -30,7 +30,7 @@ class PedidosController extends Controller
                         break;
                 }
             }else{
-                $user = JWTAuth::parseToken()->authenticate();
+                $user = auth()->user();
                 $empresa = $user->empresa;
                 $Pedidos = Pedidos::where('ID_EMPRESA', $empresa->ID)->paginate(6);
                 return $Pedidos;
@@ -69,7 +69,7 @@ class PedidosController extends Controller
             ]);
             if($validatedData){
                     $metodo_pagamento = $request->METODO_PAGAMENTO;
-                    $user = JWTAuth::parseToken()->authenticate();
+                    $user = auth()->user();
                     $empresa = $user->empresa;
                     $vlTotal = 0;
                     $pedido = new Pedidos();
@@ -109,7 +109,7 @@ class PedidosController extends Controller
     public function aprovarPedido($id){
         $helper = new Help();
         try{
-            $Pedido = Pedidos::where('ID', $id)->firstOrFail();
+            $Pedido = Pedidos::FindOrFail($id);
             $Pedido->APROVADO = 'T';
             $Pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
             $helper->startTransaction();
@@ -124,7 +124,7 @@ class PedidosController extends Controller
     public function pedidosPorPeriodo(Request $request){
 
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
@@ -147,7 +147,7 @@ class PedidosController extends Controller
     public function show($id)
     {
         try{
-            $pedido = Pedidos::where('ID', $id)->firstOrFail();
+            $pedido = Pedidos::FindOrFail($id);
             $pedido->PRODUTOS = json_decode($pedido->PRODUTOS); // transforma o json em um objeto novamente
             return $pedido;
         }catch(\Exception $e){
@@ -177,7 +177,7 @@ class PedidosController extends Controller
         $helper = new Help();
         try{
             $estoque = new EstoqueController();
-            $pedido = Pedidos::where('ID', '=', $id)->firstOrFail();
+            $pedido = Pedidos::FindOrFail($id);
             $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
             foreach($pedido->PRODUTOS as $produto){
                 $request->product_id = $produto->id;

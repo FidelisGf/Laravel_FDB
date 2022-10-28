@@ -15,6 +15,13 @@ class DespesaController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
+    public function totalDespesa(Request $request){
+        try{
+
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
     public function index(Request $request)
     {
         try{
@@ -26,7 +33,7 @@ class DespesaController extends Controller
                         break;
                 }
             }else{
-                $user = JWTAuth::parseToken()->authenticate();
+                $user = auth()->user();
                 $empresa = $user->empresa;
                 $despesas = Despesa::where('ID_EMPRESA', $empresa->ID)->with([
                     'Tags' => function($query){
@@ -36,6 +43,7 @@ class DespesaController extends Controller
                 return $despesas;
             }
         }catch(Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
 
@@ -57,9 +65,8 @@ class DespesaController extends Controller
      */
     public function store(Request $request)
     {
-        $helper = new Help();
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $validatedData = $request->validate([
                 'DESC' => ['required', 'max:200', 'min:2'],
@@ -74,24 +81,35 @@ class DespesaController extends Controller
                 $despesa->CUSTO = $request->CUSTO;
                 $despesa->DATA = Carbon::parse($request->DATA);
                 $despesa->ID_TAG = $request->ID_TAG;
-                $helper->startTransaction();
                 $despesa->save();
-                $helper->commit();
                 return $despesa;
             }
         }catch(\Exception $e){
-            $helper->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
     public function despesaBetweenTwoDates(Request $request){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
             $despesas = Despesa::whereBetween('DATA', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->paginate(6);
             return $despesas;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
+    public function despesasByTag($id){
+        try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
+            $despesa = Despesa::where('ID_EMPRESA', $empresa->ID)->where('ID_TAG', $id)->with([
+                'Tags' => function($query){
+                    $query->select('ID', 'NOME');
+                }
+            ])->paginate(6);
+            return $despesa;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
@@ -106,7 +124,7 @@ class DespesaController extends Controller
     public function show($id)
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $despesa = Despesa::where('ID', $id)->where('ID_EMPRESA', $empresa->ID)->with(['Tags' => function($query){
                 $query->select('ID', 'NOME');
@@ -137,9 +155,8 @@ class DespesaController extends Controller
      */
     public function update(Request $request, $id)
     {
-        $helper = new Help();
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $validatedData = $request->validate([
                 'DESC' => ['required', 'max:200', 'min:2'],
@@ -148,20 +165,18 @@ class DespesaController extends Controller
                 'DATA' => ['required'],
             ]);
             if($validatedData){
-                $despesa = Despesa::where('ID', $id)->firstOrFail();
+                $despesa = Despesa::FindOrFail($id);
                 $despesa->DESC = $request->DESC;
                 $despesa->ID_EMPRESA = $empresa->ID;
                 $despesa->CUSTO = $request->CUSTO;
                 $despesa->DATA = Carbon::parse($request->DATA);
                 $despesa->ID_TAG = $request->ID_TAG;
-                $helper->startTransaction();
+
                 $despesa->save();
-                $helper->commit();
                 return $despesa;
 
             }
         }catch(Exception $e){
-            $helper->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
@@ -176,7 +191,7 @@ class DespesaController extends Controller
     {
         $helper = new Help();
         try{
-            $despesa = Despesa::where('ID', $id)->firstOrFail();
+            $despesa = Despesa::FindOrFail($id);
             $helper->startTransaction();
             $despesa->delete();
             $helper->commit();

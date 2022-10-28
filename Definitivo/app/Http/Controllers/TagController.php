@@ -16,7 +16,7 @@ class TagController extends Controller
     public function index()
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $tags = Tag::where('ID_EMPRESA', $empresa->ID)->get();
             return $tags;
@@ -45,7 +45,7 @@ class TagController extends Controller
     {
         $helper = new Help();
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $validatedData = $request->validate([
                 'NOME' => ['required', 'max:100', 'min:2']

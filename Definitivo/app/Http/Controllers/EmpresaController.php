@@ -96,7 +96,7 @@ class EmpresaController extends Controller
     public function show($id)
     {
         try{
-            return Empresa::where('ID',$id)->first();
+            return Empresa::FindOrFail($id);
 
         }catch(\Exception $e){
             return response()->json(
@@ -116,7 +116,7 @@ class EmpresaController extends Controller
     public function edit($id)
     {
         try{
-            return Empresa::where('ID',$id)->first();
+            return Empresa::FindOrFail($id);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -136,7 +136,7 @@ class EmpresaController extends Controller
     public function update(Request $request, $id)
     {
         try{
-            $Empresa = Empresa::findOrFail($id);
+            $Empresa = Empresa::FindOrFail($id);
             $Empresa->update($request->all());
             return response()->json(
                 [
@@ -173,7 +173,7 @@ class EmpresaController extends Controller
     public function destroy($id)
     {
         try{
-            Empresa::findOrFail($id)->delete();
+            Empresa::FindOrFail($id)->delete();
             return response()->json([
                 "message" => "Empresa Deletada com sucesso !"
             ]);
@@ -187,7 +187,7 @@ class EmpresaController extends Controller
     }
     public function allProductsFromEmpresa($id){
         try{
-            return Empresa::findOrFail($id)->product->first();
+            return Empresa::FindOrFail($id)->product->first();
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -199,7 +199,7 @@ class EmpresaController extends Controller
 
     public function allCategoryFromEmpresa($id){
         try{
-            return Empresa::where('ID',$id)->with(['category'])->first();
+            return Empresa::FindOrFail($id)->with(['category']);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -212,7 +212,7 @@ class EmpresaController extends Controller
     protected $appends = ['categorysCount'];
     public function countCategorysFromEmpresa($id){
         try{
-            return Empresa::findOrFail($id)->withCount('category')->get();
+            return Empresa::FindOrFail($id)->withCount('category')->get();
 
         }catch(\Exception $e){
             return response()->json(

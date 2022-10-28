@@ -33,7 +33,7 @@ class VendaController extends Controller
         try{
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
@@ -58,7 +58,7 @@ class VendaController extends Controller
             $vlDinheiro = 0;
             $vlCartao = 0;
             $vlTotal = 0;
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')

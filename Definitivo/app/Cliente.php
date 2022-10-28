@@ -17,4 +17,7 @@ class Cliente extends Model
     public function pedido(){
         return $this->belongsToMany(Pedidos::class, 'ID_CLIENTE', 'ID');
     }
+    public function empresa(){
+        return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
+    }
 }

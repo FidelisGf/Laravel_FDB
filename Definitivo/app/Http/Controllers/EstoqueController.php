@@ -33,7 +33,7 @@ class EstoqueController extends Controller
                         break;
                 }
             }
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
                 'product' => function($query){
@@ -47,7 +47,7 @@ class EstoqueController extends Controller
     }
     public function filterByDisponivelParaVenda(){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
                 'product' => function($query){
@@ -78,7 +78,7 @@ class EstoqueController extends Controller
     public function storeProdutoInEstoque($product_id, $quantidade)
     {
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $Estoque = new Estoque();
             $Estoque->PRODUCT_ID = $product_id;
@@ -98,7 +98,7 @@ class EstoqueController extends Controller
         try{
             $product_id = $request->product_id;
             $quantidade = $request->quantidade;
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
             $Estoque->QUANTIDADE += $quantidade;
@@ -114,7 +114,7 @@ class EstoqueController extends Controller
         try{
             $helper = new Help();
             $helper->startTransaction();
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
             $Estoque->QUANTIDADE -= $quantidade;
@@ -131,7 +131,7 @@ class EstoqueController extends Controller
     }
     public function filterByBiggerEstoque(){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
                 'product' => function($query){
@@ -145,7 +145,7 @@ class EstoqueController extends Controller
     }
     public function filterByLowerEstoque(){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'asc')->with([
                 'product' => function($query){
@@ -163,7 +163,7 @@ class EstoqueController extends Controller
     }
     public function getQuantidadeProduct($id){
         try{
-            $estoque = Estoque::where('PRODUCT_ID', $id)->first()->only('QUANTIDADE');
+            $estoque = Estoque::FindOrFail($id)->only('QUANTIDADE');
             return $estoque;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
@@ -172,7 +172,7 @@ class EstoqueController extends Controller
 
     public function filterByProductWithMostSaidas(){
         try{
-            $user = JWTAuth::parseToken()->authenticate();
+            $user = auth()->user();
             $empresa = $user->empresa;
             $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->whereNotNull('SAIDAS')->
             orderBy('SAIDAS', 'desc')->with([

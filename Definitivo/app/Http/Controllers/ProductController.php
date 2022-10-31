@@ -11,6 +11,7 @@ use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Requests\ProductRequest;
+use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -41,7 +42,7 @@ class ProductController extends Controller
                 $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
                 join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
                     'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-                )->paginate(8);
+                )->orderBy('ID', 'desc')->paginate(8);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -121,10 +122,10 @@ class ProductController extends Controller
     {
         try{
             $user = auth()->user();
-            $PRODUCTS = Product::FindOrFail($id)->with(['category' => function($query){
+            $PRODUCTS = Product::where('ID', $id)->with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME_C');
                 }
-            ])->first();
+            ])->firstOrFail();
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
@@ -132,7 +133,6 @@ class ProductController extends Controller
             );
         }
     }
-
     /**
      * Show the form for editing the specified resource.
      *
@@ -247,6 +247,20 @@ class ProductController extends Controller
                     "message" => $e->getMessage()
                 ],400
                 );
+        }
+    }
+    public function countProducts(){
+        try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
+            return DB::table('PRODUCTS')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+            ->where('CATEGORIAS.ID_EMPRESA', '=', $empresa->ID)->where('PRODUCTS.DELETED_AT', '=', null)->count();
+        }catch(Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
         }
     }
     //ucwords($bar);

@@ -6,6 +6,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DespesaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\MedidasController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\TagController;
@@ -35,7 +36,7 @@ Route::group([
 ], function ($router) {
 
     Route::post('logout', [AuthController::class, 'logout']);
-    Route::post('refresh', 'AuthController@refresh');
+
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('profile', [AuthController::class, 'profile']);
@@ -43,7 +44,7 @@ Route::group([
 });
 
 Route::group(['middleware' => ['jwt.verify']], function() {
-
+    Route::get('refresh', [AuthController::class, 'refresh']);
     Route::get('getQuantidadeProduct/{id}', [EstoqueController::class, 'getQuantidadeProduct']);
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
     Route::get('/filterEstoque', [EstoqueController::class, 'filters']);
@@ -56,6 +57,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('aprovarPedido/{id}', [PedidosController::class, 'aprovarPedido']);
     Route::get('pedidoPorData', [PedidosController::class, 'pedidosPorPeriodo']);
 
+    Route::get('countProducts', [ProductController::class, 'countProducts']);
     Route::post('/search', [ProductController::class, 'search']);
     Route::get('/filterBy', [ProductController::class, 'filters']);
     Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);
@@ -82,6 +84,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::post('test', [ClienteController::class, 'test']);
 
+    Route::resource('medidas', 'MedidasController');
     Route::resource('despesas', 'DespesaController');
     Route::resource('tags', 'TagController');
     Route::resource('clientes', 'ClienteController');

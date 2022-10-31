@@ -22,7 +22,7 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register', 'profile', 'logout', 'getAuthenticatedUser']]);
+        $this->middleware('auth:api', ['except' => ['login','register', 'refresh', 'profile', 'logout', 'getAuthenticatedUser']]);
     }
     public function register(Request $request){
 
@@ -69,20 +69,20 @@ class AuthController extends Controller
             {
                 try {
                     if (! $user = JWTAuth::parseToken()->authenticate()) {
-                        return response()->json(['user_not_found'], 401);
+                        return response()->json('user_not_found', 401);
                     }else{
                         return response()->json(['message' => 'sucess'],200);
                     }
                 }catch (TokenInvalidException $e) {
-                    return response()->json(['token_invalid'],401);
+                    return response()->json('token_invalid', 401);
                 }
                 catch (TokenExpiredException $e) {
-                    return response()->json(['token_expired'],400);
+                    return $this->refresh();
                 }
         }
     public function logout()
     {
-        Auth::logout();
+        auth('api')->logout();
         return response()->json(['message' => 'Successfully logged out']);
     }
     /**

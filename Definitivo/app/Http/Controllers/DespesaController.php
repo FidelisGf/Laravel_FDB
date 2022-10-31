@@ -136,11 +136,10 @@ class DespesaController extends Controller
     {
         try{
             $user = auth()->user();
-            $empresa = $user->empresa;
-            $despesa = Despesa::where('ID', $id)->where('ID_EMPRESA', $empresa->ID)->with(['Tags' => function($query){
+            return Despesa::where('ID', $id)->with(['Tags' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
-            return $despesa;
+
         }catch(Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

@@ -8,6 +8,7 @@ use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\TagController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendaController;
 use App\Product;
@@ -76,6 +77,8 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('getVendasByTipoPagamento', [VendaController::class, 'getVendasByTipoPagamento']);
 
     Route::get('despesasByTag/{id}', [DespesaController::class, 'despesasByTag']);
+
+    Route::get('sumDespesasMensais', [DespesaController::class, 'sumDespesasMensais']);
 
     Route::post('test', [ClienteController::class, 'test']);
 

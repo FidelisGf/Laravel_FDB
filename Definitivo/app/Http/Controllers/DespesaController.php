@@ -63,6 +63,17 @@ class DespesaController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
+    public function sumDespesasMensais(){
+        try{
+            $startData = date('Y-m-01');
+            $endData = date('Y-m-t');
+            $empresa = auth()->user()->empresa;
+            $valor = Despesa::where('ID_EMPRESA', $empresa->ID)->whereBetween('DATA', [$startData, $endData])->sum('CUSTO');
+            return $valor;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
     public function store(Request $request)
     {
         try{

@@ -42,7 +42,7 @@ class EstoqueController extends Controller
             ])->paginate(6);
             return $PRODUCTS;
         }catch(\Exception $e){
-            return response()->json(['message' => $e]);
+            return response()->json(['message' => $e],400);
         }
     }
     public function filterByDisponivelParaVenda(){
@@ -56,7 +56,7 @@ class EstoqueController extends Controller
             ])->where('QUANTIDADE', '>', 0)->paginate(6);
             return $PRODUCTS;
         }catch(\Exception $e){
-            return response()->json(['message'=>$e->getMessage()]);
+            return response()->json(['message'=>$e->getMessage()],400);
         }
     }
     /**
@@ -90,7 +90,7 @@ class EstoqueController extends Controller
         }catch(\Exception $e){
             return response()->json([
                 "message" => $e->getMessage()
-            ]);
+            ],400);
         }
     }
 
@@ -107,7 +107,7 @@ class EstoqueController extends Controller
         }catch(\Exception $e){
             return response()->json([
                 "message" => $e->getMessage()
-            ]);
+            ],400);
         }
     }
     public function removeEstoque($product_id, $quantidade){
@@ -126,7 +126,7 @@ class EstoqueController extends Controller
             $helper->rollbackTransaction();
             return response()->json([
                 "message" => $e->getMessage()
-            ]);
+            ],400);
         }
     }
     public function filterByBiggerEstoque(){
@@ -140,7 +140,7 @@ class EstoqueController extends Controller
             ])->paginate(5);
             return $PRODUCTS;
         }catch(\Exception $e){
-            return response()->json(['message' => $e]);
+            return response()->json(['message' => $e],400);
         }
     }
     public function filterByLowerEstoque(){
@@ -154,7 +154,7 @@ class EstoqueController extends Controller
             ])->paginate(5);
             return $PRODUCTS;
         }catch(\Exception $e){
-            return response()->json(['message' => $e]);
+            return response()->json(['message' => $e],400);
         }
     }
     public function filters(Request $request){
@@ -166,7 +166,7 @@ class EstoqueController extends Controller
             $estoque = Estoque::FindOrFail($id)->only('QUANTIDADE');
             return $estoque;
         }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
 

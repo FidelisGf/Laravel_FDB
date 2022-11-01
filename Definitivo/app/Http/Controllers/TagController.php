@@ -63,7 +63,7 @@ class TagController extends Controller
             }
         }catch(\Exception $e){
             $helper->rollbackTransaction();
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()], 400);
         }
     }
 

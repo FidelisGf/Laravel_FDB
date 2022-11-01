@@ -203,6 +203,11 @@ class PedidosController extends Controller
             if($pedido->APROVADO == 'T'){
                 $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
             }
+            if($request->filled('ID_CLIENTE')){
+                $pedido->ID_CLIENTE = $request->ID_CLIENTE;
+            }else{
+                $pedido->ID_CLIENTE = null;
+            }
             $helper->startTransaction();
             $pedido->save();
             $helper->commit();

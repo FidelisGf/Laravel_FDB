@@ -42,7 +42,7 @@ class ProductController extends Controller
                 $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
                 join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
                     'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-                )->orderBy('ID', 'desc')->paginate(8);
+                )->orderBy('ID', 'desc')->paginate(7);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -87,11 +87,11 @@ class ProductController extends Controller
                 'DESC' => ['required', 'max:120', 'min:4'],
                 'VALOR'=> ['required', 'min:0'],
                 'ID_CATEGORIA' => ['required'],
+                'ID_MEDIDA' => ['required'],
                 'quantidade_inicial' => ['required', 'min:0']
             ]);
             if($validatedData){
                 $produto = Product::create($request->all());
-
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
                     $estoque = new EstoqueController();
@@ -121,11 +121,12 @@ class ProductController extends Controller
     public function show($id)
     {
         try{
-            $user = auth()->user();
             $PRODUCTS = Product::where('ID', $id)->with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME_C');
                 }
-            ])->firstOrFail();
+            ])->with(['medida' => function($query){
+                $query->select('ID', 'NOME');
+            }])->firstOrFail();
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(

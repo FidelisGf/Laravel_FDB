@@ -23,9 +23,12 @@ class Product extends Model
     public function estoque(){
         return $this->belongsTo(Estoque::class, 'PRODUCT_ID', 'ID');
     }
+    public function medida(){
+        return $this->belongsTo(Medidas::class, 'ID_MEDIDA', 'ID');
+    }
     public $timestamps = true;
 
-    protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA'];
+    protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA', 'ID_MEDIDA'];
     protected $dates = ['DELETED_AT'];
 
 

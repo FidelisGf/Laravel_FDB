@@ -17,7 +17,7 @@ class MedidasController extends Controller
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            return Medidas::where('ID_EMPRESA', $empresa->ID)->paginate(8);
+            return Medidas::where('ID_EMPRESA', $empresa->ID)->paginate(20);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -47,7 +47,7 @@ class MedidasController extends Controller
         $user = auth()->user();
         $empresa = $user->empresa;
         $validatedData = $request->validate([
-            'NOME' => ['required', 'max:100', 'min:2']
+            'NOME' => ['required', 'max:100', 'min:1']
         ]);
         if($validatedData){
             $medida = new Medidas();

@@ -12,4 +12,8 @@ class Medidas extends Model
     protected $keyType = 'integer';
     public $timestamps = false;
     protected $fillable = ['ID', 'NOME', 'NOME_REAL', 'ID_EMPRESA'];
+
+    public function product(){
+        return $this->hasMany(Product::class, 'ID_MEDIDA', 'ID');
+    }
 }

@@ -22,7 +22,7 @@ class CategoryController extends Controller
         try{
             $user = JWTAuth::parseToken()->authenticate();
             $empresa = $user->empresa;
-            $Category = Category::where('ID_EMPRESA', $empresa->ID)->paginate(15);
+            $Category = Category::where('ID_EMPRESA', $empresa->ID)->paginate(30);
             return $Category;
         }catch(\Exception $e){
             return response()->json(

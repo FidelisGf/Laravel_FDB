@@ -77,7 +77,8 @@ class AuthController extends Controller
                     return response()->json('token_invalid', 401);
                 }
                 catch (TokenExpiredException $e) {
-                    return $this->refresh();
+                    $token = auth()->guard('api')->refresh();
+                    return response()->json($token, 401);
                 }
         }
     public function logout()

@@ -19,7 +19,7 @@ class FakeProduct extends JsonResource
             'nome' => $this->nome,
             'valor' => $this->valor,
             'quantidade' => $this->quantidade,
-
+            'medida' => $this->medida
         ];
     }
 }

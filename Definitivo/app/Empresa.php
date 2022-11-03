@@ -39,4 +39,7 @@ class Empresa extends Model
     public function cliente(){
         return $this->hasMany(Cliente::class, 'ID_EMPRESA', 'ID');
     }
+    public function Materiais(){
+        return $this->hasMany(Materiais::class, 'ID_EMPRESA', 'ID');
+    }
 }

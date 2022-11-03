@@ -84,6 +84,8 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::post('test', [ClienteController::class, 'test']);
 
+
+    Route::resource('materiais', 'MateriaisController');
     Route::resource('medidas', 'MedidasController');
     Route::resource('despesas', 'DespesaController');
     Route::resource('tags', 'TagController');

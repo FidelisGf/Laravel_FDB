@@ -92,6 +92,15 @@ class MateriaisController extends Controller
         }
     }
 
+
+    public function removeQuantidade($materiais, $quantidade){
+        foreach($materiais as $material){
+             $mt = Materiais::FindOrFail($material->ID);
+             $mt->QUANTIDADE = $mt->QUANTIDADE  -  ($material->QUANTIDADE * $quantidade);
+             $mt->save();
+        }
+    }
+
     /**
      * Show the form for editing the specified resource.
      *

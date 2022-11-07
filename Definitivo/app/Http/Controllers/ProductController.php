@@ -11,6 +11,7 @@ use App\Product;
 use Illuminate\Http\Request;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Requests\ProductRequest;
+use App\Materiais;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -91,9 +92,23 @@ class ProductController extends Controller
                 'quantidade_inicial' => ['required', 'min:0']
             ]);
             if($validatedData){
-                $produto = Product::create($request->all());
+                $produto = new Product();
+                $produto->NOME = $request->NOME;
+                $produto->DESC = $request->DESC;
+                $produto->VALOR = $request->VALOR;
+                $produto->ID_CATEGORIA = $request->ID_CATEGORIA;
+                $produto->ID_MEDIDA = $request->ID_MEDIDA;
+                $materias = collect(new Materiais());
+                foreach($request->MATERIAIS as $material){
+                    $materias->push((object)$material);
+                }
+                $produto->MATERIAIS = json_encode($materias);
+                $mtController = new MateriaisController();
+
+                $produto->save();
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
+                    $mtController->removeQuantidade($materias, $quantidade);
                     $estoque = new EstoqueController();
                     $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
                     $helper->commit();

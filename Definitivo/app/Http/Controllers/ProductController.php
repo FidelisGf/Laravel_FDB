@@ -89,6 +89,7 @@ class ProductController extends Controller
                 'VALOR'=> ['required', 'min:0'],
                 'ID_CATEGORIA' => ['required'],
                 'ID_MEDIDA' => ['required'],
+                'MATERIAIS' => ['required'],
                 'quantidade_inicial' => ['required', 'min:0']
             ]);
             if($validatedData){
@@ -142,6 +143,7 @@ class ProductController extends Controller
             ])->with(['medida' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
+            $PRODUCTS->MATERIAIS = json_decode($PRODUCTS->MATERIAIS);
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(

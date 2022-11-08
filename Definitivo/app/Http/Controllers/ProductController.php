@@ -143,9 +143,8 @@ class ProductController extends Controller
             ])->with(['medida' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
-            $PRODUCTS->CREATED_AT = $PRODUCTS->CREATED_AT->format('d-m-Y h:i');
             $PRODUCTS->MATERIAIS = json_decode($PRODUCTS->MATERIAIS);
-            return $PRODUCTS;
+            return response()->json($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
                 $e->getMessage(), 400
@@ -214,10 +213,26 @@ class ProductController extends Controller
                 );
         }
     }
-
+    public function descontaQuantidadeMaterial($id, $quantidade){
+        try{
+            $product = Product::FindOrFail($id);
+            $product->MATERIAIS = json_decode($product->MATERIAIS);
+            foreach($product->MATERIAIS as $mat){
+                $tmp = Materiais::FindOrFail($mat->ID);
+                $tmp->QUANTIDADE -= ($mat->QUANTIDADE * $quantidade);
+                if($tmp->QUANTIDADE < 0){
+                    return false;
+                }else{
+                    $tmp->save();
+                }
+            }
+            return true;
+        }catch(\Exception $e){
+            return false;
+        }
+    }
     public function findLucroByProduto($id){
         try{
-
             $produto = Product::FindOrFail($id);
             $lucro = $produto->VALOR;
             $produto->MATERIAIS = json_decode($produto->MATERIAIS);

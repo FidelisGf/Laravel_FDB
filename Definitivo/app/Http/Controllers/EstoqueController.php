@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Estoque;
+use App\Product;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -93,7 +94,6 @@ class EstoqueController extends Controller
             ],400);
         }
     }
-
     public function addEstoque(Request $request){
         try{
             $product_id = $request->product_id;
@@ -102,8 +102,14 @@ class EstoqueController extends Controller
             $empresa = $user->empresa;
             $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
             $Estoque->QUANTIDADE += $quantidade;
-            $Estoque->save();
-            return response()->json(['Produto atual no estoque' => $Estoque]);
+            $prod = new ProductController();
+            $check = $prod->descontaQuantidadeMaterial($product_id, $quantidade);
+            if($check){
+                $Estoque->save();
+                return response()->json(["message" => 'Estoque Adicionado com successo !']);
+            }else{
+                return response()->json(["message" => 'Saldo de Material Insuficiente !']);
+            }
         }catch(\Exception $e){
             return response()->json([
                 "message" => $e->getMessage()

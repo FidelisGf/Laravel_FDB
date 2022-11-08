@@ -17,8 +17,8 @@ class MateriaisController extends Controller
         $user = auth()->user();
         $empresa = $user->empresa;
         try{
-            $materiais = Materiais::where('ID_EMPRESA', $empresa->ID)->
-            where('QUANTIDADE', '>', 0)->paginate(7);
+            $materiais = Materiais::where('ID_EMPRESA', $empresa->ID)
+            ->where('QUANTIDADE', '>', 0)->paginate(7);
             return $materiais;
         }catch(\Exception $e){
             return response()->json(
@@ -80,25 +80,7 @@ class MateriaisController extends Controller
      */
     public function show($id)
     {
-        try{
-            $material = Materiais::FindOrFail($id);
-            return $material;
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
-
-
-    public function removeQuantidade($materiais, $quantidade){
-        foreach($materiais as $material){
-             $mt = Materiais::FindOrFail($material->ID);
-             $mt->QUANTIDADE = $mt->QUANTIDADE  -  ($material->QUANTIDADE * $quantidade);
-             $mt->save();
-        }
+        //
     }
 
     /**

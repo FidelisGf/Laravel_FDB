@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Pedidos;
+use App\Product;
 use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -58,6 +60,8 @@ class VendaController extends Controller
             $vlDinheiro = 0;
             $vlCartao = 0;
             $vlTotal = 0;
+            $vlReal = 0;
+
             $user = auth()->user();
             $empresa = $user->empresa;
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
@@ -65,6 +69,17 @@ class VendaController extends Controller
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->paginate(8);
             foreach($vendas as $venda){
+                $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
+                $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
+                foreach($pedido->PRODUTOS as $prod){
+                    $tmp = 0;
+                    $prod = Product::FindOrFail($prod->id);
+                    $prod->MATERIAIS = json_decode($prod->MATERIAIS);
+                    foreach($prod->MATERIAIS as $material){
+                        $tmp += $material->CUSTO;
+                    }
+                    $vlReal += ($prod->VALOR - $tmp);
+                }
                 if($venda->METODO_PAGAMENTO == 'Dinheiro'){
                     $vlDinheiro += $venda->VALOR_TOTAL;
                     $vlTotal += $vlDinheiro;
@@ -76,7 +91,7 @@ class VendaController extends Controller
                     $vlTotal += $venda->VALOR_TOTAL;
                 }
             }
-            $vls = array($vlDinheiro, $vlCartao, $vlPix, $vlTotal);
+            $vls = array($vlDinheiro, $vlCartao, $vlPix, $vlTotal, $vlReal);
             $valores = json_encode($vls);
             return $valores;
         }catch(\Exception $e){

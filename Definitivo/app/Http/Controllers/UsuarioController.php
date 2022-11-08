@@ -65,9 +65,9 @@ class UsuarioController extends Controller
         try{
             $user = auth()->user();
             if($user->EMPRESA_ID != null ){
-                return response()->json([1]);
+                return response()->json(1);
             }else{
-                return response()->json([0]);
+                return response()->json(0);
             }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);

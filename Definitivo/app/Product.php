@@ -29,7 +29,7 @@ class Product extends Model
     public $timestamps = true;
 
     protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA', 'ID_MEDIDA', 'MATERIAIS'];
-    protected $dates = ['DELETED_AT'];
+    protected $dates = ['DELETED_AT', 'CREATED_AT', 'UPDATED_AT'];
 
 
 

@@ -83,7 +83,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('sumDespesasMensais', [DespesaController::class, 'sumDespesasMensais']);
 
     Route::post('test', [ClienteController::class, 'test']);
-
+    Route::get('findLucroByProduto/{id}', [ProductController::class, 'findLucroByProduto']);
 
     Route::resource('materiais', 'MateriaisController');
     Route::resource('medidas', 'MedidasController');

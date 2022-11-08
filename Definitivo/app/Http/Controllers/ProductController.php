@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\EstoqueController;
 use App\Http\Requests\ProductRequest;
 use App\Materiais;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\App;
 use Illuminate\Support\Facades\DB;
@@ -105,7 +106,6 @@ class ProductController extends Controller
                 }
                 $produto->MATERIAIS = json_encode($materias);
                 $mtController = new MateriaisController();
-
                 $produto->save();
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
@@ -143,6 +143,7 @@ class ProductController extends Controller
             ])->with(['medida' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
+            $PRODUCTS->CREATED_AT = $PRODUCTS->CREATED_AT->format('d-m-Y h:i');
             $PRODUCTS->MATERIAIS = json_decode($PRODUCTS->MATERIAIS);
             return $PRODUCTS;
         }catch(\Exception $e){
@@ -214,6 +215,24 @@ class ProductController extends Controller
         }
     }
 
+    public function findLucroByProduto($id){
+        try{
+
+            $produto = Product::FindOrFail($id);
+            $lucro = $produto->VALOR;
+            $produto->MATERIAIS = json_decode($produto->MATERIAIS);
+            foreach($produto->MATERIAIS as $material){
+                $lucro -= $material->CUSTO;
+            }
+            return response()->json($lucro);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
     public function filterByLowestValue(){
         try{
             $user = auth()->user();

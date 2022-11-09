@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Estoque;
 use App\FakeProduct;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
 use App\Http\Resources\ProductResource;
@@ -106,13 +107,14 @@ class PedidosController extends Controller
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-    public function checkQuantidadeProduto(Request $request, $id){
+    public function checkQuantidadeProduto(Request $request){
         try{
-            $prod = Product::where('ID', '=', $request->id)->firstOrFail();
-            if($prod->QUANTIDADE >= $request->quantidade){
-                return response()->json(true);
-            }else{
+            $tmp = $request->quantidade;
+            $prod = Estoque::where('PRODUCT_ID', $request->id)->firstOrFail();
+            if($prod->QUANTIDADE <= $request->quantidade){
                 return response()->json(false);
+            }else{
+                return response()->json(true);
             }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);

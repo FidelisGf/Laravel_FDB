@@ -6,6 +6,7 @@ use App\Http\Controllers\ClienteController;
 use App\Http\Controllers\DespesaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EstoqueController;
+use App\Http\Controllers\MateriaisController;
 use App\Http\Controllers\MedidasController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductController;
@@ -84,6 +85,8 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::post('test', [ClienteController::class, 'test']);
     Route::get('findLucroByProduto/{id}', [ProductController::class, 'findLucroByProduto']);
+    Route::put('adicionaQuantidadeMaterial/{id}', [MateriaisController::class, 'adicionaQuantidadeMaterial']);
+    Route::get('checkQuantidadeProduto/{id}', [PedidosController::class, 'checkQuantidadeProduto']);
 
     Route::resource('materiais', 'MateriaisController');
     Route::resource('medidas', 'MedidasController');

@@ -76,7 +76,7 @@ class VendaController extends Controller
                     $prod = Product::FindOrFail($prod->id);
                     $prod->MATERIAIS = json_decode($prod->MATERIAIS);
                     foreach($prod->MATERIAIS as $material){
-                        $tmp += $material->CUSTO;
+                        $tmp += $material->CUSTO * $material->QUANTIDADE;
                     }
                     $vlReal += ($prod->VALOR - $tmp);
                 }

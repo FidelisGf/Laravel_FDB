@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Estoque;
+use App\Materiais;
 use App\Product;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -108,7 +109,7 @@ class EstoqueController extends Controller
                 $Estoque->save();
                 return response()->json(["message" => 'Estoque Adicionado com successo !']);
             }else{
-                return response()->json(["message" => 'Saldo de Material Insuficiente !']);
+                return response()->json(["message" => 'Saldo de Material Insuficiente !'],400);
             }
         }catch(\Exception $e){
             return response()->json([
@@ -135,6 +136,7 @@ class EstoqueController extends Controller
             ],400);
         }
     }
+
     public function filterByBiggerEstoque(){
         try{
             $user = auth()->user();

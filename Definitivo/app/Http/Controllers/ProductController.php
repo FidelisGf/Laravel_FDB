@@ -109,7 +109,7 @@ class ProductController extends Controller
                 $produto->save();
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
-                    $mtController->removeQuantidade($materias, $quantidade);
+                    $mtController->removeQuantidadeMaterial($materias, $quantidade);
                     $estoque = new EstoqueController();
                     $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
                     $helper->commit();
@@ -167,7 +167,6 @@ class ProductController extends Controller
      */
     public function update(Request $request, $id)
     {
-
         try{
             $PRODUCT = Product::FindOrFail($id);
             $PRODUCT->update($request->all());
@@ -183,9 +182,7 @@ class ProductController extends Controller
                 ],400
                 );
         }
-
     }
-
     /**
      * Remove the specified resource from storage.
      *
@@ -213,31 +210,13 @@ class ProductController extends Controller
                 );
         }
     }
-    public function descontaQuantidadeMaterial($id, $quantidade){
-        try{
-            $product = Product::FindOrFail($id);
-            $product->MATERIAIS = json_decode($product->MATERIAIS);
-            foreach($product->MATERIAIS as $mat){
-                $tmp = Materiais::FindOrFail($mat->ID);
-                $tmp->QUANTIDADE -= ($mat->QUANTIDADE * $quantidade);
-                if($tmp->QUANTIDADE < 0){
-                    return false;
-                }else{
-                    $tmp->save();
-                }
-            }
-            return true;
-        }catch(\Exception $e){
-            return false;
-        }
-    }
     public function findLucroByProduto($id){
         try{
             $produto = Product::FindOrFail($id);
             $lucro = $produto->VALOR;
             $produto->MATERIAIS = json_decode($produto->MATERIAIS);
             foreach($produto->MATERIAIS as $material){
-                $lucro -= $material->CUSTO;
+                $lucro -= ($material->CUSTO * $material->QUANTIDADE);
             }
             return response()->json($lucro);
         }catch(\Exception $e){
@@ -299,6 +278,24 @@ class ProductController extends Controller
                     "message" => $e->getMessage()
                 ],400
                 );
+        }
+    }
+    public function descontaQuantidadeMaterial($id, $quantidade){
+        try{
+            $product = Product::FindOrFail($id);
+            $product->MATERIAIS = json_decode($product->MATERIAIS);
+            foreach($product->MATERIAIS as $mat){
+                $tmp = Materiais::FindOrFail($mat->ID);
+                $tmp->QUANTIDADE -= ($mat->QUANTIDADE * $quantidade);
+                if($tmp->QUANTIDADE < 0){
+                    return false;
+                }else{
+                    $tmp->save();
+                }
+            }
+            return true;
+        }catch(\Exception $e){
+            return false;
         }
     }
     public function countProducts(){

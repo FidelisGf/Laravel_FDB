@@ -28,6 +28,36 @@ class MateriaisController extends Controller
             );
         }
     }
+    public function adicionaQuantidadeMaterial(Request $request, $id){
+        try{
+            $material = Materiais::FindOrFail($id);
+            $material->QUANTIDADE += $request->QUANTIDADE;
+            $material->save();
+            return response()->json(["message" => 'Quantidade Adicionada com sucesso !']);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
+    public function removeQuantidadeMaterial($materiais, $quantidade){
+        try{
+            foreach($materiais as $mat){
+                $tmp = $mat;
+                $mat = Materiais::FindOrFail($mat->ID);
+                $mat->QUANTIDADE -= ($quantidade * $tmp->QUANTIDADE);
+                $mat->save();
+            }
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
+    }
     /**
      * Show the form for creating a new resource.
      *
@@ -80,7 +110,16 @@ class MateriaisController extends Controller
      */
     public function show($id)
     {
-        //
+        try{
+            $mat = Materiais::FindOrFail($id);
+            return response()->json($mat);
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
+        }
     }
 
     /**

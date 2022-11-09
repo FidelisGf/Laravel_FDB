@@ -106,6 +106,18 @@ class PedidosController extends Controller
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
+    public function checkQuantidadeProduto(Request $request, $id){
+        try{
+            $prod = Product::where('ID', '=', $request->id)->firstOrFail();
+            if($prod->QUANTIDADE >= $request->quantidade){
+                return response()->json(true);
+            }else{
+                return response()->json(false);
+            }
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
     public function aprovarPedido($id){
         $helper = new Help();
         try{

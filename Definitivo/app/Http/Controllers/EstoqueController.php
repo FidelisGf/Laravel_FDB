@@ -6,6 +6,7 @@ use App\Estoque;
 use App\Materiais;
 use App\Product;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EstoqueController extends Controller
@@ -22,13 +23,13 @@ class EstoqueController extends Controller
                 $opcao = $request->opcao;
                 switch($opcao){
                     case "Produtos com mais estoque":
-                        return $this->filterByBiggerEstoque();
+                        return $this->filterByBiggerEstoque($request);
                         break;
                     case "Produtos com pouco estoque":
-                        return $this->filterByLowerEstoque();
+                        return $this->filterByLowerEstoque($request);
                         break;
                     case "Produtos com mais saidas":
-                        return $this->filterByProductWithMostSaidas();
+                        return $this->filterByProductWithMostSaidas($request);
                         break;
                     case "Disponivel para venda" :
                         return $this->filterByDisponivelParaVenda();
@@ -137,30 +138,51 @@ class EstoqueController extends Controller
         }
     }
 
-    public function filterByBiggerEstoque(){
+    public function filterByBiggerEstoque(Request $request){
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
-                'product' => function($query){
-                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
-                }
-            ])->paginate(5);
-            return $PRODUCTS;
+            if($request->filled('pdf')){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = DB::table("ESTOQUES")->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->select('PRODUCTS.ID',
+                'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
+                ->orderBy('ESTOQUES.QUANTIDADE', 'desc')->get();
+                return $PRODUCTS;
+            }else{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
+                    'product' => function($query){
+                        $query->select('ID', 'NOME', 'VALOR', 'DESC');
+                    }
+                ])->paginate(5);
+                return $PRODUCTS;
+            }
         }catch(\Exception $e){
             return response()->json(['message' => $e],400);
         }
     }
-    public function filterByLowerEstoque(){
+    public function filterByLowerEstoque(Request $request){
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'asc')->with([
-                'product' => function($query){
-                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
-                }
-            ])->paginate(5);
-            return $PRODUCTS;
+            if($request->filled('pdf')){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = DB::table("ESTOQUES")->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->select('PRODUCTS.ID',
+                'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
+                ->orderBy('ESTOQUES.QUANTIDADE', 'asc')->get();
+                return $PRODUCTS;
+            }else{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'asc')->with([
+                    'product' => function($query){
+                        $query->select('ID', 'NOME', 'VALOR', 'DESC');
+                    }
+                ])->paginate(5);
+                return $PRODUCTS;
+            }
+
         }catch(\Exception $e){
             return response()->json(['message' => $e],400);
         }
@@ -178,17 +200,27 @@ class EstoqueController extends Controller
         }
     }
 
-    public function filterByProductWithMostSaidas(){
+    public function filterByProductWithMostSaidas(Request $request){
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->whereNotNull('SAIDAS')->
-            orderBy('SAIDAS', 'desc')->with([
-                'product' => function($query){
-                    $query->select('ID', 'NOME', 'VALOR', 'DESC');
-                }
-            ])->paginate(6);
-            return $produtos;
+            if($request->filled('pdf')){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = DB::table("ESTOQUES")->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->select('PRODUCTS.ID',
+                'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
+                ->orderBy('ESTOQUES.SAIDAS', 'desc')->get();
+                return $PRODUCTS;
+            }else{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->whereNotNull('SAIDAS')->
+                orderBy('SAIDAS', 'desc')->with([
+                    'product' => function($query){
+                        $query->select('ID', 'NOME', 'VALOR', 'DESC');
+                    }
+                ])->paginate(6);
+                return $produtos;
+            }
         }catch(\Exception $e){
             return response()->json(['message', $e->getMessage()],400);
         }

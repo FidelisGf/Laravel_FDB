@@ -41,9 +41,34 @@ class VendaController extends Controller
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
-            ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO')->paginate(6);
-            foreach($vendas as $venda){
-                $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d m Y H:i');
+            ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO');
+            if($request->filled('pdf')){
+                $vlTotal_vendas = 0;
+                $vlReal = 0;
+                $vendas = $vendas->get();
+                foreach($vendas as $venda){
+                    $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
+                    $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
+                    foreach($pedido->PRODUTOS as $prod){
+                        $tmp = 0;
+                        $prod = Product::FindOrFail($prod->id);
+                        $prod->MATERIAIS = json_decode($prod->MATERIAIS);
+                        foreach($prod->MATERIAIS as $material){
+                            $tmp += $material->CUSTO * $material->QUANTIDADE;
+                        }
+                        $vlReal += ($prod->VALOR - $tmp);
+                    }
+                    $vlTotal_vendas += $venda->VALOR_TOTAL;
+                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d m Y H:i');
+                }
+                return response()->json(["dados" => $vendas, "vlTotal" => $vlTotal_vendas,
+                "vlReal" => $vlReal, "vlDiff" => ($vlTotal_vendas - $vlReal)]);
+            }else{
+                $vendas = $vendas->paginate(8);
+                foreach($vendas as $venda){
+                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d m Y H:i');
+                }
+                return $vendas;
             }
             return $vendas;
         }catch(\Exception $e){
@@ -61,7 +86,6 @@ class VendaController extends Controller
             $vlCartao = 0;
             $vlTotal = 0;
             $vlReal = 0;
-
             $user = auth()->user();
             $empresa = $user->empresa;
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){

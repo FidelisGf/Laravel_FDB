@@ -32,10 +32,10 @@ class ProductController extends Controller
                 $op = $request->opcao;
                 switch ($op){
                     case "Produtos mais baratos":
-                        return $this->filterByLowestValue();
+                        return $this->filterByLowestValue($request);
                         break;
                     case "Produtos mais caros":
-                        return $this->filterByExpansiveValue();
+                        return $this->filterByExpansiveValue($request);
                         break;
                 }
             }else{
@@ -227,16 +227,28 @@ class ProductController extends Controller
             );
         }
     }
-    public function filterByLowestValue(){
+    public function filterByLowestValue(Request $request){
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
-                'category' => function($query){
-                    $query->select('ID_CATEGORIA', 'NOME_C');
-                }
-            ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(6);
-            return $PRODUCTS;
+            if($request->filled('pdf')){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
+                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->
+                join('MEDIDAS', 'MEDIDAS.ID', '=', 'PRODUCTS.ID_MEDIDA')->select(
+                   'PRODUCTS.ID', 'PRODUCTS.NOME', 'CATEGORIAS.NOME_C', 'MEDIDAS.NOME_REAL',  'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
+                )->orderBy('PRODUCTS.VALOR', 'asc')->get();
+                return $PRODUCTS;
+            }else{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
+                    'category' => function($query){
+                        $query->select('ID_CATEGORIA', 'NOME_C');
+                    }
+                ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(6);
+                return $PRODUCTS;
+            }
+
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -246,16 +258,27 @@ class ProductController extends Controller
         }
     }
 
-    public function filterByExpansiveValue(){
+    public function filterByExpansiveValue(Request $request){
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
-                'category' => function($query){
-                    $query->select('ID_CATEGORIA', 'NOME_C');
-                }
-            ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(6);
-            return $PRODUCTS;
+            if($request->filled('pdf')){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
+                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->
+                join('MEDIDAS', 'MEDIDAS.ID', '=', 'PRODUCTS.ID_MEDIDA')->select(
+                   'PRODUCTS.ID', 'PRODUCTS.NOME', 'CATEGORIAS.NOME_C', 'MEDIDAS.NOME_REAL',  'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
+                )->orderBy('PRODUCTS.VALOR', 'desc')->get();
+                return $PRODUCTS;
+            }else{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
+                    'category' => function($query){
+                        $query->select('ID_CATEGORIA', 'NOME_C');
+                    }
+                ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(6);
+                return $PRODUCTS;
+            }
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -314,17 +337,5 @@ class ProductController extends Controller
     }
     //ucwords($bar);
 
-    public function filters(Request $request){
-        $op = $request->opcao;
-        switch ($op){
-            case "Produtos mais baratos":
-                return $this->filterByLowestValue();
-                break;
-
-            case "Produtos mais caros":
-                return $this->filterByExpansiveValue();
-                break;
-        }
-    }
 
 }

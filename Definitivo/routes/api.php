@@ -60,7 +60,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     Route::get('countProducts', [ProductController::class, 'countProducts']);
     Route::post('/search', [ProductController::class, 'search']);
-    Route::get('/filterBy', [ProductController::class, 'filters']);
     Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);
 
     Route::get('/getEmpresaFromUser', [EmpresaController::class, 'getEmpresaFromUser']);

@@ -9,6 +9,7 @@ use App\Http\Resources\ProductResource;
 use App\Pedidos;
 use App\Product;
 use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
 use League\CommonMark\Util\ArrayCollection;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -138,16 +139,26 @@ class PedidosController extends Controller
     public function pedidosPorPeriodo(Request $request){
 
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $startData = Carbon::parse($request->start);
-            $endData = Carbon::parse($request->end);
-            $tmp = null;
-            $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->paginate(6);
-            foreach($Pedidos as $Pedido){
-                 $Pedido->PRODUTOS = json_decode($Pedido->PRODUTOS); // transforma o json em um objeto novamente
+            if($request->filled('pdf')){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $startData = Carbon::parse($request->start);
+                $endData = Carbon::parse($request->end);
+                $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->
+                select('ID', 'METODO_PAGAMENTO', 'VALOR_TOTAL', 'APROVADO', 'CREATED_AT')->get();
+                return $Pedidos;
+            }else{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $startData = Carbon::parse($request->start);
+                $endData = Carbon::parse($request->end);
+                $tmp = null;
+                $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->paginate(6);
+                foreach($Pedidos as $Pedido){
+                     $Pedido->PRODUTOS = json_decode($Pedido->PRODUTOS); // transforma o json em um objeto novamente
+                }
+                return $Pedidos;
             }
-            return $Pedidos;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

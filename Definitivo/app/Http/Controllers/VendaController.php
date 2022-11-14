@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Despesa;
 use App\Pedidos;
 use App\Product;
 use App\Venda;
@@ -59,7 +60,7 @@ class VendaController extends Controller
                         $vlReal += ($prod->VALOR - $tmp);
                     }
                     $vlTotal_vendas += $venda->VALOR_TOTAL;
-                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d m Y H:i');
+                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d / m / Y :  H:i');
                 }
                 return response()->json(["dados" => $vendas, "vlTotal" => $vlTotal_vendas,
                 "vlReal" => $vlReal, "vlDiff" => ($vlTotal_vendas - $vlReal)]);
@@ -71,6 +72,45 @@ class VendaController extends Controller
                 return $vendas;
             }
             return $vendas;
+        }catch(\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage()
+            ],400);
+        }
+    }
+    public function getLucroAndGastos(Request $request){
+        try{
+            $startData = Carbon::parse($request->start);
+            $endData = Carbon::parse($request->end);
+            $user = auth()->user();
+            $empresa = $user->empresa;
+            $vlGastosDespesas = Despesa::where('ID_EMPRESA', $empresa->ID)->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('CUSTO');
+            $vlTotal_vendas = 0;
+            $vlReal = 0;
+            $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
+                $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
+                ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+            })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
+            ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO');
+            $vendas = $vendas->get();
+            foreach($vendas as $venda){
+                $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
+                $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
+                foreach($pedido->PRODUTOS as $prod){
+                    $tmp = 0;
+                    $prod = Product::FindOrFail($prod->id);
+                    $prod->MATERIAIS = json_decode($prod->MATERIAIS);
+                    foreach($prod->MATERIAIS as $material){
+                        $tmp += $material->CUSTO * $material->QUANTIDADE;
+                    }
+                    $vlReal += ($prod->VALOR - $tmp);
+                }
+                $vlTotal_vendas += $venda->VALOR_TOTAL;
+
+                $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d / m / Y :  H:i');
+            }
+            $vlReal -= $vlGastosDespesas;
+            return response()->json(["Total" => $vlTotal_vendas, "Lucro" => $vlReal, "Despesas" => $vlGastosDespesas]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()

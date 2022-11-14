@@ -28,7 +28,7 @@ class DespesaController extends Controller
             if($request->filled('opcao')){
                 $opcao = $request->opcao;
                 switch($opcao){
-                    case 'Duas datas' :
+                    case 'Despesas entre duas datas' :
                         return $this->despesaBetweenTwoDates($request);
                         break;
                 }
@@ -105,7 +105,10 @@ class DespesaController extends Controller
             $empresa = $user->empresa;
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
-            $despesas = Despesa::whereBetween('DATA', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->paginate(6);
+            $despesas = Despesa::whereBetween('DATA', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)
+            ->with(['Tags' => function($query){
+                $query->select('ID', 'NOME');
+            }])->paginate(6);
             return $despesas;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -168,24 +171,16 @@ class DespesaController extends Controller
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $validatedData = $request->validate([
-                'DESC' => ['required', 'max:200', 'min:2'],
-                'CUSTO' => ['required', 'min:0.01'],
-                'ID_TAG' => ['required'],
-                'DATA' => ['required'],
-            ]);
-            if($validatedData){
-                $despesa = Despesa::FindOrFail($id);
-                $despesa->DESC = $request->DESC;
-                $despesa->ID_EMPRESA = $empresa->ID;
-                $despesa->CUSTO = $request->CUSTO;
-                $despesa->DATA = Carbon::parse($request->DATA);
-                $despesa->ID_TAG = $request->ID_TAG;
 
-                $despesa->save();
-                return $despesa;
+            $despesa = Despesa::FindOrFail($id);
+            $despesa->DESC = $request->DESC;
+            $despesa->ID_EMPRESA = $empresa->ID;
+            $despesa->CUSTO = $request->CUSTO;
+            $despesa->DATA = Carbon::parse($request->DATA);
+            $despesa->ID_TAG = $request->ID_TAG;
 
-            }
+            $despesa->save();
+            return $despesa;
         }catch(Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

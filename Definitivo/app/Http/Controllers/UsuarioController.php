@@ -38,7 +38,7 @@ class UsuarioController extends Controller
         try{
             $validator = Validator::make($request->all(), [
                 'NOME' => 'required|unique:EMPRESAS|max:50|min:2',
-                'CNPJ' => 'required|unique:EMPRESAS|max:14|min:14',
+                'CNPJ' => 'required',
                 'EMAIL'=> 'required|unique:EMPRESAS|email|max:120|min:5',
                 'NOME_FANTASIA' => 'required|max:60|min:2',
                 'ENDERECO' => 'required|max:255|min:2',

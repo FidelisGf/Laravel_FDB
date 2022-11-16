@@ -48,7 +48,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('refresh', [AuthController::class, 'refresh']);
     Route::get('getQuantidadeProduct/{id}', [EstoqueController::class, 'getQuantidadeProduct']);
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
-    Route::get('/filterEstoque', [EstoqueController::class, 'filters']);
 
     Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);
     Route::get('/mostExpansiveProduct/{id}', [CategoryController::class, 'CategoryMostExpansiveProduct']);
@@ -63,12 +62,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/allByCategory/{id}', [ProductController::class, 'findAllProductByCategory']);
 
     Route::get('/getEmpresaFromUser', [EmpresaController::class, 'getEmpresaFromUser']);
-    Route::get('/searchEmp', [EmpresaController::class, 'applyFilter']);
-    Route::get('/autoCompleteEmpresa' ,[EmpresaController::class, 'autoCompleteEmpresa']);
-    Route::get('/allProductsByEmpresa/{id}', [EmpresaController::class, 'allProductsFromEmpresa']);
-    Route::get('/countCategorysFromEmpresa/{id}', [EmpresaController::class, 'countCategorysFromEmpresa']);
-    Route::get('/allCategoryFromEmpresa/{id}', [EmpresaController::class, 'allCategoryFromEmpresa']);
-
     Route::get('/profile', [UsuarioController::class, 'profile']);
 
     Route::get('/checaEmpUser', [UsuarioController::class, 'checkIfUserHasEmpresa'] );
@@ -79,7 +72,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('getVendasByTipoPagamento', [VendaController::class, 'getVendasByTipoPagamento']);
 
     Route::get('despesasByTag/{id}', [DespesaController::class, 'despesasByTag']);
-
+    Route::get("getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
     Route::get('sumDespesasMensais', [DespesaController::class, 'sumDespesasMensais']);
     Route::post('checkQuantidadeProduto', [PedidosController::class, 'checkQuantidadeProduto']);
     Route::post('test', [ClienteController::class, 'test']);

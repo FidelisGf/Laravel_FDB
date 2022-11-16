@@ -3,104 +3,30 @@
 namespace App\Http\Controllers;
 
 use App\Materiais;
+use App\Repositories\MateriaisRepository;
 use Illuminate\Http\Request;
 
 class MateriaisController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+    public function index(MateriaisRepository $materiaisRepository)
     {
-        $user = auth()->user();
-        $empresa = $user->empresa;
-        try{
-            $materiais = Materiais::where('ID_EMPRESA', $empresa->ID)
-            ->where('QUANTIDADE', '>', 0)->paginate(7);
-            return $materiais;
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+       return $materiaisRepository->index();
     }
-    public function adicionaQuantidadeMaterial(Request $request, $id){
-        try{
-            $material = Materiais::FindOrFail($id);
-            $material->QUANTIDADE += $request->QUANTIDADE;
-            $material->save();
-            return response()->json(["message" => 'Quantidade Adicionada com sucesso !']);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+    public function adicionaQuantidadeMaterial(Request $request, $id, MateriaisRepository $materiaisRepository){
+        return $materiaisRepository->adicionaQuantidadeMaterial($request, $id);
     }
-    public function removeQuantidadeMaterial($materiais, $quantidade){
-        try{
-            foreach($materiais as $mat){
-                $tmp = $mat;
-                $mat = Materiais::FindOrFail($mat->ID);
-                $mat->QUANTIDADE -= ($quantidade * $tmp->QUANTIDADE);
-                $mat->save();
-            }
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+    public function removeQuantidadeMaterial($materiais, $quantidade, MateriaisRepository $materiaisRepository){
+        return $materiaisRepository->removeQuantidadeMaterial($materiais, $quantidade);
     }
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
+
     public function create()
     {
         //
     }
 
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
+    public function store(Request $request, MateriaisRepository $materiaisRepository)
     {
-        $user = auth()->user();
-        $empresa = $user->empresa;
-        try{
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'max:60', 'min:2'],
-                'CUSTO' => ['required']
-            ]);
-            if($validatedData){
-                $NOME_REAL = "$request->NOME _ $empresa->ID";
-                $material = new Materiais();
-                $material->ID_EMPRESA = $empresa->ID;
-                $material->NOME = $request->NOME;
-                $material->CUSTO = $request->CUSTO;
-                $material->NOME_REAL = $NOME_REAL;
-                $material->QUANTIDADE = $request->QUANTIDADE;
-                $material->save();
-                return $material;
-            }
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $materiaisRepository->store($request);
     }
     /**
      * Display the specified resource.
@@ -108,18 +34,9 @@ class MateriaisController extends Controller
      * @param  int  $id
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, MateriaisRepository $materiaisRepository)
     {
-        try{
-            $mat = Materiais::FindOrFail($id);
-            return response()->json($mat);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $materiaisRepository->show($id);
     }
 
     /**

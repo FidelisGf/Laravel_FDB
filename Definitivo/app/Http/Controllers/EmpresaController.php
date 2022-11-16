@@ -6,6 +6,7 @@ use App\Category;
 use App\Empresa;
 use App\Http\Requests\EmpresaRequest;
 use App\Http\Resources\EmpresaResource;
+use App\Repositories\EmpresaRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator as FacadesValidator;
@@ -14,256 +15,47 @@ use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EmpresaController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
-    public function index()
+
+    public function index(EmpresaRepository $empresaRepository)
     {
-        try{
-            $EMPRESAS = Empresa::paginate(3)->toArray();
-            return $EMPRESAS;
-            //return response()->json(Empresa::all());
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $empresaRepository->index();
     }
 
-    public function getEmpresaFromUser(){
-        try{
-            $user = JWTAuth::parseToken()->authenticate();
-            $empresa = $user->empresa;
-            return $empresa;
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+    public function getEmpresaFromUser(EmpresaRepository $empresaRepository){
+        return $empresaRepository->getEmpresaFromUser();
     }
 
-    /**
-     * Show the form for creating a new resource.
-     *
-     * @return \Illuminate\Http\Response
-     */
     public function create()
     {
         //
     }
 
-    public function store(Request $request)
+    public function store(Request $request, EmpresaRepository $empresaRepository)
     {
-        try{
-                $validator = FacadesValidator::make($request->all(), [
-                    'NOME' => 'required|unique:EMPRESAS|max:50|min:2',
-                    'CNPJ' => 'required|unique:EMPRESAS|max:14|min:14',
-                    'EMAIL'=> 'required|unique:EMPRESAS|email|max:120|min:5',
-                    'NOME_FANTASIA' => 'required|max:60|min:2',
-                    'ENDERECO' => 'required|max:255|min:2',
-                    'INC_ESTADUAL' => 'required|unique:EMPRESAS|max:12|min:9',
-                ]);
-                if(!$validator->fails()){
-                    if(Empresa::create($request->all())){
-                        return response()->json([
-                            "message" => "Empresa criada com sucesso"
-                        ],200);
-                    }else{
-                        return false;
-                    }
-                }
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $empresaRepository->store($request);
     }
 
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
+    public function show($id, EmpresaRepository $empresaRepository)
     {
-        try{
-            return Empresa::FindOrFail($id);
-
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $empresaRepository->show($id);
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
+    public function edit($id, EmpresaRepository $empresaRepository)
     {
-        try{
-            return Empresa::FindOrFail($id);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $empresaRepository->edit($id);
     }
 
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
+    public function update(Request $request, $id, EmpresaRepository $empresaRepository)
     {
-        try{
-            $Empresa = Empresa::FindOrFail($id);
-            $Empresa->update($request->all());
-            return response()->json(
-                [
-                    "message" => "Empresa editada com sucesso"
-                ],200
-                );
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-                );
-        }
+        return $empresaRepository->update($request, $id);
 
     }
-    public function filterByAscName(Empresa $empresa){
-        try{
-            return $empresa::orderBy('NOME', 'asc')->paginate(3)->toArray();
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
+    public function destroy($id, EmpresaRepository $empresaRepository)
     {
-        try{
-            Empresa::FindOrFail($id)->delete();
-            return response()->json([
-                "message" => "Empresa Deletada com sucesso !"
-            ]);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],200
-            );
-        }
-    }
-    public function allProductsFromEmpresa($id){
-        try{
-            return Empresa::FindOrFail($id)->product->first();
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
+        return $empresaRepository->destroy($id);
     }
 
-    public function allCategoryFromEmpresa($id){
-        try{
-            return Empresa::FindOrFail($id)->with(['category']);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
-
-    protected $appends = ['categorysCount'];
-    public function countCategorysFromEmpresa($id){
-        try{
-            return Empresa::FindOrFail($id)->withCount('category')->get();
-
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-
-    }
-
-    public function applyFilter(Request $request){
-        try{
-            $query = Empresa::query();
-            if($request->filled('search')){
-                $search = $request->search;
-                $search = ucwords($search);
-                $query->where('NOME', 'LIKE', "%{$search}%")->orWhere('CNPJ', 'LIKE', "%{$search}%");
-            }
-
-            if($request->filled('selected')){
-                $selected = $request->selected;
-                switch($selected){
-                    case 'BYNAME':
-                        $query->orderBy('NOME', 'asc');
-                        break;
-                }
-            }
-            return $query->paginate(3);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
-    public function autoCompleteEmpresa(Request $request){
-        try{
-            $search = $request->search;
-            $search = ucwords($search);
-            $Empresas = Empresa::where('NOME', 'LIKE', "%{$search}%")->get();
-            return response()->json($Empresas);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
 
 
 

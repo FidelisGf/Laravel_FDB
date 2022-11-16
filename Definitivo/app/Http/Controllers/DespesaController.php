@@ -2,12 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Despesa;
 use App\Repositories\DespesaRepository;
-use Carbon\Carbon;
-use Exception;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class DespesaController extends Controller
 {

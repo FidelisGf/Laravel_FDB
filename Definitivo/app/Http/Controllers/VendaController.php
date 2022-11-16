@@ -2,15 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Despesa;
-use App\Pedidos;
-use App\Product;
+
 use App\Repositories\VendaRepository;
-use App\Venda;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class VendaController extends Controller
 {

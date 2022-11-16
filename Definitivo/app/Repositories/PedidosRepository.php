@@ -4,7 +4,6 @@ namespace App\Repositories;
 
 use App\Estoque;
 use App\FakeProduct;
-use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;

@@ -2,13 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Estoque;
-use App\Materiais;
-use App\Product;
 use App\Repositories\EstoqueRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EstoqueController extends Controller
 {

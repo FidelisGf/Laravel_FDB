@@ -3,9 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Repositories\TagRepository;
-use App\Tag;
 use Illuminate\Http\Request;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class TagController extends Controller
 {

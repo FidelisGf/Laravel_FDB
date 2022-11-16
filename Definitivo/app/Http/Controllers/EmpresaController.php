@@ -2,16 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Category;
-use App\Empresa;
-use App\Http\Requests\EmpresaRequest;
-use App\Http\Resources\EmpresaResource;
+
 use App\Repositories\EmpresaRepository;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator as FacadesValidator;
-use Illuminate\Validation\Validator;
-use Tymon\JWTAuth\Facades\JWTAuth;
 
 class EmpresaController extends Controller
 {

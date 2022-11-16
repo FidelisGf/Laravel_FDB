@@ -2,16 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Empresa;
+
 use App\Repositories\UsuarioRepository;
-use App\Usuario;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
-use Tymon\JWTAuth\Facades\JWTAuth as FacadesJWTAuth;
-use Tymon\JWTAuth\JWT;
-use Tymon\JWTAuth\JWTAuth;
+
 
 class UsuarioController extends Controller
 {

@@ -2,22 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Category;
-use App\Empresa;
-use App\Estoque;
-use App\Http\Resources\CategoryResource;
-use App\Http\Resources\ProductResource;
-use App\Product;
+
 use Illuminate\Http\Request;
-use App\Http\Controllers\EstoqueController;
-use App\Http\Requests\ProductRequest;
-use App\Materiais;
 use App\Repositories\ProductRepository;
-use Carbon\Carbon;
-use Exception;
-use Illuminate\Support\Facades\App;
-use Illuminate\Support\Facades\DB;
-use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class ProductController extends Controller
 {

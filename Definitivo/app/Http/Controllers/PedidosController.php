@@ -2,14 +2,10 @@
 
 namespace App\Http\Controllers;
 
-use App\Estoque;
-use App\FakeProduct;
-use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
-use App\Pedidos;
-use App\Product;
+
 use App\Repositories\PedidosRepository;
-use Carbon\Carbon;
 use Illuminate\Http\Request;
+
 class PedidosController extends Controller
 {
 

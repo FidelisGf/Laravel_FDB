@@ -4,9 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Http\Resources\CategoryResource;
-use App\Http\Resources\ProductResource;
-use App\Product;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 

@@ -4,9 +4,7 @@ namespace App\Repositories;
 
 use App\Empresa;
 use App\Estoque;
-use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\Help;
-use App\Http\Controllers\MateriaisController;
 use App\Http\interfaces\ProductInterface as InterfacesProductInterface;
 use App\Http\Resources\ProductResource;
 use App\Materiais;

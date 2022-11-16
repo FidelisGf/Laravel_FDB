@@ -2,13 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Cliente;
-use App\Mail\SendMailUser;
 use App\Repositories\ClienteRepository;
-use Facade\FlareClient\Http\Client;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Mail;
-use Tymon\JWTAuth\Facades\JWTAuth;
+
 
 class ClienteController extends Controller
 {

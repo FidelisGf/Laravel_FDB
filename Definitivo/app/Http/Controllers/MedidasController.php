@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Medidas;
+
 use App\Repositories\MedidasRepository;
 use Illuminate\Http\Request;
 

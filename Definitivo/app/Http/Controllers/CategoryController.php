@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Category;
 use App\Http\Resources\CategoryResource;
+use App\Repositories\CategoryRepository;
 use Illuminate\Http\Request;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -14,35 +15,14 @@ class CategoryController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(CategoryRepository $categoryRepository)
     {
-        try{
-            $user = JWTAuth::parseToken()->authenticate();
-            $empresa = $user->empresa;
-            $Category = Category::where('ID_EMPRESA', $empresa->ID)->paginate(30);
-            return $Category;
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ]
-                );
-        }
-
+      return $categoryRepository->index();
     }
 
 
-
-    public function findCategoryWithProductsIn(){
-        try{
-            return Category::whereHas('product')->paginate(15);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ]
-            );
-        }
+    public function findCategoryWithProductsIn(CategoryRepository $categoryRepository){
+        return $categoryRepository->findCategoryWithProductsIn();
     }
     /**
      * Store a newly created resource in storage.
@@ -50,26 +30,9 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request)
+    public function store(Request $request, CategoryRepository $categoryRepository)
     {
-        try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $Category = new Category();
-            $NOME_REAL = "$request->NOME_C _ $empresa->ID";
-            $Category->ID_EMPRESA = $empresa->ID;
-            $Category->NOME_C = $request->NOME_C;
-            $Category->NOME_REAL = $NOME_REAL;
-            if($Category->save()){
-                return $Category;
-            }
-        }catch(\Exception $e){
-           return response()->json(
-            [
-                "message" => $e->getMessage()
-            ]
-            );
-        }
+        return $categoryRepository->store($request);
     }
     /**
      * Display the specified resource.
@@ -77,16 +40,9 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function show($id)
+    public function show($id, CategoryRepository $categoryRepository)
     {
-        try{
-            $category = Category::FindOrFail($id);
-            return new CategoryResource($category);
-        }catch(\Exception $e){
-            return response()->json([
-                "message" => $e->getMessage()
-            ],400);
-        }
+        return $categoryRepository->show($id);
     }
     /**
      * Show the form for editing the specified resource.
@@ -101,60 +57,10 @@ class CategoryController extends Controller
      * @param  \App\Category  $category
      * @return \Illuminate\Http\Response
      */
-    public function update(Request $request, Category $category)
-    {
-        try{
-            $Category = Category::FindOrFail($category->ID_CATEGORIA);
-            $Category->update($request->all());
-            return response()->json(
-                [
-                    "message" => "Categoria editada com sucesso"
-                ]
-                );
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-                );
-        }
+    public function update(Request $request, $id, CategoryRepository $categoryRepository){
+        return $categoryRepository->update($request, $id);
     }
-    public function CategoryMostExpansiveProduct($id){
-        try{
-            $PRODUCTS = Category::FindOrFail($id)->product->max('VALOR');
-            return response()->json($PRODUCTS);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
-    public function CategoryAVGProductPrice($id){
-        try{
-            $PRODUCTS = Category::FindOrFail($id)->product->avg('VALOR');
-            return response()->json($PRODUCTS);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-            );
-        }
-    }
-    public function CategoryMinProductPrice($id){
-        try{
-            $PRODUCTS = Category::FindOrFail($id)->product->min('VALOR');
-            return response()->json($PRODUCTS);
-        }catch(\Exception $e){
-            return response()->json(
-                [
-                    "message" => $e->getMessage()
-                ],400
-                );
-        }
-    }
+
 
     /**
      * Remove the specified resource from storage.

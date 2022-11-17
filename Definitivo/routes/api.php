@@ -50,9 +50,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque']);
 
     Route::get('/findCategoryWithProductsIn', [CategoryController::class, 'findCategoryWithProductsIn']);
-    Route::get('/mostExpansiveProduct/{id}', [CategoryController::class, 'CategoryMostExpansiveProduct']);
-    Route::get('/avgFromCategorysProducts/{id}', [CategoryController::class, 'CategoryAVGProductPrice']);
-    Route::get('minFromCategorysProducts/{id}', [CategoryController::class, 'CategoryMinProductPrice']);
 
     Route::put('aprovarPedido/{id}', [PedidosController::class, 'aprovarPedido']);
     Route::get('pedidoPorData', [PedidosController::class, 'pedidosPorPeriodo']);
@@ -75,7 +72,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get("getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
     Route::get('sumDespesasMensais', [DespesaController::class, 'sumDespesasMensais']);
     Route::post('checkQuantidadeProduto', [PedidosController::class, 'checkQuantidadeProduto']);
-    Route::post('test', [ClienteController::class, 'test']);
+    Route::post('test/{id}', [ClienteController::class, 'test']);
     Route::get('findLucroByProduto/{id}', [ProductController::class, 'findLucroByProduto']);
     Route::put('adicionaQuantidadeMaterial/{id}', [MateriaisController::class, 'adicionaQuantidadeMaterial']);
 

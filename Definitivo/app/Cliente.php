@@ -16,7 +16,7 @@ class Cliente extends Model
     protected $generator = 'GEN_CLIENTES_ID';
     protected $keyType = 'integer';
     public $timestamps = true;
-    protected $fillable = ['ID', 'NOME', 'CPF', 'ENDERECO', 'TELEFONE', 'NOME_REAL', 'ID_EMPRESA'];
+    protected $fillable = ['ID', 'NOME', 'CPF', 'ENDERECO', 'TELEFONE', 'EMAIL', 'NOME_REAL', 'ID_EMPRESA'];
 
 
     public function pedido(){

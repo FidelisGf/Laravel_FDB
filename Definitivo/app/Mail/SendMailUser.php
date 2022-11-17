@@ -2,24 +2,25 @@
 
 namespace App\Mail;
 
-use App\Usuario;
+use App\Cliente;
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class SendMailUser extends Mailable
 {
     use Queueable, SerializesModels;
-
+    private $usuario;
+    private $cod;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Usuario $usuario)
+    public function __construct(Cliente $usuario, $cod)
     {
         $this->usuario = $usuario;
+        $this->cod = strval($cod);
     }
 
     /**
@@ -30,9 +31,10 @@ class SendMailUser extends Mailable
     public function build()
     {
         return $this->from('to@email.com')
+                ->attach(storage_path("pedido.pdf"), ['mime' => 'application/pdf'])
                 ->markdown('emails.test-markdown')
                 ->with([
-                    'user'     => $this->usuario
+                    'user'  => $this->usuario
                 ]);
     }
 }

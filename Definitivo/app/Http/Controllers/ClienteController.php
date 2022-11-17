@@ -23,8 +23,9 @@ class ClienteController extends Controller
         //
     }
 
-    public function test(ClienteRepository $clienteRepository){
-        return $clienteRepository->test();
+    public function test($id, Request $request ,ClienteRepository $clienteRepository){
+        $cod = $request->COD;
+        return $clienteRepository->test($id, $cod);
     }
 
     public function store(Request $request, ClienteRepository $clienteRepository)

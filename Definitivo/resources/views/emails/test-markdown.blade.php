@@ -1,13 +1,12 @@
+
 @component('mail::message')
-# Olá {{ $user->NAME }}!
+# Olá Sr {{ $user->NOME }}...
 
 # Obrigado pela preferência !
 Estamos trabalhando duro para que você desfrute do melhor software possivel...
 <p>Bem Vindo ao Empresarial !</p>
 
-@component('mail::button', ['url' => "http://localhost:3000/#/"])
-Acesse o link para confirmar seu cadastro
-@endcomponent
+<p>Segue em anexo o pdf de seu pedido.</p>
 
 Obrigado,<br>
 Empresarial...

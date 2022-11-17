@@ -3,11 +3,12 @@
 namespace App\Repositories;
 
 use App\Cliente;
+use App\Http\interfaces\ClienteInterface;
 use App\Mail\SendMailUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 
-class ClienteRepository
+class ClienteRepository implements ClienteInterface
 {
     public function __construct()
     {
@@ -24,9 +25,15 @@ class ClienteRepository
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-    public function test(){
-        $to = "jpinformaticafoz@gmail.com";
-        Mail::to($to)->send(new SendMailUser(auth()->user()));
+    public function test($id, $cod){
+        try{
+            $cliente = Cliente::FindOrFail($id);
+            Mail::to($cliente->EMAIL)->send(new SendMailUser($cliente, $cod));
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+
+
     }
     public function store(Request $request)
     {
@@ -37,6 +44,7 @@ class ClienteRepository
                 'NOME' => ['required', 'max:60', 'min:2'],
                 'CPF' => ['required', 'min:11', 'max:11'],
                 'ENDERECO'=> ['required', 'min:8'],
+                'EMAIL'=> ['required', 'min:12'],
                 'TELEFONE' => ['required', 'min:11', 'max:12']
             ]);
             if($validatedData){
@@ -44,6 +52,7 @@ class ClienteRepository
                 $NOME_REAL = "$request->NOME _ $empresa->ID";
                 $cliente->NOME = $request->NOME;
                 $cliente->CPF = $request->CPF;
+                $cliente->EMAIL = $request->EMAIL;
                 $cliente->ENDERECO = $request->ENDERECO;
                 $cliente->TELEFONE = $request->TELEFONE;
                 $cliente->ID_EMPRESA = $empresa->ID;

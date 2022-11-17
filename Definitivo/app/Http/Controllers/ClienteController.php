@@ -20,14 +20,8 @@ class ClienteController extends Controller
 
     public function create()
     {
-        //
-    }
 
-    public function test($id, Request $request ,ClienteRepository $clienteRepository){
-        $cod = $request->COD;
-        return $clienteRepository->test($id, $cod);
     }
-
     public function store(Request $request, ClienteRepository $clienteRepository)
     {
         return $clienteRepository->store($request);

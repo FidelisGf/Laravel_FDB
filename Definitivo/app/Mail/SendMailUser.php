@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Cliente;
+use App\Pedidos;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
@@ -11,16 +12,17 @@ class SendMailUser extends Mailable
 {
     use Queueable, SerializesModels;
     private $usuario;
-    private $cod;
+    private $url = "https://laravel.com/docs/5.6/queues";
+    private $pedidos;
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Cliente $usuario, $cod)
+    public function __construct(Cliente $usuario, Pedidos $pedidos)
     {
         $this->usuario = $usuario;
-        $this->cod = strval($cod);
+        $this->pedidos = $pedidos;
     }
 
     /**
@@ -31,10 +33,12 @@ class SendMailUser extends Mailable
     public function build()
     {
         return $this->from('to@email.com')
-                ->attach(storage_path("pedido.pdf"), ['mime' => 'application/pdf'])
                 ->markdown('emails.test-markdown')
                 ->with([
-                    'user'  => $this->usuario
+                    'user'  => $this->usuario,
+                    'pedido' => $this->pedidos,
+                    'rota' => $this->url,
+                    'empresa' => auth()->user()->empresa
                 ]);
     }
 }

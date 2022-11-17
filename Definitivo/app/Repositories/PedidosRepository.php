@@ -3,11 +3,13 @@
 namespace App\Repositories;
 
 use App\Estoque;
+use App\Events\VendaGerada;
 use App\FakeProduct;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
 use App\Pedidos;
+use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
@@ -77,6 +79,10 @@ class PedidosRepository implements PedidoInterface
                     }
                     $helper->startTransaction();
                     $pedido->save();
+                    if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
+                        $pedido->PRODUTOS = json_decode($PRODUCTS);
+                        event(new VendaGerada($pedido, $pedido->ID_CLIENTE));
+                    }
                     $helper->commit();
                     return $pedido;
             }
@@ -114,6 +120,22 @@ class PedidosRepository implements PedidoInterface
             $Pedido->save();
             return $Pedido;
         }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
+    public function destroy($id){
+        $help = new Help();
+        try{
+            $pedido = Pedidos::FindOrFail($id);
+            $help->startTransaction();
+            if($pedido->APROVADO == "T"){
+                $venda = Venda::where('ID_PEDIDO', '=', $pedido->ID);
+                $venda->delete();
+            }
+            $pedido->delete();
+            $help->commit();
+        }catch(\Exception $e){
+            $help->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()]);
         }
     }

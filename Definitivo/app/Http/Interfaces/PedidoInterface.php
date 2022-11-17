@@ -10,4 +10,5 @@ interface PedidoInterface{
     public function aprovarPedido($id);
     public function update(Request $request, $id);
     public function pedidosPorPeriodo(Request $request);
+    public function destroy($id);
 }

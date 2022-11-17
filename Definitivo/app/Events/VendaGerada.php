@@ -2,6 +2,7 @@
 
 namespace App\Events;
 
+use App\Pedidos;
 use App\Venda;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
@@ -15,16 +16,17 @@ class VendaGerada
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
     public $venda ;
+    public $idClient;
     /**
      * Create a new event instance.
      *
      * @return void
      */
-    public function __construct(Venda $venda)
+    public function __construct(Pedidos $venda, $id)
     {
         $this->venda = $venda;
+        $this->idClient = $id;
     }
-
     /**
      * Get the channels the event should broadcast on.
      *

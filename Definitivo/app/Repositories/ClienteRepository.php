@@ -25,16 +25,6 @@ class ClienteRepository implements ClienteInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-    public function test($id, $cod){
-        try{
-            $cliente = Cliente::FindOrFail($id);
-            Mail::to($cliente->EMAIL)->send(new SendMailUser($cliente, $cod));
-        }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()],400);
-        }
-
-
-    }
     public function store(Request $request)
     {
         try{

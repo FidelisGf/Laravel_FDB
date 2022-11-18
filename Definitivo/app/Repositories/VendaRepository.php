@@ -54,7 +54,7 @@ class VendaRepository implements VendaInterface
                     $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
                     foreach($pedido->PRODUTOS as $prod){
                         $tmp = 0;
-                        $prod = Product::FindOrFail($prod->id);
+                        $prod = Product::withTrashed()->FindOrFail($prod->id);
                         $prod->MATERIAIS = json_decode($prod->MATERIAIS);
                         foreach($prod->MATERIAIS as $material){
                             $tmp += $material->CUSTO * $material->QUANTIDADE;
@@ -101,7 +101,7 @@ class VendaRepository implements VendaInterface
                 $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
                 foreach($pedido->PRODUTOS as $prod){
                     $custo = 0;
-                    $tmpProd = Product::FindOrFail($prod->id);
+                    $tmpProd = Product::withTrashed()->FindOrFail($prod->id);
                     $tmpProd->MATERIAIS = json_decode($tmpProd->MATERIAIS);
                     foreach($tmpProd->MATERIAIS as $material){
                         $custo += $material->CUSTO * $material->QUANTIDADE;
@@ -139,7 +139,7 @@ class VendaRepository implements VendaInterface
                 $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
                 foreach($pedido->PRODUTOS as $prod){
                     $tmp = 0;
-                    $prod = Product::FindOrFail($prod->id);
+                    $prod = Product::withTrashed()->FindOrFail($prod->id);
                     $prod->MATERIAIS = json_decode($prod->MATERIAIS);
                     foreach($prod->MATERIAIS as $material){
                         $tmp += $material->CUSTO * $material->QUANTIDADE;

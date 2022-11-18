@@ -12,6 +12,7 @@ use App\Pedidos;
 use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class PedidosRepository implements PedidoInterface
 {
@@ -124,18 +125,10 @@ class PedidosRepository implements PedidoInterface
         }
     }
     public function destroy($id){
-        $help = new Help();
         try{
             $pedido = Pedidos::FindOrFail($id);
-            $help->startTransaction();
-            if($pedido->APROVADO == "T"){
-                $venda = Venda::where('ID_PEDIDO', '=', $pedido->ID);
-                $venda->delete();
-            }
             $pedido->delete();
-            $help->commit();
         }catch(\Exception $e){
-            $help->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()]);
         }
     }

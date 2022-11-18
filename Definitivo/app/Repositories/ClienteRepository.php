@@ -7,7 +7,6 @@ use App\Http\interfaces\ClienteInterface;
 use App\Mail\SendMailUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-
 class ClienteRepository implements ClienteInterface
 {
     public function __construct()

@@ -7,7 +7,6 @@
 O numero do seu pedido é # {{$pedido->ID}}, você pode conferir as informações do mesmo abaixo :
 
 
-
 @component('mail::table')
 | PRODUTO 	| VALOR 	| QUANTIDADE 	|
 | :---------	| :-------	| :------------	|

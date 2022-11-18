@@ -11,8 +11,6 @@ class Pedidos extends Model
     protected $table = 'PEDIDOS';
     const CREATED_AT = 'CREATED_AT';
     const UPDATED_AT = 'UPDATED_AT';
-    const DELETED_AT = 'DELETED_AT';
-    use SoftDeletes;
     protected $primaryKey = 'ID';
     protected $generator = 'GEN_PEDIDOS_ID';
     protected $keyType = 'integer';

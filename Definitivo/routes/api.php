@@ -10,6 +10,7 @@ use App\Http\Controllers\MateriaisController;
 use App\Http\Controllers\MedidasController;
 use App\Http\Controllers\PedidosController;
 use App\Http\Controllers\ProductController;
+use App\Http\Controllers\ResetPwController;
 use App\Http\Controllers\TagController;
 use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendaController;
@@ -37,7 +38,8 @@ Route::group([
 ], function ($router) {
 
     Route::post('logout', [AuthController::class, 'logout']);
-
+    Route::post('sendMailResetPassword', [ResetPwController::class, 'sendResetPwEmail']);
+    Route::post('resetPassword', [ResetPwController::class, 'resetPassword']);
     Route::post('login', [AuthController::class, 'login']);
     Route::post('register', [AuthController::class, 'register']);
     Route::post('profile', [AuthController::class, 'profile']);

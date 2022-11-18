@@ -11,7 +11,7 @@ O numero do seu pedido é # {{$pedido->ID}}, você pode conferir as informaçõe
 | PRODUTO 	| VALOR 	| QUANTIDADE 	|
 | :---------	| :-------	| :------------	|
 @foreach ($pedido->PRODUTOS as $prod)
-| {{$prod->nome}}   | {{$prod->valor}}   | {{$prod->quantidade}} {{$prod->medida}}  |
+| {{$prod->nome}}   | R$ {{$prod->valor}}   | {{$prod->quantidade}} {{$prod->medida}}  |
 @endforeach
 @endcomponent
 

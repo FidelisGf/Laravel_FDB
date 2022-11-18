@@ -6,6 +6,7 @@ use App\Despesa;
 use App\Http\interfaces\DespesaInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class DespesaRepository implements DespesaInterface
 {
@@ -93,11 +94,22 @@ class DespesaRepository implements DespesaInterface
             $empresa = $user->empresa;
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
-            $despesas = Despesa::whereBetween('DATA', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)
-            ->with(['Tags' => function($query){
-                $query->select('ID', 'NOME');
-            }])->paginate(6);
+            $despesas = null;
+            if($request->filled('pdf')){
+                $despesas = DB::table('DESPESAS')
+                ->whereBetween('DATA', [$startData, $endData])
+                ->join('TAGS', 'TAGS.ID', '=', 'DESPESAS.ID_TAG')->select('DESPESAS.ID','DESPESAS.CUSTO', 'DESPESAS.DESC', 'TAGS.NOME_REAL', 'DESPESAS.DATA')->get();
+            }else{
+                $despesas = Despesa::whereBetween('DATA', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)
+                ->with(['Tags' => function($query){
+                    $query->select('ID', 'NOME');
+                }])->paginate(6);
+            }
+            foreach ($despesas as $despesa ) {
+                $despesa->DATA = Carbon::parse($despesa->DATA)->format('d / m / Y :  H:i');
+            }
             return $despesas;
+
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

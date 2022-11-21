@@ -4,10 +4,7 @@
 Utilize o Token abaixo :
 
 {{$token}}
-@component('mail::button', ['url' => ''])
-Button Text
-@endcomponent
 
-Thanks,<br>
-{{ config('app.name') }}
+Agradecemos a preferência,<br>
+Empresarial
 @endcomponent

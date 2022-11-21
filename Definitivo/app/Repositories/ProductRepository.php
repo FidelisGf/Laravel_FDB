@@ -36,7 +36,7 @@ class ProductRepository implements InterfacesProductInterface
                 $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
                 join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
                     'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-                )->orderBy('ID', 'desc')->paginate(7);
+                )->orderBy('ID', 'desc')->paginate(20);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -66,7 +66,7 @@ class ProductRepository implements InterfacesProductInterface
                     'category' => function($query){
                         $query->select('ID_CATEGORIA', 'NOME_C');
                     }
-                ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(6);
+                ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(20);
                 return $PRODUCTS;
             }
 
@@ -96,7 +96,7 @@ class ProductRepository implements InterfacesProductInterface
                     'category' => function($query){
                         $query->select('ID_CATEGORIA', 'NOME_C');
                     }
-                ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(6);
+                ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(20);
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -114,7 +114,7 @@ class ProductRepository implements InterfacesProductInterface
             $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
             join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
                 'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-            )->where('CATEGORIAS.ID_CATEGORIA', $id)->paginate(8);
+            )->where('CATEGORIAS.ID_CATEGORIA', $id)->paginate(20);
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
@@ -246,7 +246,7 @@ class ProductRepository implements InterfacesProductInterface
             $search = $request->search;
             $search = ucwords($search);
             $PRODUCTS = Product::query()->where('NOME', 'LIKE', '%'. $search.'%')
-                                ->orWhere('DESC', 'LIKE', '%'.$search.'%')->paginate(15);
+                                ->orWhere('DESC', 'LIKE', '%'.$search.'%')->paginate(20);
             return ProductResource::collection($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(

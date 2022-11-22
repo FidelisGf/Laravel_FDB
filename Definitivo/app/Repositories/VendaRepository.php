@@ -34,6 +34,30 @@ class VendaRepository implements VendaInterface
             }
         }
     }
+    public function getVendasPorMes()
+    {
+        try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
+            $startData = date('Y-m-01');
+            $endData = date('Y-m-t');
+            $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
+                $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
+                ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+            })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
+            ->select('VENDAS.VALOR_TOTAL')->get();
+            $v = [];
+            foreach($vendas as $venda){
+                $v [] = floatval( $venda->VALOR_TOTAL );
+            }
+            return response()->json($v);
+        }catch(\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage()
+            ],400);
+        }
+
+    }
     public function getVendasByDate(Request $request){
         try{
             $startData = Carbon::parse($request->start);

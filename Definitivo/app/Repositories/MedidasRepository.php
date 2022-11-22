@@ -28,20 +28,29 @@ class MedidasRepository implements MedidasInterface
     }
     public function store(Request $request)
     {
-        $user = auth()->user();
-        $empresa = $user->empresa;
-        $validatedData = $request->validate([
-            'NOME' => ['required', 'max:100', 'min:1']
-        ]);
-        if($validatedData){
-            $medida = new Medidas();
-            $NOME_REAL = "$request->NOME _ $empresa->ID";
-            $medida->NOME = $request->NOME;
-            $medida->ID_EMPRESA = $empresa->ID;
-            $medida->NOME_REAL = $NOME_REAL;
-            $medida->save();
-            return $medida;
+        try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
+            $validatedData = $request->validate([
+                'NOME' => ['required', 'max:100', 'min:1']
+            ]);
+            if($validatedData){
+                $medida = new Medidas();
+                $NOME_REAL = "$request->NOME _ $empresa->ID";
+                $medida->NOME = $request->NOME;
+                $medida->ID_EMPRESA = $empresa->ID;
+                $medida->NOME_REAL = $NOME_REAL;
+                $medida->save();
+                return response()->json(["message" => "Medida cadastrada com sucesso !"]);
+            }
+        }catch(\Exception $e){
+            return response()->json(
+                [
+                    "message" => $e->getMessage()
+                ],400
+            );
         }
+
     }
 
 }

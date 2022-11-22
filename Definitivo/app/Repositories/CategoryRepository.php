@@ -6,7 +6,7 @@ use App\Category;
 use App\Http\interfaces\CategoryInterface;
 use Illuminate\Http\Request;
 
-class CategoryRepository implements CategoryInterface
+class CategoryRepository implements CategoryInterface //Precisa de refatoração
 {
     private $model;
     public function __construct(Category $model)
@@ -18,7 +18,7 @@ class CategoryRepository implements CategoryInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $Category = Category::where('ID_EMPRESA', $empresa->ID)->paginate(30);
+            $Category = Category::where('ID_EMPRESA', $empresa->ID)->get();
             return $Category;
         }catch(\Exception $e){
             return response()->json(
@@ -50,13 +50,13 @@ class CategoryRepository implements CategoryInterface
             $Category->NOME_C = $request->NOME_C;
             $Category->NOME_REAL = $NOME_REAL;
             if($Category->save()){
-                return $Category;
+                return response()->json(["message" => "Categoria cadastrada com sucesso !"]);
             }
         }catch(\Exception $e){
            return response()->json(
             [
                 "message" => $e->getMessage()
-            ]
+            ],400
             );
         }
     }

@@ -66,7 +66,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/checaEmpUser', [UsuarioController::class, 'checkIfUserHasEmpresa'] );
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'] );
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'] );
-    Route::get('/getVendasPorMes', [VendaController::class, 'getVendasPorMes']);
+    Route::get('/getVendasPorDia', [VendaController::class, 'getVendasPorDia']);
     Route::get('despesasByTag/{id}', [DespesaController::class, 'despesasByTag']);
     Route::get("getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
     Route::get('sumDespesasMensais', [DespesaController::class, 'sumDespesasMensais']);

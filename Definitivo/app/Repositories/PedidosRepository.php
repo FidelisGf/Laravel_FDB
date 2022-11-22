@@ -96,7 +96,7 @@ class PedidosRepository implements PedidoInterface
         try{
             $prod = Estoque::where('PRODUCT_ID', $request->id)->firstOrFail();
             if($prod->QUANTIDADE <= $request->quantidade){
-                return response()->json(false);
+                return response()->json(false,400);
             }else{
                 return response()->json(true);
             }

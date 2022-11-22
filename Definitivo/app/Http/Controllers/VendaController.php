@@ -13,8 +13,8 @@ class VendaController extends Controller
     {
         return $vendaRepository->index($request);
     }
-    public function getVendasPorMes(VendaRepository $vendaRepository){
-        return $vendaRepository->getVendasPorMes();
+    public function getVendasPorDia(VendaRepository $vendaRepository){
+        return $vendaRepository->getVendasPorDia();
     }
     /**
      * Show the form for creating a new resource.

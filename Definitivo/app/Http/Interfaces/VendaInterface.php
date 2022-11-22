@@ -7,5 +7,5 @@ interface VendaInterface{
     public function getVendasByDate(Request $request);
     public function getLucroAndGastos(Request $request);
     public function getVendasByTipoPagamento(Request $request);
-    public function getVendasPorMes();
+    public function getVendasPorDia();
 }

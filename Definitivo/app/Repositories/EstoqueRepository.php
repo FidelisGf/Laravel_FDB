@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Estoque;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\EstoqueInterface;
+use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -169,8 +170,8 @@ class EstoqueRepository implements EstoqueInterface
     }
     public function getQuantidadeProduct($id){
         try{
-            $estoque = Estoque::FindOrFail($id)->only('QUANTIDADE');
-            return $estoque;
+            $estoque = Estoque::where('PRODUCT_ID', $id)->firstOrFail();
+            return $estoque->QUANTIDADE;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

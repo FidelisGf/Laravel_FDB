@@ -34,13 +34,13 @@ class VendaRepository implements VendaInterface
             }
         }
     }
-    public function getVendasPorMes()
+    public function getVendasPorDia()
     {
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $startData = date('Y-m-01');
-            $endData = date('Y-m-t');
+            $startData =  date_create('today');
+            $endData = date_create('today 23:00');
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);

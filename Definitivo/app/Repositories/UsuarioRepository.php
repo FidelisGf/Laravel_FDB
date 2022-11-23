@@ -16,29 +16,29 @@ class UsuarioRepository implements UsuarioInterface
     }
     public function vinculaUsuarioEmpresa(Request $request){
         try{
-            $validator = Validator::make($request->all(), [
+            $validator = $request->validate([
                 'NOME' => 'required|unique:EMPRESAS|max:50|min:2',
-                'CNPJ' => 'required',
+                'CNPJ' => 'required|min:18|max:18',
                 'EMAIL'=> 'required|unique:EMPRESAS|email|max:120|min:5',
                 'NOME_FANTASIA' => 'required|max:60|min:2',
                 'ENDERECO' => 'required|max:255|min:2',
                 'INC_ESTADUAL' => 'required|unique:EMPRESAS|max:12|min:9',
             ]);
-            if(!$validator->fails()){
+            if($validator){
                 $Empresa = Empresa::create($request->all());
                 if($Empresa){
                     $auth = JWTAuth::parseToken()->authenticate();
                     $USER = $auth;
                     $USER->EMPRESA_ID = $Empresa->ID;
                     if($USER->save()){
-                        return response()->json(['message' => 'Usuario e Empresa vinculados com sucesso !' + $USER]);
+                        return response()->json(['message' => 'Usuario e Empresa vinculados com sucesso !']);
                     }else{
-                        return response()->json(['message' => 'Falha ao vincular Usuario e Empresa']);
+                        return response()->json(['message' => 'Falhar ao vincular usuario !'],400);
                     }
                 }
             }
         }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
     public function checkIfUserHasEmpresa(){

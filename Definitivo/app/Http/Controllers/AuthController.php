@@ -8,6 +8,7 @@ use App\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 use Tymon\JWTAuth\Exceptions\TokenInvalidException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -24,15 +25,23 @@ class AuthController extends Controller
         $this->middleware('auth:api', ['except' => ['login','register', 'refresh', 'profile', 'logout', 'getAuthenticatedUser']]);
     }
     public function register(Request $request){
+        try{
 
-        $user = Usuario::create(array_merge(
-            $request->all(),
-            ['PASSWORD' => bcrypt($request->PASSWORD)]// 'criptografa' a senha antes de inserir no banco
-        ));
-        return response()->json([
-            'message' => 'Usuario registrado',
-            'Usuario' => $user
-        ]);
+            $validator = $request->validate([
+                'NAME' => 'required|max:50|min:4',
+                'PASSWORD' => 'required|max:50|min:6',
+                'EMAIL'=> 'required|max:60|min:8|email'
+            ]);
+            if($validator){
+                $user = Usuario::create(array_merge(
+                    $request->all(),
+                    ['PASSWORD' => bcrypt($request->PASSWORD)]// 'criptografa' a senha antes de inserir no banco
+                ));
+                return response()->json(["message" => 'Usuario registrado com sucesso !',"Usuario" => $user], 201);
+            }
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
     }
 
 

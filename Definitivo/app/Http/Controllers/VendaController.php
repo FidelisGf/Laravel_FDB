@@ -16,6 +16,9 @@ class VendaController extends Controller
     public function getVendasPorDia(VendaRepository $vendaRepository){
         return $vendaRepository->getVendasPorDia();
     }
+    public function getTotalVendasInTheLastThreeMonths(VendaRepository $vendaRepository){
+        return $vendaRepository->getTotalVendasInTheLastThreeMonths();
+    }
     /**
      * Show the form for creating a new resource.
      *

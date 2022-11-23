@@ -50,13 +50,13 @@ class VendaRepository implements VendaInterface
             $v[0] = floatval( $vendas->min('VENDAS.VALOR_TOTAL') );
             $v[1] = floatval( $vendas->avg('VENDAS.VALOR_TOTAL') );
             $v[2] = floatval( $vendas->max('VENDAS.VALOR_TOTAL') );
-            return response()->json($v);
+            $qntd = intval($vendas->count());
+            return response()->json(["values" => $v, "quantidade" => $qntd]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()
             ],400);
         }
-
     }
     public function getVendasByDate(Request $request){
         try{
@@ -189,5 +189,56 @@ class VendaRepository implements VendaInterface
                 'message' => $e->getMessage()
             ],400);
         }
+    }
+
+
+    public function getTotalVendasInTheLastThreeMonths(){
+        try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
+
+            $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
+                $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
+                ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+            });
+            $v = [];
+            // $startData = $this->transformDataToAMonthInThePast("1", "start");
+            // $endData = $this->transformDataToAMonthInThePast("0", "end");
+            // $mes2 = floatval($vendas->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL'));
+            // $startData = $this->transformDataToAMonthInThePast("2", "start");
+            // $endData = $this->transformDataToAMonthInThePast("1", "end");
+            // $mes1 = floatval($vendas->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL'));
+            $startData = $this->getStartOfThisMonthByActualDay();
+            $endData = date_create('today 23:00');
+            $mes3 = $vendas->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL');
+            return response()->json(["start" => $startData, "end" => $endData, "valores" => $mes3, "user" => $user]);
+        }catch(\Exception $e){
+            return response()->json([
+                'message' => $e->getMessage()
+            ],400);
+        }
+    }
+
+    public function transformDataToAMonthInThePast($mes, $type){
+        $temp = strval(date_create('today')->format('Y-m-d'));
+        $d = substr(strval($temp), strrpos(strval($temp), '-') + 1);
+        $strD = intval( $d - 1 );
+        $strD = strval($strD);
+        $tempData=  date_create('today');
+        if($type == "start"){
+            return date_add($tempData, date_interval_create_from_date_string("-$mes month -$strD days"));
+        }else{
+            $tempData=  date_create('today');
+            return date_add($tempData, date_interval_create_from_date_string("-$mes month -$d days"));
+        }
+
+    }
+    public function getStartOfThisMonthByActualDay(){
+        $temp = strval(date_create('today')->format('Y-m-d'));
+        $d = substr(strval($temp), strrpos(strval($temp), '-') + 1);
+        $tempData=  date_create('today');
+        $strD = intval( $d - 1 );
+        $strD = strval($strD);
+        return date_add($tempData, date_interval_create_from_date_string("-$strD days"));
     }
 }

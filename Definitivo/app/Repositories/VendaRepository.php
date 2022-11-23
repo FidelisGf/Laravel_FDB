@@ -45,11 +45,11 @@ class VendaRepository implements VendaInterface
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
-            ->select('VENDAS.VALOR_TOTAL')->get();
+            ->select('VENDAS.VALOR_TOTAL');
             $v = [];
-            foreach($vendas as $venda){
-                $v [] = floatval( $venda->VALOR_TOTAL );
-            }
+            $v[0] = floatval( $vendas->min('VENDAS.VALOR_TOTAL') );
+            $v[1] = floatval( $vendas->avg('VENDAS.VALOR_TOTAL') );
+            $v[2] = floatval( $vendas->max('VENDAS.VALOR_TOTAL') );
             return response()->json($v);
         }catch(\Exception $e){
             return response()->json([

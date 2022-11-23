@@ -186,6 +186,9 @@ class PedidosRepository implements PedidoInterface
                 $endData = Carbon::parse($request->end);
                 $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->
                 select('ID', 'METODO_PAGAMENTO', 'VALOR_TOTAL', 'APROVADO', 'CREATED_AT')->get();
+                foreach($Pedidos as $p){
+                    $p->APROVADO = $p->APROVADO == "T" ? "PAGO" : "PENDENTE";
+                }
                 return $Pedidos;
             }else{
                 $user = auth()->user();

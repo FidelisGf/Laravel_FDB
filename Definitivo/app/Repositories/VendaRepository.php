@@ -190,33 +190,34 @@ class VendaRepository implements VendaInterface
             ],400);
         }
     }
-
-
     public function getTotalVendasInTheLastThreeMonths(){
         try{
             $user = auth()->user();
-            $empresa = $user->empresa;
-
-            $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
-                $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
-                ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
-            });
-            $v = [];
-            // $startData = $this->transformDataToAMonthInThePast("1", "start");
-            // $endData = $this->transformDataToAMonthInThePast("0", "end");
-            // $mes2 = floatval($vendas->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL'));
-            // $startData = $this->transformDataToAMonthInThePast("2", "start");
-            // $endData = $this->transformDataToAMonthInThePast("1", "end");
-            // $mes1 = floatval($vendas->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL'));
             $startData = $this->getStartOfThisMonthByActualDay();
             $endData = date_create('today 23:00');
-            $mes3 = $vendas->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL');
-            return response()->json(["start" => $startData, "end" => $endData, "valores" => $mes3, "user" => $user]);
+            $mes3 = floatval($this->getSalesSumBetweenDates($startData, $endData));
+            $startData = $this->transformDataToAMonthInThePast("1", "start");
+            $endData = $this->transformDataToAMonthInThePast("0", "end");
+            $mes2 = floatval( $this->getSalesSumBetweenDates($startData, $endData) );
+            $startData = $this->transformDataToAMonthInThePast("2", "start");
+            $endData = $this->transformDataToAMonthInThePast("1", "end");
+            $mes1 = floatval( $this->getSalesSumBetweenDates($startData, $endData) );
+            $meses = [$mes1, $mes2, $mes3];
+            return response()->json(["valores" => $meses]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()
             ],400);
         }
+    }
+    public function getSalesSumBetweenDates($startData, $endData){
+        $user = auth()->user();
+        $empresa = $user->empresa;
+        $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
+            $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
+            ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+        })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL');
+        return $vendas;
     }
 
     public function transformDataToAMonthInThePast($mes, $type){
@@ -231,11 +232,10 @@ class VendaRepository implements VendaInterface
             $tempData=  date_create('today');
             return date_add($tempData, date_interval_create_from_date_string("-$mes month -$d days"));
         }
-
     }
     public function getStartOfThisMonthByActualDay(){
         $temp = strval(date_create('today')->format('Y-m-d'));
-        $d = substr(strval($temp), strrpos(strval($temp), '-') + 1);
+        $d = substr(strval($temp), strrpos(strval($temp), '-') + 1); // procura dentro de temp a string após o primeiro - , porem o mais 1 faz com que ele vá para a proxima string, ou seja 'd' , que representa nossos dias
         $tempData=  date_create('today');
         $strD = intval( $d - 1 );
         $strD = strval($strD);

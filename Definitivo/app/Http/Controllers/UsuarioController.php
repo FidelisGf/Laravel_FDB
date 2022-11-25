@@ -36,6 +36,9 @@ class UsuarioController extends Controller
     public function profile(UsuarioRepository $usuarioRepository){
         return $usuarioRepository->profile();
     }
+    public function showAvalibleRoles(UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->showRolesAvaibles();
+    }
 
     /**
      * Store a newly created resource in storage.

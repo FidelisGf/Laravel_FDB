@@ -26,25 +26,30 @@ class AuthController extends Controller
     }
     public function register(Request $request){
         try{
-
             $validator = $request->validate([
                 'NAME' => 'required|max:50|min:4',
                 'PASSWORD' => 'required|max:50|min:6',
-                'EMAIL'=> 'required|max:60|min:8|email'
+                'EMAIL'=> 'required|max:60|min:8|email',
+                'ID_ROLE' => 'required'
             ]);
             if($validator){
+                $user = auth()->user();
                 $user = Usuario::create(array_merge(
                     $request->all(),
                     ['PASSWORD' => bcrypt($request->PASSWORD)]// 'criptografa' a senha antes de inserir no banco
                 ));
+                if(auth()->user()->empresa->ID){
+                    if(auth()->user()->role->LEVEL == 10){
+                        $user->EMPRESA_ID = auth()->user()->empresa->ID;
+                        $user->save();
+                    }
+                }
                 return response()->json(["message" => 'Usuario registrado com sucesso !',"Usuario" => $user], 201);
             }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-
-
     /**
      * Get a JWT via given credentials.
      *
@@ -69,10 +74,6 @@ class AuthController extends Controller
             return response()->json(['message' => $e->getMessage()],404);
         }
     }
-    public function profile(Request $request) {
-        $user = Auth::user();
-        return response()->json($user);
-    }
     public function getAuthenticatedUser()
             {
                 try {
@@ -91,7 +92,7 @@ class AuthController extends Controller
         }
     public function logout()
     {
-        auth('api')->logout();
+        auth()->logout();
         return response()->json(['message' => 'Successfully logged out']);
     }
     /**
@@ -115,7 +116,7 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->guard('api')->factory()->getTTL() * 1
+            'expires_in' => auth()->guard('api')->factory()->getTTL() * 60
         ]);
     }
 

@@ -128,6 +128,7 @@ class PedidosRepository implements PedidoInterface
         try{
             $pedido = Pedidos::FindOrFail($id);
             $pedido->delete();
+            return response()->json(['message' => "Deletado com sucesso !"]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }

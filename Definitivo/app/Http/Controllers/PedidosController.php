@@ -72,6 +72,11 @@ class PedidosController extends Controller
      */
     public function destroy($id, PedidosRepository $pedidosRepository)
     {
-        return $pedidosRepository->destroy($id);
+        $user = auth()->user();
+        if($user->role->LEVEL == 10){
+            return $pedidosRepository->destroy($id);
+        }else{
+            return response()->json(["message" => "Usuario nao autorizado !"],400);
+        }
     }
 }

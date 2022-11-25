@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Empresa;
 use App\Http\interfaces\UsuarioInterface;
+use App\Role;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -41,6 +42,15 @@ class UsuarioRepository implements UsuarioInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
+    public function showRolesAvaibles(){
+        try{
+            $roles = Role::all();
+            return $roles;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
+
     public function checkIfUserHasEmpresa(){
         try{
             $user = auth()->user();
@@ -64,7 +74,7 @@ class UsuarioRepository implements UsuarioInterface
     public function profile(){
         try{
             $user = auth()->user();
-            return $user;
+            return $user->role->LEVEL;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

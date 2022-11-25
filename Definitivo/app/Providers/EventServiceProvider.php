@@ -2,7 +2,9 @@
 
 namespace App\Providers;
 
+use App\Events\MakeLog;
 use App\Events\VendaGerada;
+use App\Listeners\SaveLog;
 use App\Listeners\SendMailVendaGerada;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -20,6 +22,9 @@ class EventServiceProvider extends ServiceProvider
         VendaGerada::class => [
             SendMailVendaGerada::class,
         ],
+        MakeLog::class => [
+            SaveLog::class
+        ]
     ];
 
     /**

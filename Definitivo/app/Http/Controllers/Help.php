@@ -21,4 +21,13 @@ class Help extends Controller
         $pdo->setAttribute(\PDO::ATTR_AUTOCOMMIT,1);
         $pdo->commit();
     }
+    function compareIfChange($item, $item2){
+        $item2 =json_decode(json_encode($item2), true);
+        $item = json_decode(json_encode($item), true);
+        for($i = 0; $i < sizeof($item); $i++){
+            if($item[$i] != $item2[$i]){
+                return $item[$i];
+            }
+        }
+    }
 }

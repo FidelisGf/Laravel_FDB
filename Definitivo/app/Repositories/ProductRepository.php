@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Empresa;
 use App\Estoque;
+use App\Events\MakeLog;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\ProductInterface as InterfacesProductInterface;
 use App\Http\Resources\ProductResource;
@@ -141,6 +142,8 @@ class ProductRepository implements InterfacesProductInterface
         }
     }
     public function store(Request $request){
+        $user = auth()->user();
+        $empresa = $user->empresa;
         try{
             $helper = new Help();
             $helper->startTransaction();
@@ -172,6 +175,7 @@ class ProductRepository implements InterfacesProductInterface
                     $mtController->removeQuantidadeMaterial($materias, $quantidade);
                     $estoque = new EstoqueRepository();
                     $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
+                    event(new MakeLog("Produtos", "", "insert", "$produto->NOME", "", $produto->ID, $empresa->ID, $user->ID));
                     $helper->commit();
                     return response()->json(
                         $produto
@@ -188,9 +192,14 @@ class ProductRepository implements InterfacesProductInterface
         }
     }
     public function update(Request $request, $id){
+        $helper = new Help();
+        $user = auth()->user();
+        $empresa = $user->empresa;
         try{
             $PRODUCT = Product::FindOrFail($id);
+            //$tmp = $PRODUCT;
             $PRODUCT->update($request->all());
+            //event(new MakeLog("Produtos", "", "update", "$change", "Produto inteiro", $PRODUCT->ID, $empresa->ID, $user->ID));
             return response()->json(
                 [
                     "message" => "Produto editado com sucesso"

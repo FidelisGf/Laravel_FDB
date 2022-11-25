@@ -2,12 +2,13 @@
 
 namespace App\Repositories;
 
+use App\Events\MakeLog;
 use App\Http\interfaces\MateriaisInterface;
 use App\Materiais;
 use Illuminate\Http\Request;
-
 class MateriaisRepository implements MateriaisInterface
 {
+
     public function __construct()
     {
         //
@@ -30,10 +31,14 @@ class MateriaisRepository implements MateriaisInterface
         }
     }
     public function adicionaQuantidadeMaterial(Request $request, $id){
+        $user = auth()->user();
+        $empresa = $user->empresa;
         try{
             $material = Materiais::FindOrFail($id);
+            $tmp = $material->QUANTIDADE;
             $material->QUANTIDADE += $request->QUANTIDADE;
             $material->save();
+            event(new MakeLog("Materiais", "QUANTIDADE", "update", "$material->QUANTIDADE", "$tmp", $material->ID, $empresa->ID, $user->ID));
             return response()->json(["message" => 'Quantidade Adicionada com sucesso !']);
         }catch(\Exception $e){
             return response()->json(
@@ -44,12 +49,16 @@ class MateriaisRepository implements MateriaisInterface
         }
     }
     public function removeQuantidadeMaterial($materiais, $quantidade){
+        $user = auth()->user();
+        $empresa = $user->empresa;
         try{
             foreach($materiais as $mat){
                 $tmp = $mat;
                 $mat = Materiais::FindOrFail($mat->ID);
+                $tmpQntd = $mat->QUANTIDADE;
                 $mat->QUANTIDADE -= ($quantidade * $tmp->QUANTIDADE);
                 $mat->save();
+                event(new MakeLog("Materiais", "QUANTIDADE", "update", "$mat->QUANTIDADE", "$tmpQntd", $mat->ID, $empresa->ID, $user->ID));
             }
         }catch(\Exception $e){
             return response()->json(
@@ -75,8 +84,11 @@ class MateriaisRepository implements MateriaisInterface
                 $material->CUSTO = $request->CUSTO;
                 $material->NOME_REAL = $NOME_REAL;
                 $material->QUANTIDADE = $request->QUANTIDADE;
-                $material->save();
-                return $material;
+                if($material->save()) {
+                    event(new MakeLog("Materiais", "", "insert", "$material->NOME", "", $material->ID, $empresa->ID, $user->ID));
+                    return $material;
+                };
+
             }
         }catch(\Exception $e){
             return response()->json(

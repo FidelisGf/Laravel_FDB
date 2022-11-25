@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Category;
+use App\Events\MakeLog;
 use App\Http\interfaces\CategoryInterface;
 use Illuminate\Http\Request;
 
@@ -50,6 +51,7 @@ class CategoryRepository implements CategoryInterface //Precisa de refatoração
             $Category->NOME_C = $request->NOME_C;
             $Category->NOME_REAL = $NOME_REAL;
             if($Category->save()){
+                event(new MakeLog("Categorias", "", "insert", "$Category->NOME_C", "", $Category->ID_CATEGORIA, $empresa->ID, $user->ID));
                 return response()->json(["message" => "Categoria cadastrada com sucesso !"]);
             }
         }catch(\Exception $e){

@@ -54,6 +54,7 @@ class CategoryRepository implements CategoryInterface //Precisa de refatoração
                 event(new MakeLog("Categorias", "", "insert", "$Category->NOME_C", "", $Category->ID_CATEGORIA, $empresa->ID, $user->ID));
                 return response()->json(["message" => "Categoria cadastrada com sucesso !"]);
             }
+            event(new MakeLog("Categorias", "", "insert", json_encode($Category), "", $Category->ID, $empresa->ID, $user->ID));
         }catch(\Exception $e){
            return response()->json(
             [

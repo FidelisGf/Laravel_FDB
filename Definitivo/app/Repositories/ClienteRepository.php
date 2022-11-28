@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Cliente;
+use App\Events\MakeLog;
 use App\Http\interfaces\ClienteInterface;
 use App\Mail\SendMailUser;
 use Illuminate\Http\Request;
@@ -47,6 +48,7 @@ class ClienteRepository implements ClienteInterface
                 $cliente->ID_EMPRESA = $empresa->ID;
                 $cliente->NOME_REAL = $NOME_REAL;
                 $cliente->save();
+                event(new MakeLog("Clientes", "", "insert", json_encode($cliente), "", $cliente->ID, $empresa->ID, $user->ID));
                 return $cliente;
             }
         }catch(\Exception $e){

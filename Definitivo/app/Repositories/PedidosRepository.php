@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Estoque;
+use App\Events\MakeLog;
 use App\Events\VendaGerada;
 use App\FakeProduct;
 use App\Http\Controllers\Help;
@@ -42,8 +43,6 @@ class PedidosRepository implements PedidoInterface
     }
     public function store(Request $request){
         try{
-            $helper = new Help();
-
             $validatedData = $request->validate([
                 'METODO_PAGAMENTO' => ['required'],
                 'produtos' => ['required'],
@@ -78,17 +77,15 @@ class PedidosRepository implements PedidoInterface
                     if($pedido->APROVADO == 'T'){
                         $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }
-                    $helper->startTransaction();
                     $pedido->save();
+                    event(new MakeLog("Pedidos", "", "insert", "", "", $pedido->ID, $empresa->ID, $user->ID));
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
                         $pedido->PRODUTOS = json_decode($PRODUCTS);
                         event(new VendaGerada($pedido, $pedido->ID_CLIENTE));
                     }
-                    $helper->commit();
                     return $pedido;
             }
         }catch(\Exception $e){
-            $helper->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
@@ -126,14 +123,19 @@ class PedidosRepository implements PedidoInterface
     }
     public function destroy($id){
         try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
             $pedido = Pedidos::FindOrFail($id);
             $pedido->delete();
+            event(new MakeLog("Pedidos", "", "delete", "", "", $pedido->ID, $empresa->ID, $user->ID));
             return response()->json(['message' => "Deletado com sucesso !"]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }
     }
     public function update(Request $request, $id){
+        $user = auth()->user();
+        $empresa = $user->empresa;
         $helper = new Help();
         try{
             $estoque = new EstoqueRepository();
@@ -170,6 +172,7 @@ class PedidosRepository implements PedidoInterface
             }
             $helper->startTransaction();
             $pedido->save();
+            event(new MakeLog("Pedidos", "", "update", "", "", $pedido->ID, $empresa->ID, $user->ID));
             $helper->commit();
             $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
             return $pedido;

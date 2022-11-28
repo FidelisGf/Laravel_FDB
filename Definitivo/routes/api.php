@@ -79,6 +79,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/getTotalVendasUltimosTresMeses', [VendaController::class, 'getTotalVendasInTheLastThreeMonths'])->middleware(FuncMiddleware::class);
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque'])->middleware(FuncMiddleware::class);
     Route::get('/pedidos/{id}', [PedidosController::class, 'show'])->middleware(FuncMiddleware::class);
+    Route::put('/pedidos/{id}', [PedidosController::class, 'update'])->middleware(FuncMiddleware::class);
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middleware(FuncMiddleware::class);
     Route::put('/products/{id}', [ProductController::class, 'update'])->middleware(FuncMiddleware::class);
     Route::put('aprovarPedido/{id}', [PedidosController::class, 'aprovarPedido'])->middleware(FuncMiddleware::class);

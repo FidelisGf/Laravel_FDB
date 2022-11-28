@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Events\MakeLog;
 use App\Http\interfaces\MedidasInterface;
 use App\Medidas;
 use Illuminate\Http\Request;
@@ -41,6 +42,7 @@ class MedidasRepository implements MedidasInterface
                 $medida->ID_EMPRESA = $empresa->ID;
                 $medida->NOME_REAL = $NOME_REAL;
                 $medida->save();
+                event(new MakeLog("Produto/Medidas", "", "insert", json_encode($medida), "", $medida->ID, $empresa->ID, $user->ID));
                 return response()->json(["message" => "Medida cadastrada com sucesso !"]);
             }
         }catch(\Exception $e){

@@ -175,7 +175,7 @@ class ProductRepository implements InterfacesProductInterface
                     $mtController->removeQuantidadeMaterial($materias, $quantidade);
                     $estoque = new EstoqueRepository();
                     $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
-                    event(new MakeLog("Produtos", "", "insert", "$produto->NOME", "", $produto->ID, $empresa->ID, $user->ID));
+                    event(new MakeLog("Produtos", "", "insert", " $produto->NOME", "", $produto->ID, $empresa->ID, $user->ID));
                     $helper->commit();
                     return response()->json(
                         $produto
@@ -197,9 +197,9 @@ class ProductRepository implements InterfacesProductInterface
         $empresa = $user->empresa;
         try{
             $PRODUCT = Product::FindOrFail($id);
-            //$tmp = $PRODUCT;
+            $tmp = $PRODUCT;
             $PRODUCT->update($request->all());
-            //event(new MakeLog("Produtos", "", "update", "$change", "Produto inteiro", $PRODUCT->ID, $empresa->ID, $user->ID));
+            event(new MakeLog("Produtos", "", "update", json_encode($PRODUCT), json_encode($tmp), $PRODUCT->ID, $empresa->ID, $user->ID));
             return response()->json(
                 [
                     "message" => "Produto editado com sucesso"
@@ -216,9 +216,11 @@ class ProductRepository implements InterfacesProductInterface
     public function destroy($id){
         try{
             $user = auth()->user();
+            $empresa = $user->empresa;
             $estoque = Estoque::where('EMPRESA_ID', $user->empresa->ID)->where('PRODUCT_ID', $id);
             $estoque->delete();
             $PRODUCT = Product::where('ID',$id)->first();
+            event(new MakeLog("Produtos", "", "delete", "", json_encode($PRODUCT), $PRODUCT->ID, $empresa->ID, $user->ID));
             $PRODUCT->delete();
             return response()->json(
                 [
@@ -235,12 +237,14 @@ class ProductRepository implements InterfacesProductInterface
     }
     public function findLucroByProduto($id){
         try{
+            $user = auth()->user();
             $produto = Product::FindOrFail($id);
             $lucro = $produto->VALOR;
             $produto->MATERIAIS = json_decode($produto->MATERIAIS);
             foreach($produto->MATERIAIS as $material){
                 $lucro -= ($material->CUSTO * $material->QUANTIDADE);
             }
+
             return response()->json($lucro);
         }catch(\Exception $e){
             return response()->json(
@@ -267,15 +271,19 @@ class ProductRepository implements InterfacesProductInterface
     }
     public function descontaQuantidadeMaterial($id, $quantidade){
         try{
+            $user = auth()->user();
+            $empresa = $user->empresa;
             $product = Product::FindOrFail($id);
             $product->MATERIAIS = json_decode($product->MATERIAIS);
             foreach($product->MATERIAIS as $mat){
                 $tmp = Materiais::FindOrFail($mat->ID);
+                $antigoVl = $tmp;
                 $tmp->QUANTIDADE -= ($mat->QUANTIDADE * $quantidade);
                 if($tmp->QUANTIDADE < 0){
                     return false;
                 }else{
                     $tmp->save();
+                    event(new MakeLog("Produtos/Desconto Material", "QUANTIDADE", "update", "$tmp->QUANTIDADE", "$antigoVl->QUANTIDADE", $tmp->ID, $empresa->ID, $user->ID));
                 }
             }
             return true;

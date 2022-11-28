@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Events\MakeLog;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\TagInterface;
 use App\Tag;
@@ -40,6 +41,7 @@ class TagRepository implements TagInterface
                 $tag->NOME_REAL = $NOME_REAL;
                 $helper->startTransaction();
                 $tag->save();
+                event(new MakeLog("Produto/Tags", "", "insert", json_encode($tag), "", $tag->ID, $empresa->ID, $user->ID));
                 $helper->commit();
                 return $tag;
             }

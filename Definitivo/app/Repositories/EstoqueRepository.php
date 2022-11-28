@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Estoque;
+use App\Events\MakeLog;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\EstoqueInterface;
 use App\Product;
@@ -126,18 +127,16 @@ class EstoqueRepository implements EstoqueInterface
     }
     public function removeEstoque($product_id, $quantidade){
         try{
-            $helper = new Help();
-            $helper->startTransaction();
             $user = auth()->user();
             $empresa = $user->empresa;
             $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+            $tmp = $Estoque;
             $Estoque->QUANTIDADE -= $quantidade;
             $Estoque->SAIDAS += $quantidade;
             $Estoque->save();
-            $helper->commit();
+            event(new MakeLog("Estoque/Quantidade", "QUANTIDADE", "update", json_encode($Estoque), json_encode($tmp), $Estoque->ID, $empresa->ID, $user->ID));
             return response()->json(['Produto atual no estoque' => $Estoque]);
         }catch(\Exception $e){
-            $helper->rollbackTransaction();
             return response()->json([
                 "message" => $e->getMessage()
             ],400);

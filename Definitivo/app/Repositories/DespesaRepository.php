@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Despesa;
+use App\Events\MakeLog;
 use App\Http\interfaces\DespesaInterface;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -68,6 +69,7 @@ class DespesaRepository implements DespesaInterface
                 $despesa->DATA = Carbon::parse($request->DATA);
                 $despesa->ID_TAG = $request->ID_TAG;
                 $despesa->save();
+                event(new MakeLog("Despesas", "", "insert", "$despesa->DESC", "", $despesa->ID, $empresa->ID, $user->ID));
                 return $despesa;
             }
         }catch(\Exception $e){
@@ -132,11 +134,13 @@ class DespesaRepository implements DespesaInterface
             $user = auth()->user();
             $empresa = $user->empresa;
             $despesa = Despesa::FindOrFail($id);
+            $tmp = $despesa;
             $despesa->DESC = $request->DESC;
             $despesa->ID_EMPRESA = $empresa->ID;
             $despesa->CUSTO = $request->CUSTO;
             $despesa->DATA = Carbon::parse($request->DATA);
             $despesa->ID_TAG = $request->ID_TAG;
+            event(new MakeLog("Despesas", "", "update", json_encode($despesa), json_encode($tmp), $despesa->ID, $empresa->ID, $user->ID));
             $despesa->save();
             return $despesa;
         }catch(\Exception $e){

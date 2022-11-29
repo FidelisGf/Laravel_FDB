@@ -24,7 +24,7 @@ class Pedidos extends Model
         return $this->belongsTo(Venda::class, 'ID_PEDIDO', 'ID');
     }
     public function cliente(){
-        return $this->hasOne(Cliente::class, 'ID_CLIENTE', 'ID');
+        return $this->hasOne(Cliente::class, 'ID', 'ID_CLIENTE');
     }
     protected $dates = ['DELETED_AT'];
 }

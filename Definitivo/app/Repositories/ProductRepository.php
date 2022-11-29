@@ -283,7 +283,7 @@ class ProductRepository implements InterfacesProductInterface
                     return false;
                 }else{
                     $tmp->save();
-                    event(new MakeLog("Produtos/Desconto Material", "QUANTIDADE", "update", "$tmp->QUANTIDADE", "$antigoVl->QUANTIDADE", $tmp->ID, $empresa->ID, $user->ID));
+                    //event(new MakeLog("Produtos/Desconto Material", "QUANTIDADE", "update", "$tmp->QUANTIDADE", "$antigoVl->QUANTIDADE", $tmp->ID, $empresa->ID, $user->ID));
                 }
             }
             return true;

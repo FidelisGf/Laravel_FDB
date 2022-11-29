@@ -10,11 +10,13 @@ use App\FakeProduct;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
+use App\Mail\SendMailUser;
 use App\Pedidos;
 use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Mail;
 
 class PedidosRepository implements PedidoInterface
 {
@@ -79,10 +81,10 @@ class PedidosRepository implements PedidoInterface
                         $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }
                     $pedido->save();
-                    event(new MakeLog("Pedidos", "", "insert", "", "", $pedido->ID, $empresa->ID, $user->ID));
+                    //event(new MakeLog("Pedidos", "", "insert", "", "", $pedido->ID, $empresa->ID, $user->ID));
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
                         $pedido->PRODUTOS = json_decode($PRODUCTS);
-                        event(new VendaGerada($pedido, $pedido->ID_CLIENTE));
+                        Mail::to($pedido->cliente->EMAIL)->send(new SendMailUser($pedido));
                     }
                     return $pedido;
             }

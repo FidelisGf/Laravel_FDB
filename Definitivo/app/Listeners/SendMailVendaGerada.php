@@ -12,6 +12,8 @@ use Illuminate\Support\Facades\Mail;
 
 class SendMailVendaGerada
 {
+
+    //public $afterCommit = true;
     /**
      * Create the event listener.
      *
@@ -30,7 +32,9 @@ class SendMailVendaGerada
      */
     public function handle(VendaGerada $event)
     {
-        $cliente = Cliente::FindOrFail($event->idClient);
-        Mail::to($cliente->EMAIL)->send(new SendMailUser($cliente, $event->venda));
+
+        $email = $event->venda->cliente->EMAIL;
+        Mail::to($email)->queue(new SendMailUser($event->venda));
     }
 }
+

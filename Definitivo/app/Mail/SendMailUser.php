@@ -8,21 +8,22 @@ use App\Pedidos;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
+use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 
 class SendMailUser extends Mailable
 {
-    use  SerializesModels;
-    public $usuario;
-    public $pedidos;
+    use SerializesModels;
+
     /**
      * Create a new message instance.
      *
      * @return void
      */
-    public function __construct(Cliente $usuario, Pedidos $pedidos)
+    private $pedidos;
+
+    public function __construct(Pedidos $pedidos)
     {
-        $this->usuario = $usuario;
         $this->pedidos = $pedidos;
     }
 
@@ -36,9 +37,9 @@ class SendMailUser extends Mailable
         return $this->from('to@email.com')
                 ->markdown('emails.test-markdown')
                 ->with([
-                    'user'  => $this->usuario,
+                    'user'  => $this->pedidos->cliente,
                     'pedido' => $this->pedidos,
-                    'empresa' => auth()->user()->empresa
+
                 ]);
     }
 }

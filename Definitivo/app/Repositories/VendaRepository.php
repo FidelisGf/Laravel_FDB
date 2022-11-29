@@ -50,6 +50,7 @@ class VendaRepository implements VendaInterface
             $v[0] = floatval( $vendas->min('VENDAS.VALOR_TOTAL') );
             $v[1] = floatval( $vendas->avg('VENDAS.VALOR_TOTAL') );
             $v[2] = floatval( $vendas->max('VENDAS.VALOR_TOTAL') );
+            $v[3] = floatval( $vendas->sum('VENDAS.VALOR_TOTAL'));
             $qntd = intval($vendas->count());
             return response()->json(["values" => $v, "quantidade" => $qntd]);
         }catch(\Exception $e){

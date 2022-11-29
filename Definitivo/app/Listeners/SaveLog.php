@@ -4,11 +4,13 @@ namespace App\Listeners;
 
 use App\Events\MakeLog;
 use App\Log;
+use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Queue\InteractsWithQueue;
 
 class SaveLog
 {
+
     /**
      * Create the event listener.
      *

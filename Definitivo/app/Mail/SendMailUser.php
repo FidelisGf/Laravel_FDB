@@ -3,6 +3,7 @@
 namespace App\Mail;
 
 use App\Cliente;
+use App\Empresa;
 use App\Pedidos;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -11,10 +12,9 @@ use Illuminate\Queue\SerializesModels;
 
 class SendMailUser extends Mailable
 {
-    use SerializesModels;
-    private $usuario;
-    private $url = "https://laravel.com/docs/5.6/queues";
-    private $pedidos;
+    use  SerializesModels;
+    public $usuario;
+    public $pedidos;
     /**
      * Create a new message instance.
      *
@@ -38,7 +38,6 @@ class SendMailUser extends Mailable
                 ->with([
                     'user'  => $this->usuario,
                     'pedido' => $this->pedidos,
-                    'rota' => $this->url,
                     'empresa' => auth()->user()->empresa
                 ]);
     }

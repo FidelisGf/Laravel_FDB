@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Cliente;
-use App\Jobs\ProcessMail;
+use App\Mail\SendMailUser;
 use App\Repositories\PedidosRepository;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 
 class PedidosController extends Controller
 {
@@ -25,13 +26,14 @@ class PedidosController extends Controller
         //
     }
 
+
     public function store(Request $request, PedidosRepository $pedidosRepository)
     {
-        $pedido =  $pedidosRepository->store($request);
-        $cliente = Cliente::FindOrFail($pedido->ID_CLIENTE);
-        ProcessMail::dispatchNow($cliente, $pedido);
-        return $pedido;
+
+        return $pedidosRepository->store($request);
+
     }
+
 
     public function checkQuantidadeProduto(Request $request, PedidosRepository $pedidosRepository){
         return $pedidosRepository->checkQuantidadeProduto($request);

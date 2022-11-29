@@ -10,7 +10,6 @@ use App\FakeProduct;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
-use App\Jobs\ProcessMail;
 use App\Pedidos;
 use App\Venda;
 use Carbon\Carbon;
@@ -83,7 +82,7 @@ class PedidosRepository implements PedidoInterface
                     event(new MakeLog("Pedidos", "", "insert", "", "", $pedido->ID, $empresa->ID, $user->ID));
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
                         $pedido->PRODUTOS = json_decode($PRODUCTS);
-                        $cliente = Cliente::FindOrFail($pedido->ID_CLIENTE);
+                        event(new VendaGerada($pedido, $pedido->ID_CLIENTE));
                     }
                     return $pedido;
             }

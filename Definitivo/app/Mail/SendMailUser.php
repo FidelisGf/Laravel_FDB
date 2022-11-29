@@ -5,12 +5,13 @@ namespace App\Mail;
 use App\Cliente;
 use App\Pedidos;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 class SendMailUser extends Mailable
 {
-    use Queueable, SerializesModels;
+    use SerializesModels;
     private $usuario;
     private $url = "https://laravel.com/docs/5.6/queues";
     private $pedidos;

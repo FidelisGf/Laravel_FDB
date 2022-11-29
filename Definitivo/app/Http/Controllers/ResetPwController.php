@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 class ResetPwController extends Controller
 {
-    public function sendResetPwEmail(Request $request){
+    public function sendResetPwEmail(Request $request){ // criar uma repository para
         try{
             $email = $request->EMAIL;
             $token = (string) Str::uuid();

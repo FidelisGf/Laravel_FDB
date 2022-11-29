@@ -35,7 +35,6 @@ class ProcessMail implements ShouldQueue
      */
     public function handle() // preciso utilizar o queue:work para que isso funcione
     {
-
-        Mail::to($this->cliente->EMAIL)->send(new SendMailUser($this->cliente, $this->venda));
+      return Mail::to($this->cliente->EMAIL)->send(new SendMailUser($this->cliente, $this->venda));
     }
 }

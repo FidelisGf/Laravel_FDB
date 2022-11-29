@@ -2,7 +2,8 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Cliente;
+use App\Jobs\ProcessMail;
 use App\Repositories\PedidosRepository;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,10 @@ class PedidosController extends Controller
 
     public function store(Request $request, PedidosRepository $pedidosRepository)
     {
-        return $pedidosRepository->store($request);
+        $pedido =  $pedidosRepository->store($request);
+        $cliente = Cliente::FindOrFail($pedido->ID_CLIENTE);
+        ProcessMail::dispatchNow($cliente, $pedido);
+        return $pedido;
     }
 
     public function checkQuantidadeProduto(Request $request, PedidosRepository $pedidosRepository){

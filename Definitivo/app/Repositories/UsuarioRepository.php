@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Empresa;
 use App\Http\interfaces\UsuarioInterface;
 use App\Role;
+use App\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -14,6 +15,19 @@ class UsuarioRepository implements UsuarioInterface
     public function __construct()
     {
 
+    }
+    public function index(){
+        try{
+            $empresa = auth()->user()->empresa->ID;
+            $usuarios = Usuario::where('EMPRESA_ID', $empresa)->with([
+                'role' => function($query){
+                    $query->select('ID', 'NOME');
+                }
+            ])->where('ID_ROLE', '!=', 1)->paginate(15);
+            return $usuarios;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
     }
     public function vinculaUsuarioEmpresa(Request $request){
         try{
@@ -78,6 +92,25 @@ class UsuarioRepository implements UsuarioInterface
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
+    }
+    public function getActiveUsers(){
+        try{
+            $empresa = auth()->user()->empresa->ID;
+            $actives = Usuario::where('EMPRESA_ID', $empresa)->count();
+            return $actives;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
+    public function destroy($id){
+        try{
+            $usuario = Usuario::FindOrFail($id);
+            $usuario->delete();
+            return response(['message'=> 'Usuario excluido com sucesso !'],200);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+
     }
 
 }

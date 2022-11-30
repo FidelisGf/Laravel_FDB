@@ -14,9 +14,12 @@ class UsuarioController extends Controller
      *
      * @return \Illuminate\Http\Response
      */
-    public function index()
+    public function index(UsuarioRepository $usuarioRepository)
     {
-        //
+        return $usuarioRepository->index();
+    }
+    public function destroy($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->destroy($id);
     }
 
     public function create()
@@ -39,60 +42,7 @@ class UsuarioController extends Controller
     public function showAvalibleRoles(UsuarioRepository $usuarioRepository){
         return $usuarioRepository->showRolesAvaibles();
     }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @return \Illuminate\Http\Response
-     */
-    public function store(Request $request)
-    {
-        //
-    }
-
-    /**
-     * Display the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function show($id)
-    {
-        //
-    }
-
-    /**
-     * Show the form for editing the specified resource.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function edit($id)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function update(Request $request, $id)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
+    public function getActiveUsers(UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getActiveUsers();
     }
 }

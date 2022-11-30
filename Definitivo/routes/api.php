@@ -83,7 +83,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::delete('/products/{id}', [ProductController::class, 'destroy'])->middleware(FuncMiddleware::class);
     Route::put('/products/{id}', [ProductController::class, 'update'])->middleware(FuncMiddleware::class);
     Route::put('aprovarPedido/{id}', [PedidosController::class, 'aprovarPedido'])->middleware(FuncMiddleware::class);
-
+    Route::get('/getActiveUsers', [UsuarioController::class, 'getActiveUsers'])->middleware(FuncMiddleware::class);
     //Resources
 
     Route::resource('materiais', 'MateriaisController');
@@ -97,6 +97,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('empresas', 'EmpresaController');
     Route::resource('categorys', 'CategoryController');
     Route::resource('estoques', 'EstoqueController');
+    Route::resource('usuarios', 'UsuarioController')->middleware(FuncMiddleware::class);
 });
 
 

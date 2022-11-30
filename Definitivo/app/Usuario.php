@@ -4,15 +4,18 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 class Usuario extends Authenticatable implements JWTSubject
 {
     use Notifiable;
+    use SoftDeletes;
     protected $table = 'USERS';
     const CREATED_AT = 'CREATED_AT';
     const UPDATED_AT = 'UPDATED_AT';
+    const DELETED_AT = 'DELETED_AT';
     protected $fillable = ['NAME', 'EMAIL', 'PASSWORD', 'EMPRESA_ID', 'ID_ROLE', 'CPF'];
     protected $rememberTokenName = 'REMEMBER_TOKEN';
     protected $hidden = ['PASSWORD', 'REMEMBER_TOKEN'];
@@ -25,6 +28,9 @@ class Usuario extends Authenticatable implements JWTSubject
     }
     public function role(){
         return $this->hasOne(Role::class, 'ID', 'ID_ROLE');
+    }
+    public function penalidades(){
+        return $this->hasMany(Penalidade::class, 'ID_USER', 'ID');
     }
     public function getJWTCustomClaims()
     {

@@ -54,14 +54,14 @@ class PedidosRepository implements PedidoInterface
                 'aprovado' => ['required'],
             ]);
             if($validatedData){
-                    $metodo_pagamento = $request->METODO_PAGAMENTO;
                     $user = auth()->user();
                     $empresa = $user->empresa;
                     $vlTotal = 0;
                     $pedido = new Pedidos();
                     $estoque = new EstoqueRepository();
+                    $ItensPedido = collect(new Pedido_Itens());
                     $FakeProducts = collect(new FakeProduct());
-                    $pedido->METODO_PAGAMENTO = $metodo_pagamento;
+                    $pedido->METODO_PAGAMENTO = $request->METODO_PAGAMENTO;
                     $pedido->ID_EMPRESA = $empresa->ID;
                     $pedido->VALOR_TOTAL = $vlTotal;
                     $pedido->APROVADO = "$request->aprovado";
@@ -72,20 +72,22 @@ class PedidosRepository implements PedidoInterface
                         $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }
                     $pedido->ID_USER = $user->ID;
-                    $pedido->save();
                     foreach($request->produtos as $produto){
                         $itens = new Pedido_Itens();
                         $FakeProduct = new ResourcesFakeProduct((object) $produto);
                         $itens->ID_PRODUTO = $FakeProduct->ID;
                         $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
-                        $itens->ID_PEDIDO = $pedido->ID;
-                        $itens->save();
+                        $ItensPedido->push($itens);
                         $vlTotal += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;
                         $estoque->removeEstoque($FakeProduct->ID, $FakeProduct->QUANTIDADE);
                         $FakeProducts->push($FakeProduct);
                     }
                     $pedido->VALOR_TOTAL = $vlTotal;
                     $pedido->save();
+                    foreach($ItensPedido as $item){
+                        $item->ID_PEDIDO = $pedido->ID;
+                        $item->save();
+                    }
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
                         //$pedido->PRODUTOS = json_decode($PRODUCTS);
                         Mail::to($pedido->cliente->EMAIL)->send(new SendMailUser($pedido, $FakeProducts, $pedido->cliente));
@@ -118,7 +120,6 @@ class PedidosRepository implements PedidoInterface
                 $p = Product::FindOrFail($p->ID_PRODUTO);
                 $p->QUANTIDADE = $qntd;
                 $produtos->push($p);
-
             }
             return response()->json(['pedido' => $pedido, 'produtos' => $produtos]);
         }catch(\Exception $e){
@@ -181,7 +182,7 @@ class PedidosRepository implements PedidoInterface
                 if($query != null){
                     $query->QUANTIDADE = $FakeProduct->QUANTIDADE;
                     $query->save();
-                    //return response()->json(['pedido' => $query]);
+
                 }else{
                     $itens = new Pedido_Itens();
                     $itens->ID_PRODUTO = $FakeProduct->ID;

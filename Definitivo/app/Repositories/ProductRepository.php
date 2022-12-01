@@ -128,10 +128,6 @@ class ProductRepository implements InterfacesProductInterface
     }
     public function show($id){
         try{
-            // join('PEDIDOS', function ($joins) use($empresa){
-            //     $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
-            //     ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
-            // })
             $user = auth()->user();
             $empresa = $user->empresa;
             $PRODUCTS = Product::where('ID', $id)->with(['category' => function($query){

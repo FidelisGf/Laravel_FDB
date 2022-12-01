@@ -12,4 +12,10 @@ class Pedido_Itens extends Model
     protected $keyType = 'integer';
     public $timestamps = false;
     protected $fillable = ['ID', 'ID_PRODUTO', 'ID_PEDIDO', 'QUANTIDADE'];
+    public function produtos(){
+        return $this->hasMany(Product::class, 'ID', 'ID_PRODUTO');
+    }
+    public function pedidos(){
+        return $this->belongsTo(Pedidos::class, 'ID_PEDIDO', 'ID');
+    }
 }

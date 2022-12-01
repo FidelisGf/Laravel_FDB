@@ -16,6 +16,7 @@ use App\Http\Controllers\UsuarioController;
 use App\Http\Controllers\VendaController;
 use App\Http\Middleware\FuncMiddleware;
 use App\Product;
+use App\Repositories\VendaRepository;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -67,7 +68,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('checkQuantidadeProduto', [PedidosController::class, 'checkQuantidadeProduto']);
     Route::get('findLucroByProduto/{id}', [ProductController::class, 'findLucroByProduto']);
     Route::put('adicionaQuantidadeMaterial/{id}', [MateriaisController::class, 'adicionaQuantidadeMaterial']);
-
+    Route::get('getVendasByDate', [VendaRepository::class, 'getVendasByTipoPagamento']);
 
 
     //Ações que Admin's e gerentes podem executar no sistema

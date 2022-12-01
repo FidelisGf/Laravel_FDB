@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Despesa;
 use App\Http\interfaces\VendaInterface;
+use App\Materiais;
 use App\Pedidos;
 use App\Product;
 use App\Venda;
@@ -76,12 +77,21 @@ class VendaRepository implements VendaInterface
                 $vendas = $vendas->get();
                 foreach($vendas as $venda){
                     $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
-                    $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
-                    foreach($pedido->PRODUTOS as $prod){
+                    $produtos = collect(new Product());
+                    foreach($pedido->itens as $p){
+                        $p = Product::withTrashed()->FindOrFail($p->ID_PRODUTO);
+                        $produtos->push($p);
+                    }
+                    foreach($produtos as $prod){
                         $tmp = 0;
-                        $prod = Product::withTrashed()->FindOrFail($prod->id);
-                        $prod->MATERIAIS = json_decode($prod->MATERIAIS);
-                        foreach($prod->MATERIAIS as $material){
+                        $materias = collect(new Materiais());
+                        foreach($prod->materias as $matItem){
+                            $qntd = $matItem->QUANTIDADE;
+                            $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
+                            $matItem->QUANTIDADE = $qntd;
+                            $materias->push($matItem);
+                        }
+                        foreach($materias as $material){
                             $tmp += $material->CUSTO * $material->QUANTIDADE;
                         }
                         $vlReal += ($prod->VALOR - $tmp);
@@ -144,7 +154,7 @@ class VendaRepository implements VendaInterface
             ],400);
         }
     }
-    public function getVendasByTipoPagamento(Request $request){
+    public function getVendasByTipoPagamento(Request $request){ // fazer somente na query sql
         try{
             $startData = Carbon::parse($request->start);
             $endData = Carbon::parse($request->end);
@@ -158,33 +168,10 @@ class VendaRepository implements VendaInterface
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
-            })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->paginate(8);
-            foreach($vendas as $venda){
-                $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
-                $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
-                foreach($pedido->PRODUTOS as $prod){
-                    $tmp = 0;
-                    $prod = Product::withTrashed()->FindOrFail($prod->id);
-                    $prod->MATERIAIS = json_decode($prod->MATERIAIS);
-                    foreach($prod->MATERIAIS as $material){
-                        $tmp += $material->CUSTO * $material->QUANTIDADE;
-                    }
-                    $vlReal += ($prod->VALOR - $tmp);
-                }
-                if($venda->METODO_PAGAMENTO == 'Dinheiro'){
-                    $vlDinheiro += $venda->VALOR_TOTAL;
-                    $vlTotal += $vlDinheiro;
-                }else if($venda->METODO_PAGAMENTO == 'Cartao/Debito'){
-                    $vlCartao += $venda->VALOR_TOTAL;
-                    $vlTotal += $vlCartao;
-                }else if($venda->METODO_PAGAMENTO == 'Pix'){
-                    $vlPix += $venda->VALOR_TOTAL;
-                    $vlTotal += $venda->VALOR_TOTAL;
-                }
-            }
-            $vls = array($vlDinheiro, $vlCartao, $vlPix, $vlTotal, $vlReal);
-            $valores = json_encode($vls);
-            return $valores;
+            })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
+            ->select(DB::raw('sum(PEDIDOS.VALOR_TOTAL) as valores'))
+            ->groupBy('PEDIDOS.METODO_PAGAMENTO')->orderBy('PEDIDOS.METODO_PAGAMENTO', 'asc')->get();
+            return response()->json($vendas);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()

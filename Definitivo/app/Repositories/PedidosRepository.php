@@ -11,7 +11,9 @@ use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
 use App\Mail\SendMailUser;
+use App\Pedido_Itens;
 use App\Pedidos;
+use App\Product;
 use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -59,17 +61,6 @@ class PedidosRepository implements PedidoInterface
                     $pedido = new Pedidos();
                     $estoque = new EstoqueRepository();
                     $FakeProducts = collect(new FakeProduct());
-                    $PRODUCTS = collect(new FakeProduct());
-                    foreach($request->produtos as $produto){
-                        $FakeProduct = new ResourcesFakeProduct((object) $produto);
-                        $FakeProducts->push($FakeProduct);
-                    }
-                    foreach($FakeProducts as $produto){
-                        $vlTotal += $produto->valor * $produto->quantidade;
-                        $PRODUCTS->push($produto);
-                        $estoque->removeEstoque($produto->id, $produto->quantidade);
-                    }
-                    $pedido->PRODUTOS = json_encode($PRODUCTS); // manda em formato de json para o banco
                     $pedido->METODO_PAGAMENTO = $metodo_pagamento;
                     $pedido->ID_EMPRESA = $empresa->ID;
                     $pedido->VALOR_TOTAL = $vlTotal;
@@ -80,11 +71,24 @@ class PedidosRepository implements PedidoInterface
                     if($pedido->APROVADO == 'T'){
                         $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
                     }
+                    $pedido->ID_USER = $user->ID;
                     $pedido->save();
-                    //event(new MakeLog("Pedidos", "", "insert", "", "", $pedido->ID, $empresa->ID, $user->ID));
+                    foreach($request->produtos as $produto){
+                        $itens = new Pedido_Itens();
+                        $FakeProduct = new ResourcesFakeProduct((object) $produto);
+                        $itens->ID_PRODUTO = $FakeProduct->ID;
+                        $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
+                        $itens->ID_PEDIDO = $pedido->ID;
+                        $itens->save();
+                        $vlTotal += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;
+                        $estoque->removeEstoque($FakeProduct->ID, $FakeProduct->QUANTIDADE);
+                        $FakeProducts->push($FakeProduct);
+                    }
+                    $pedido->VALOR_TOTAL = $vlTotal;
+                    $pedido->save();
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
-                        $pedido->PRODUTOS = json_decode($PRODUCTS);
-                        Mail::to($pedido->cliente->EMAIL)->send(new SendMailUser($pedido));
+                        //$pedido->PRODUTOS = json_decode($PRODUCTS);
+                        //Mail::to($pedido->cliente->EMAIL)->send(new SendMailUser($pedido));
                     }
                     return $pedido;
             }
@@ -94,8 +98,8 @@ class PedidosRepository implements PedidoInterface
     }
     public function checkQuantidadeProduto(Request $request){
         try{
-            $prod = Estoque::where('PRODUCT_ID', $request->id)->firstOrFail();
-            if($prod->QUANTIDADE <= $request->quantidade){
+            $prod = Estoque::where('PRODUCT_ID', $request->ID)->firstOrFail();
+            if($prod->QUANTIDADE <= $request->QUANTIDADE){
                 return response()->json(false,400);
             }else{
                 return response()->json(true);
@@ -107,8 +111,16 @@ class PedidosRepository implements PedidoInterface
     public function show($id){
         try{
             $pedido = Pedidos::FindOrFail($id);
-            $pedido->PRODUTOS = json_decode($pedido->PRODUTOS); // transforma o json em um objeto novamente
-            return $pedido;
+            $prod =  $pedido->itens;
+            $produtos = collect(new Product());
+            foreach($prod as $p){
+                $qntd = $p->QUANTIDADE;
+                $p = Product::FindOrFail($p->ID_PRODUTO);
+                $p->QUANTIDADE = $qntd;
+                $produtos->push($p);
+
+            }
+            return response()->json(['pedido' => $pedido, 'produtos' => $produtos]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],404);
         }
@@ -139,32 +151,52 @@ class PedidosRepository implements PedidoInterface
     public function update(Request $request, $id){
         $user = auth()->user();
         $empresa = $user->empresa;
-        $helper = new Help();
+        //$helper = new Help();
+        $flag = false;
         try{
             $estoque = new EstoqueRepository();
             $pedido = Pedidos::FindOrFail($id);
-            $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
-            foreach($pedido->PRODUTOS as $produto){
-                $request->product_id = $produto->id;
-                $request->quantidade = $produto->quantidade;
+            $prod =  Pedido_Itens::where('ID_PEDIDO', $id);
+            $produtos = collect(new Product());
+            foreach($prod as $p){
+                $qntd = $p->QUANTIDADE;
+                $p = Product::FindOrFail($p->ID_PRODUTO);
+                $p->QUANTIDADE = $qntd;
+                $produtos->push($p);
+
+            }
+            foreach($produtos as $produto){
+                $request->product_id = $produto->ID;
+                $request->quantidade = $produto->QUANTIDADE;
                 $estoque->addEstoque($request);
             }
-            $FakeProducts = collect(new FakeProduct());
-            $PRODUCTS = collect(new FakeProduct());
-            foreach($request->PRODUTOS as $produto){
-                $FakeProduct = new ResourcesFakeProduct((object) $produto);
-                $FakeProducts->push($FakeProduct);
-            }
             $valor_total = 0;
-            foreach($FakeProducts as $produto){
-               $valor_total += $produto->valor * $produto->quantidade;
-               $PRODUCTS->push($produto);
-               $estoque->removeEstoque($produto->id, $produto->quantidade);
+            //$FakeProducts = collect(new FakeProduct());
+            //$helper->startTransaction();
+            foreach($request->PRODUTOS as $produto){
+                $flag = false;
+                $FakeProduct = new ResourcesFakeProduct((object) $produto);
+                foreach(Pedido_Itens::where('ID_PRODUTO', $FakeProduct->ID)->get() as $p){
+                    if($p->ID_PRODUTO != $FakeProduct->ID){
+                        $p->QUANTIDADE = $FakeProduct->QUANTIDADE;
+                       
+                        $p->save();
+                        $flag = true;
+                    }
+                }
+                if(!$flag){
+                    $itens = new Pedido_Itens();
+                    $itens->ID_PRODUTO = $FakeProduct->ID;
+                    $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
+                    $itens->ID_PEDIDO = $id;
+                }
+                $valor_total += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;
+                $estoque->removeEstoque($FakeProduct->ID, $FakeProduct->QUANTIDADE);
             }
             $pedido->METODO_PAGAMENTO = $request->METODO_PAGAMENTO;
             $pedido->VALOR_TOTAL = $valor_total;
             $pedido->APROVADO = "$request->APROVADO";
-            $pedido->PRODUTOS = json_encode($PRODUCTS);
+            $pedido->ID_USER = $user->ID;
             if($pedido->APROVADO == 'T'){
                 $pedido->DT_PAGAMENTO = now()->format('Y-m-d H:i');
             }
@@ -173,14 +205,12 @@ class PedidosRepository implements PedidoInterface
             }else{
                 $pedido->ID_CLIENTE = null;
             }
-            $helper->startTransaction();
             $pedido->save();
-            event(new MakeLog("Pedidos", "", "update", "", "", $pedido->ID, $empresa->ID, $user->ID));
-            $helper->commit();
-            $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
+            //$helper->commit();
             return $pedido;
+           
         }catch(\Exception $e){
-            $helper->rollbackTransaction();
+            //$helper->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()],400);
         }
     }

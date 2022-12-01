@@ -4,6 +4,7 @@ namespace App;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use PhpParser\Node\Expr\FuncCall;
 
 class Pedidos extends Model
 {
@@ -15,7 +16,7 @@ class Pedidos extends Model
     protected $generator = 'GEN_PEDIDOS_ID';
     protected $keyType = 'integer';
     public $timestamps = true;
-    protected $fillable = ['ID', 'PRODUTOS', 'METODO_PAGAMENTO',
+    protected $fillable = ['ID', 'METODO_PAGAMENTO',
                           'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO', 'ID_CLIENTE'];
     public function empresas(){
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
@@ -25,6 +26,9 @@ class Pedidos extends Model
     }
     public function cliente(){
         return $this->hasOne(Cliente::class, 'ID', 'ID_CLIENTE');
+    }
+    public function itens(){
+        return $this->hasMany(Pedido_Itens::class, 'ID_PEDIDO', 'ID');
     }
     protected $dates = ['DELETED_AT'];
 }

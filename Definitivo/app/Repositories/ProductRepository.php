@@ -10,6 +10,7 @@ use App\Http\interfaces\ProductInterface as InterfacesProductInterface;
 use App\Http\Resources\ProductResource;
 use App\Materiais;
 use App\Product;
+use App\Produtos_Materias;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 
@@ -127,13 +128,26 @@ class ProductRepository implements InterfacesProductInterface
     }
     public function show($id){
         try{
+            // join('PEDIDOS', function ($joins) use($empresa){
+            //     $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
+            //     ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+            // })
+            $user = auth()->user();
+            $empresa = $user->empresa;
             $PRODUCTS = Product::where('ID', $id)->with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME_C');
                 }
             ])->with(['medida' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
-            $PRODUCTS->MATERIAIS = json_decode($PRODUCTS->MATERIAIS);
+            $materias = collect(new Materiais());
+            foreach($PRODUCTS->materias as $matItem){
+                $qntd = $matItem->QUANTIDADE;
+                $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
+                $matItem->QUANTIDADE = $qntd;
+                $materias->push($matItem);
+            }
+            $PRODUCTS->MATERIAS = $materias;
             return response()->json($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
@@ -163,13 +177,18 @@ class ProductRepository implements InterfacesProductInterface
                 $produto->VALOR = $request->VALOR;
                 $produto->ID_CATEGORIA = $request->ID_CATEGORIA;
                 $produto->ID_MEDIDA = $request->ID_MEDIDA;
+                $produto->save();
                 $materias = collect(new Materiais());
                 foreach($request->MATERIAIS as $material){
-                    $materias->push((object)$material);
+                    $produto_material = new Produtos_Materias();
+                    $materia = (object) $material;
+                    $produto_material->ID_PRODUTO = $produto->ID;
+                    $produto_material->ID_MATERIA = $materia->ID;
+                    $produto_material->QUANTIDADE = $materia->QUANTIDADE;
+                    $produto_material->save();
+                    $materias->push($materia);
                 }
-                $produto->MATERIAIS = json_encode($materias);
                 $mtController = new MateriaisRepository();
-                $produto->save();
                 if($produto){
                     $quantidade = $request->quantidade_inicial;
                     $mtController->removeQuantidadeMaterial($materias, $quantidade);
@@ -240,11 +259,17 @@ class ProductRepository implements InterfacesProductInterface
             $user = auth()->user();
             $produto = Product::FindOrFail($id);
             $lucro = $produto->VALOR;
-            $produto->MATERIAIS = json_decode($produto->MATERIAIS);
-            foreach($produto->MATERIAIS as $material){
+
+            $materias = collect(new Materiais());
+            foreach($produto->materias as $matItem){
+                $qntd = $matItem->QUANTIDADE;
+                $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
+                $matItem->QUANTIDADE = $qntd;
+                $materias->push($matItem);
+            }
+            foreach($materias as $material){
                 $lucro -= ($material->CUSTO * $material->QUANTIDADE);
             }
-
             return response()->json($lucro);
         }catch(\Exception $e){
             return response()->json(

@@ -26,9 +26,12 @@ class Product extends Model
     public function medida(){
         return $this->belongsTo(Medidas::class, 'ID_MEDIDA', 'ID');
     }
+    public function materias(){
+        return $this->hasMany(Produtos_Materias::class, 'ID_PRODUTO', 'ID');
+    }
     public $timestamps = true;
 
-    protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA', 'ID_MEDIDA', 'MATERIAIS', 'CREATED_AT', 'UPDATED_AT'];
+    protected $fillable = ['NOME', 'DESC', 'VALOR', 'ID_CATEGORIA', 'ID_MEDIDA', 'CREATED_AT', 'UPDATED_AT'];
     protected $dates = ['DELETED_AT', 'CREATED_AT', 'UPDATED_AT'];
 
 

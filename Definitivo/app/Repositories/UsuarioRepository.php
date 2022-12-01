@@ -110,7 +110,21 @@ class UsuarioRepository implements UsuarioInterface
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
-
+    }
+    public function show($id){
+        try{
+            $valorTotalVendas = 0;
+            $usuario = Usuario::FindOrFail($id);
+            $cargo = $usuario->role->NOME;
+            $qntdVendas = $usuario->pedidos->count();
+            $valorTotalVendas = floatval( $usuario->pedidos->where('DT_PAGAMENTO', '!=', null)->sum('VALOR_TOTAL'));
+            $qntdPenalidades = $usuario->penalidades->count();
+            $usuario = $usuario->only('ID', 'NAME', 'EMAIL', 'CPF', 'CREATED_AT', 'UPDATED_AT', 'ID_ROLE');
+            return response()->json(['usuario' => $usuario, 'qntdVendas' => $qntdVendas, 'qntdPenalidades'
+            =>$qntdPenalidades, 'totalVendido' => $valorTotalVendas, 'cargo' => $cargo],200);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
     }
 
 }

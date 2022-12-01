@@ -32,6 +32,9 @@ class Usuario extends Authenticatable implements JWTSubject
     public function penalidades(){
         return $this->hasMany(Penalidade::class, 'ID_USER', 'ID');
     }
+    public function pedidos(){
+        return $this->hasMany(Pedidos::class, 'ID_USER', 'ID');
+    }
     public function getJWTCustomClaims()
     {
         return [];

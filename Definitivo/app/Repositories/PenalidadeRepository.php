@@ -25,7 +25,7 @@ class PenalidadeRepository
                 $penalidade->DATA = Carbon::parse($request->DATA);
                 $penalidade->TIPO = $request->TIPO;
                 $penalidade->DESC = $request->DESC;
-                $penalidade->ID_USER = auth()->user()->ID;
+                $penalidade->ID_USER = $request->ID_USER;
                 $penalidade->save();
                 return response()->json(['message' => 'Penalidade registrada com sucesso !']);
             }

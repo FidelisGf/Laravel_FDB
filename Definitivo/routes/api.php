@@ -98,6 +98,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('categorys', 'CategoryController');
     Route::resource('estoques', 'EstoqueController');
     Route::resource('usuarios', 'UsuarioController')->middleware(FuncMiddleware::class);
+    Route::resource('penalidades', 'PenalidadeController')->middleware(FuncMiddleware::class);
 });
 
 

@@ -4,6 +4,7 @@ namespace App\Mail;
 
 use App\Cliente;
 use App\Empresa;
+use App\Http\Resources\FakeProduct;
 use App\Pedidos;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -21,10 +22,13 @@ class SendMailUser extends Mailable
      * @return void
      */
     private $pedidos;
-
-    public function __construct(Pedidos $pedidos)
+    private $cliente;
+    private $PRODUTOS;
+    public function __construct($pedidos, $PRODUTOS, $cliente)
     {
+        $this->PRODUTOS = $PRODUTOS;
         $this->pedidos = $pedidos;
+        $this->cliente = $cliente;
     }
 
     /**
@@ -37,8 +41,9 @@ class SendMailUser extends Mailable
         return $this->from('to@email.com')
                 ->markdown('emails.test-markdown')
                 ->with([
-                    'user'  => $this->pedidos->cliente,
+                    'user'  => $this->cliente,
                     'pedido' => $this->pedidos,
+                    'PRODUTOS' => $this->PRODUTOS
 
                 ]);
     }

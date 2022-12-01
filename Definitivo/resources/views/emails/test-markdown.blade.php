@@ -9,8 +9,8 @@ O numero do seu pedido é # {{$pedido->ID}}, você pode conferir as informaçõe
 @component('mail::table')
 | PRODUTO 	| VALOR 	| QUANTIDADE 	|
 | :---------	| :-------	| :------------	|
-@foreach ($pedido->PRODUTOS as $prod)
-| {{$prod->nome}}   | R$ {{$prod->valor}}   | {{$prod->quantidade}} {{$prod->medida}}  |
+@foreach ($PRODUTOS as $prod)
+| {{$prod->NOME}}   | R$ {{$prod->VALOR}}   | {{$prod->QUANTIDADE}} {{$prod->MEDIDA}}  |
 @endforeach
 @endcomponent
 

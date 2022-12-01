@@ -21,6 +21,9 @@ class UsuarioController extends Controller
     public function destroy($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->destroy($id);
     }
+    public function show($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->show($id);
+    }
 
     public function create()
     {

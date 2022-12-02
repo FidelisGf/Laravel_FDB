@@ -186,7 +186,7 @@ class VendaRepository implements VendaInterface
             $date =  date_create('today 23:00')->format('Y-m-d H:i');
             $tmp = $date;
             $hoje = date('d');
-            $hoje = strval(60 + ($hoje - 1));
+            $hoje = strval(60 + $hoje);
             $dateIni = date_create("-$hoje days")->format('Y-m-d H:i');
             $meses = DB::table('PEDIDOS')->where('PEDIDOS.DT_PAGAMENTO', '!=', null)->
             whereBetween('PEDIDOS.DT_PAGAMENTO', [$dateIni, $date])

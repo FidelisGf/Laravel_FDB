@@ -134,15 +134,26 @@ class VendaRepository implements VendaInterface
             $vendas = $vendas->get();
             foreach($vendas as $venda){
                 $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
-                $pedido->PRODUTOS = json_decode($pedido->PRODUTOS);
-                foreach($pedido->PRODUTOS as $prod){
+                $produtos = collect(new Product());
+                foreach($pedido->itens as $p){
+                    $tmp = $p->QUANTIDADE;
+                    $p = Product::withTrashed()->FindOrFail($p->ID_PRODUTO);
+                    $p->QUANTIDADE = $tmp;
+                    $produtos->push($p);
+                }
+                foreach($produtos as $prod){
                     $custo = 0;
-                    $tmpProd = Product::withTrashed()->FindOrFail($prod->id);
-                    $tmpProd->MATERIAIS = json_decode($tmpProd->MATERIAIS);
-                    foreach($tmpProd->MATERIAIS as $material){
+                    $materias = collect(new Materiais());
+                    foreach($prod->materias as $matItem){
+                        $qntd = $matItem->QUANTIDADE;
+                        $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
+                        $matItem->QUANTIDADE = $qntd;
+                        $materias->push($matItem);
+                    }
+                    foreach($materias as $material){
                         $custo += $material->CUSTO * $material->QUANTIDADE;
                     }
-                    $vlReal += ( ($tmpProd->VALOR - $custo) * $prod->quantidade) ;
+                    $vlReal += ( ($prod->VALOR - $custo) * $prod->QUANTIDADE) ;
                 }
                 $vlTotal_vendas += $venda->VALOR_TOTAL;
                 $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d / m / Y :  H:i');
@@ -181,10 +192,7 @@ class VendaRepository implements VendaInterface
     }
     public function getTotalVendasInTheLastThreeMonths(){
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
             $date =  date_create('today 23:00')->format('Y-m-d H:i');
-            $tmp = $date;
             $hoje = date('d');
             $hoje = strval(60 + $hoje);
             $dateIni = date_create("-$hoje days")->format('Y-m-d H:i');
@@ -196,7 +204,7 @@ class VendaRepository implements VendaInterface
             foreach($meses as $mes){
                 $valores[] = floatval( $mes->VALORES );
             }
-            return response()->json([$dateIni]);
+            return response()->json([$valores]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()

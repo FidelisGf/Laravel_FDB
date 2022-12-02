@@ -11,6 +11,7 @@ use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Symfony\Component\VarDumper\Cloner\Data;
 
 class VendaRepository implements VendaInterface
 {
@@ -181,52 +182,26 @@ class VendaRepository implements VendaInterface
     public function getTotalVendasInTheLastThreeMonths(){
         try{
             $user = auth()->user();
-            $startData = $this->getStartOfThisMonthByActualDay();
-            $endData = date_create('today 23:00');
-            $mes3 = floatval($this->getSalesSumBetweenDates($startData, $endData));
-            $startData = $this->transformDataToAMonthInThePast("1", "start");
-            $endData = $this->transformDataToAMonthInThePast("0", "end");
-            $mes2 = floatval( $this->getSalesSumBetweenDates($startData, $endData) );
-            $startData = $this->transformDataToAMonthInThePast("2", "start");
-            $endData = $this->transformDataToAMonthInThePast("1", "end");
-            $mes1 = floatval( $this->getSalesSumBetweenDates($startData, $endData) );
-            $meses = [$mes1, $mes2, $mes3];
-            return response()->json(["valores" => $meses]);
+            $empresa = $user->empresa;
+            $date =  date_create('today 23:00')->format('Y-m-d H:i');
+            $tmp = $date;
+            $hoje = date('d');
+            $hoje = strval(60 + ($hoje - 1));
+            $dateIni = date_create("-$hoje days")->format('Y-m-d H:i');
+            $meses = DB::table('PEDIDOS')->where('PEDIDOS.DT_PAGAMENTO', '!=', null)->
+            whereBetween('PEDIDOS.DT_PAGAMENTO', [$dateIni, $date])
+            ->select(DB::raw('extract (MONTH from PEDIDOS.DT_PAGAMENTO) as mes, sum(PEDIDOS.VALOR_TOTAL) as valores'))
+            ->groupBy(DB::raw('mes'))->get();
+            $valores = [];
+            foreach($meses as $mes){
+                $valores[] = floatval( $mes->VALORES );
+            }
+            return response()->json([$dateIni]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()
             ],400);
         }
     }
-    public function getSalesSumBetweenDates($startData, $endData){
-        $user = auth()->user();
-        $empresa = $user->empresa;
-        $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
-            $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
-            ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
-        })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])->sum('VENDAS.VALOR_TOTAL');
-        return $vendas;
-    }
 
-    public function transformDataToAMonthInThePast($mes, $type){
-        $temp = strval(date_create('today')->format('Y-m-d'));
-        $d = substr(strval($temp), strrpos(strval($temp), '-') + 1);
-        $strD = intval( $d - 1 );
-        $strD = strval($strD);
-        $tempData=  date_create('today');
-        if($type == "start"){
-            return date_add($tempData, date_interval_create_from_date_string("-$mes month -$strD days"));
-        }else{
-            $tempData=  date_create('today');
-            return date_add($tempData, date_interval_create_from_date_string("-$mes month -$d days"));
-        }
-    }
-    public function getStartOfThisMonthByActualDay(){
-        $temp = strval(date_create('today')->format('Y-m-d'));
-        $d = substr(strval($temp), strrpos(strval($temp), '-') + 1); // procura dentro de temp a string após o primeiro - , porem o mais 1 faz com que ele vá para a proxima string, ou seja 'd' , que representa nossos dias
-        $tempData=  date_create('today');
-        $strD = intval( $d - 1 );
-        $strD = strval($strD);
-        return date_add($tempData, date_interval_create_from_date_string("-$strD days"));
-    }
 }

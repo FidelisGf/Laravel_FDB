@@ -38,7 +38,7 @@ class AuthController extends Controller
                     $request->all(),
                     ['PASSWORD' => bcrypt($request->PASSWORD)]// 'criptografa' a senha antes de inserir no banco
                 ));
-                if(auth()->user()->empresa->ID){
+                if(auth()->user()){
                     if(auth()->user()->role->LEVEL == 10){
                         $user->EMPRESA_ID = auth()->user()->empresa->ID;
                         $user->save();

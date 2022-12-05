@@ -295,8 +295,14 @@ class ProductRepository implements InterfacesProductInterface
             $user = auth()->user();
             $empresa = $user->empresa;
             $product = Product::FindOrFail($id);
-            $product->MATERIAIS = json_decode($product->MATERIAIS);
-            foreach($product->MATERIAIS as $mat){
+            $materias = collect(new Materiais());
+            foreach($product->materias as $matItem){
+                $qntd = $matItem->QUANTIDADE;
+                $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
+                $matItem->QUANTIDADE = $qntd;
+                $materias->push($matItem);
+            }
+            foreach($materias as $mat){
                 $tmp = Materiais::FindOrFail($mat->ID);
                 $antigoVl = $tmp;
                 $tmp->QUANTIDADE -= ($mat->QUANTIDADE * $quantidade);
@@ -304,7 +310,6 @@ class ProductRepository implements InterfacesProductInterface
                     return false;
                 }else{
                     $tmp->save();
-                    //event(new MakeLog("Produtos/Desconto Material", "QUANTIDADE", "update", "$tmp->QUANTIDADE", "$antigoVl->QUANTIDADE", $tmp->ID, $empresa->ID, $user->ID));
                 }
             }
             return true;

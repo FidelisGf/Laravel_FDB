@@ -11,5 +11,5 @@ class Produtos_Materias extends Model
     protected $generator = 'GEN_PRODUTOS_MATERIAS_ID';
     protected $keyType = 'integer';
     public $timestamps = false;
-    protected $fillable = ['ID', 'ID_PRODUTO', 'ID_MATERIA', 'QUANTIDADE'];
+    protected $fillable = ['ID', 'ID_PRODUTO', 'ID_MATERIA', 'QUANTIDADE', 'CUSTO'];
 }

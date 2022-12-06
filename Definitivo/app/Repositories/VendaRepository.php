@@ -70,7 +70,8 @@ class VendaRepository implements VendaInterface
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
-            ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO');
+            ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO',
+            'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO');
             if($request->filled('pdf')){
                 $vlTotal_vendas = 0;
                 $vendas = $vendas->get();
@@ -110,15 +111,19 @@ class VendaRepository implements VendaInterface
              join('PRODUCTS', 'PRODUCTS.ID', '=', 'PEDIDOS_ITENS.ID_PRODUTO')->
             join('PRODUTOS_MATERIAS', 'PRODUTOS_MATERIAS.ID_PRODUTO', '=', 'PRODUCTS.ID')->
             join('MATERIAIS' , 'MATERIAIS.ID', '=', 'PRODUTOS_MATERIAS.ID_MATERIA')->
-            select(DB::raw ("VENDAS.ID as ID_VENDA, MATERIAIS.ID as ID_MATERIAL, MATERIAIS.CUSTO as CUSTO_MATERIAL, PRODUTOS_MATERIAS.QUANTIDADE as
-            QUANTIDADE_MATERIA, PRODUCTS.NOME, PRODUCTS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as QUANTIDADE_PRODUTO,
-            PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))->distinct(DB::raw("ID_VENDA"))->get();
+            select(DB::raw ("VENDAS.ID as ID_VENDA, MATERIAIS.ID as ID_MATERIAL, MATERIAIS.CUSTO as CUSTO_MATERIAL,
+            PRODUTOS_MATERIAS.QUANTIDADE as
+            QUANTIDADE_MATERIA, PRODUCTS.NOME, PEDIDOS_ITENS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as
+            QUANTIDADE_PRODUTO,PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))
+            ->distinct(DB::raw("ID_VENDA"))->get();
             foreach($vendas as $v){
                 $vlTotal_vendas += $v->VALOR_TOTAL;
-                $vlReal += (($v->VALOR_PRODUTO - ( $v->CUSTO_MATERIAL * $v->QUANTIDADE_MATERIA)) * $v->QUANTIDADE_PRODUTO);
+                $vlReal += (($v->VALOR_PRODUTO - ( $v->CUSTO_MATERIAL * $v->QUANTIDADE_MATERIA))
+                * $v->QUANTIDADE_PRODUTO);
             }
             $saldoFinal = $vlReal - $vlGastosDespesas;
-            return response()->json(["Total" => $vlTotal_vendas, "Lucro_Vendas" => $vlReal, "Despesas" => $vlGastosDespesas, "Saldo_Final" => $saldoFinal]);
+            return response()->json(["Total" => $vlTotal_vendas, "Lucro_Vendas"
+            => $vlReal, "Despesas" => $vlGastosDespesas, "Saldo_Final" => $saldoFinal]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()
@@ -141,7 +146,8 @@ class VendaRepository implements VendaInterface
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
             ->select(DB::raw('sum(PEDIDOS.VALOR_TOTAL) as valores'))
-            ->groupBy('PEDIDOS.METODO_PAGAMENTO')->orderBy('PEDIDOS.METODO_PAGAMENTO', 'asc')->get();
+            ->groupBy('PEDIDOS.METODO_PAGAMENTO')
+            ->orderBy('PEDIDOS.METODO_PAGAMENTO', 'asc')->get();
             return response()->json($vendas);
         }catch(\Exception $e){
             return response()->json([
@@ -157,7 +163,8 @@ class VendaRepository implements VendaInterface
             $dateIni = date_create("-$hoje days")->format('Y-m-d H:i');
             $meses = DB::table('PEDIDOS')->where('PEDIDOS.DT_PAGAMENTO', '!=', null)->
             whereBetween('PEDIDOS.DT_PAGAMENTO', [$dateIni, $date])
-            ->select(DB::raw('extract (MONTH from PEDIDOS.DT_PAGAMENTO) as mes, sum(PEDIDOS.VALOR_TOTAL) as valores'))
+            ->select(DB::raw('extract (MONTH from PEDIDOS.DT_PAGAMENTO) as mes, sum(PEDIDOS.VALOR_TOTAL)
+            as valores'))
             ->groupBy(DB::raw('mes'))->get();
             $valores = [];
             foreach($meses as $mes){

@@ -89,6 +89,7 @@ class PedidosRepository implements PedidoInterface
                         $FakeProduct = new ResourcesFakeProduct((object) $produto);
                         $itens->ID_PRODUTO = $FakeProduct->ID;
                         $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
+                        $itens->VALOR = $FakeProduct->VALOR;
                         $ItensPedido->push($itens);
                         $vlTotal += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;
                         $estoque->removeEstoque($FakeProduct->ID, $FakeProduct->QUANTIDADE);
@@ -129,11 +130,13 @@ class PedidosRepository implements PedidoInterface
             $produtos = collect(new Product());
             foreach($prod as $p){
                 $qntd = $p->QUANTIDADE;
+                $valor = $p->VALOR;
                 $p = Product::where('ID', $p->ID_PRODUTO)->with(['medida' => function($query){
                     $query->select('ID', 'NOME');
                 }])->firstOrFail();
                 $p->MEDIDA = $p->medida->NOME;
                 $p->QUANTIDADE = $qntd;
+                $p->VALOR = $valor;
                 $produtos->push($p);
             }
             return response()->json(['pedido' => $pedido, 'produtos' => $produtos]);
@@ -188,6 +191,7 @@ class PedidosRepository implements PedidoInterface
                     $itens->ID_PRODUTO = $FakeProduct->ID;
                     $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
                     $itens->ID_PEDIDO = $id;
+                    $itens->VALOR = $FakeProduct->VALOR;
                     $itens->save();
                 }
                 $pedido->VALOR_TOTAL += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;

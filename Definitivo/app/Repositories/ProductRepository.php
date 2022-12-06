@@ -139,8 +139,10 @@ class ProductRepository implements InterfacesProductInterface
             $materias = collect(new Materiais());
             foreach($PRODUCTS->materias as $matItem){
                 $qntd = $matItem->QUANTIDADE;
+                $valor = $matItem->VALOR;
                 $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
                 $matItem->QUANTIDADE = $qntd;
+                $matItem->VALOR = $valor;
                 $materias->push($matItem);
             }
             $PRODUCTS->MATERIAS = $materias;
@@ -181,6 +183,7 @@ class ProductRepository implements InterfacesProductInterface
                     $produto_material->ID_PRODUTO = $produto->ID;
                     $produto_material->ID_MATERIA = $materia->ID;
                     $produto_material->QUANTIDADE = $materia->QUANTIDADE;
+                    $produto_material->CUSTO = $materia->CUSTO;
                     $produto_material->save();
                     $materias->push($materia);
                 }

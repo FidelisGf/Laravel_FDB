@@ -73,7 +73,6 @@ class VendaRepository implements VendaInterface
             ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO');
             if($request->filled('pdf')){
                 $vlTotal_vendas = 0;
-                $vlReal = 0;
                 $vendas = $vendas->get();
                 foreach($vendas as $venda){
                     $vlTotal_vendas += $venda->VALOR_TOTAL;

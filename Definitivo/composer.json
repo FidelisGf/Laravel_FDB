@@ -36,6 +36,7 @@
         "laravel/tinker": "^2.0",
         "laravel/ui": "2.4",
         "predis/predis": "^2.0",
+        "spatie/laravel-query-builder": "^4.0",
         "tymon/jwt-auth": "^1.0"
     },
     "require-dev": {

@@ -214,7 +214,6 @@ class ProductRepository implements InterfacesProductInterface
             $PRODUCT = Product::FindOrFail($id);
             $tmp = $PRODUCT;
             $PRODUCT->update($request->all());
-            event(new MakeLog("Produtos", "", "update", json_encode($PRODUCT), json_encode($tmp), $PRODUCT->ID, $empresa->ID, $user->ID));
             return response()->json(
                 [
                     "message" => "Produto editado com sucesso"

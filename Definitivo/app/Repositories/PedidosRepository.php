@@ -11,14 +11,17 @@ use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
 use App\Mail\SendMailUser;
+use App\Notifications\EmailNotify;
 use App\Pedido_Itens;
 use App\Pedidos;
 use App\Product;
 use App\Venda;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
+use Illuminate\Notifications\Notification;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Notification as FacadesNotification;
 
 class PedidosRepository implements PedidoInterface
 {
@@ -98,7 +101,8 @@ class PedidosRepository implements PedidoInterface
                         $item->save();
                     }
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
-                        Mail::to($pedido->cliente->EMAIL)->send(new SendMailUser($pedido, $FakeProducts, $pedido->cliente));
+                        $user = auth()->user();
+                        FacadesNotification::route('mail', $user->EMAIL)->notify(new EmailNotify($pedido, $FakeProducts));
                     }
                     return $pedido;
             }

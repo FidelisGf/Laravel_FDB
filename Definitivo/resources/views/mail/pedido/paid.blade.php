@@ -1,10 +1,7 @@
 
 @component('mail::message')
-# Olá Sr(a) {{ $user->NOME }}...
 
-<p>Seja Bem Vindo a nossa empresa</p>
-# Obrigado pela preferência !
-O numero do seu pedido é # {{$pedido->ID}}, você pode conferir as informações do mesmo abaixo :
+#Olá Sr(a) Cliente
 
 @component('mail::table')
 | PRODUTO 	| VALOR 	| QUANTIDADE 	|

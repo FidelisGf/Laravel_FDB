@@ -48,7 +48,6 @@ class VendaRepository implements VendaInterface
                 ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
             ->select('VENDAS.VALOR_TOTAL');
-            $v = [];
             $v[0] = floatval( $vendas->min('VENDAS.VALOR_TOTAL') );
             $v[1] = floatval( $vendas->avg('VENDAS.VALOR_TOTAL') );
             $v[2] = floatval( $vendas->max('VENDAS.VALOR_TOTAL') );
@@ -77,31 +76,10 @@ class VendaRepository implements VendaInterface
                 $vlReal = 0;
                 $vendas = $vendas->get();
                 foreach($vendas as $venda){
-                    $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
-                    $produtos = collect(new Product());
-                    foreach($pedido->itens as $p){
-                        $p = Product::withTrashed()->FindOrFail($p->ID_PRODUTO);
-                        $produtos->push($p);
-                    }
-                    foreach($produtos as $prod){
-                        $tmp = 0;
-                        $materias = collect(new Materiais());
-                        foreach($prod->materias as $matItem){
-                            $qntd = $matItem->QUANTIDADE;
-                            $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
-                            $matItem->QUANTIDADE = $qntd;
-                            $materias->push($matItem);
-                        }
-                        foreach($materias as $material){
-                            $tmp += $material->CUSTO * $material->QUANTIDADE;
-                        }
-                        $vlReal += ($prod->VALOR - $tmp);
-                    }
                     $vlTotal_vendas += $venda->VALOR_TOTAL;
                     $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d / m / Y :  H:i');
                 }
-                return response()->json(["dados" => $vendas, "vlTotal" => $vlTotal_vendas,
-                "vlReal" => $vlReal, "vlDiff" => ($vlTotal_vendas - $vlReal)]);
+            return response()->json(["dados" => $vendas, "vlTotal" => $vlTotal_vendas]);
             }else{
                 $vendas = $vendas->paginate(8);
                 foreach($vendas as $venda){
@@ -125,38 +103,20 @@ class VendaRepository implements VendaInterface
             $vlGastosDespesas = Despesa::where('ID_EMPRESA', $empresa->ID)->whereBetween('DATA', [$startData, $endData])->sum('CUSTO');
             $vlTotal_vendas = 0;
             $vlReal = 0;
-            $saldoFinal = 0;
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
                 $joins->on('VENDAS.ID_PEDIDO', '=', 'PEDIDOS.ID')
-                ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
-            })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
-            ->select('VENDAS.ID', 'VENDAS.VALOR_TOTAL', 'VENDAS.ID_PEDIDO', 'PEDIDOS.METODO_PAGAMENTO', 'PEDIDOS.DT_PAGAMENTO');
-            $vendas = $vendas->get();
-            foreach($vendas as $venda){
-                $pedido = Pedidos::FindOrFail($venda->ID_PEDIDO);
-                $produtos = collect(new Product());
-                foreach($pedido->itens as $p){
-                    $tmp = $p->QUANTIDADE;
-                    $p = Product::withTrashed()->FindOrFail($p->ID_PRODUTO);
-                    $p->QUANTIDADE = $tmp;
-                    $produtos->push($p);
-                }
-                foreach($produtos as $prod){
-                    $custo = 0;
-                    $materias = collect(new Materiais());
-                    foreach($prod->materias as $matItem){
-                        $qntd = $matItem->QUANTIDADE;
-                        $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
-                        $matItem->QUANTIDADE = $qntd;
-                        $materias->push($matItem);
-                    }
-                    foreach($materias as $material){
-                        $custo += $material->CUSTO * $material->QUANTIDADE;
-                    }
-                    $vlReal += ( ($prod->VALOR - $custo) * $prod->QUANTIDADE) ;
-                }
-                $vlTotal_vendas += $venda->VALOR_TOTAL;
-                $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d / m / Y :  H:i');
+               ->where('VENDAS.ID_EMPRESA', '=', $empresa->ID);
+             })->whereBetween('PEDIDOS.DT_PAGAMENTO', [$startData, $endData])
+             ->join('PEDIDOS_ITENS', 'PEDIDOS_ITENS.ID_PEDIDO', '=', 'PEDIDOS.ID')->
+             join('PRODUCTS', 'PRODUCTS.ID', '=', 'PEDIDOS_ITENS.ID_PRODUTO')->
+            join('PRODUTOS_MATERIAS', 'PRODUTOS_MATERIAS.ID_PRODUTO', '=', 'PRODUCTS.ID')->
+            join('MATERIAIS' , 'MATERIAIS.ID', '=', 'PRODUTOS_MATERIAS.ID_MATERIA')->
+            select(DB::raw ("VENDAS.ID as ID_VENDA, MATERIAIS.ID as ID_MATERIAL, MATERIAIS.CUSTO as CUSTO_MATERIAL, PRODUTOS_MATERIAS.QUANTIDADE as
+            QUANTIDADE_MATERIA, PRODUCTS.NOME, PRODUCTS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as QUANTIDADE_PRODUTO,
+            PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))->distinct(DB::raw("ID_VENDA"))->get();
+            foreach($vendas as $v){
+                $vlTotal_vendas += $v->VALOR_TOTAL;
+                $vlReal += (($v->VALOR_PRODUTO - ( $v->CUSTO_MATERIAL * $v->QUANTIDADE_MATERIA)) * $v->QUANTIDADE_PRODUTO);
             }
             $saldoFinal = $vlReal - $vlGastosDespesas;
             return response()->json(["Total" => $vlTotal_vendas, "Lucro_Vendas" => $vlReal, "Despesas" => $vlGastosDespesas, "Saldo_Final" => $saldoFinal]);

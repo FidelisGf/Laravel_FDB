@@ -88,7 +88,7 @@ class UsuarioRepository implements UsuarioInterface
     public function profile(){
         try{
             $user = auth()->user();
-            return $user->role->LEVEL;
+            return response()->json(['level' => $user->role->LEVEL, 'cargo' => $user->role->NOME]) ;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

@@ -3,6 +3,10 @@
 
 #Olá Sr(a) Cliente
 
+
+<p>Seja Bem-vindo a nossa empresa, agradecemos pela sua preferência !</p>
+<p>O numero do seu pedido é #{{$pedido->ID}}, caso tenha alguma duvida, entre em contato conosco.</p>
+
 @component('mail::table')
 | PRODUTO 	| VALOR 	| QUANTIDADE 	|
 | :---------	| :-------	| :------------	|

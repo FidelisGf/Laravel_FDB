@@ -55,10 +55,8 @@ class MateriaisRepository implements MateriaisInterface
             foreach($materiais as $mat){
                 $tmp = $mat;
                 $mat = Materiais::FindOrFail($mat->ID);
-                $tmpQntd = $mat->QUANTIDADE;
-                $mat->QUANTIDADE -= ($quantidade * $tmp->QUANTIDADE);
+                $mat->QUANTIDADE -= ($tmp->QUANTIDADE * $quantidade);
                 $mat->save();
-                event(new MakeLog("Materiais", "QUANTIDADE", "update", "$mat->QUANTIDADE", "$tmpQntd", $mat->ID, $empresa->ID, $user->ID));
             }
         }catch(\Exception $e){
             return response()->json(

@@ -71,7 +71,6 @@ class ProductRepository implements InterfacesProductInterface
                 ])->orderBy('PRODUCTS.VALOR', 'asc')->paginate(20);
                 return $PRODUCTS;
             }
-
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -193,7 +192,6 @@ class ProductRepository implements InterfacesProductInterface
                     $mtController->removeQuantidadeMaterial($materias, $quantidade);
                     $estoque = new EstoqueRepository();
                     $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
-                    event(new MakeLog("Produtos", "", "insert", " $produto->NOME", "", $produto->ID, $empresa->ID, $user->ID));
                     $helper->commit();
                     return response()->json(
                         $produto
@@ -257,16 +255,13 @@ class ProductRepository implements InterfacesProductInterface
             $user = auth()->user();
             $produto = Product::FindOrFail($id);
             $lucro = $produto->VALOR;
-
-            $materias = collect(new Materiais());
             foreach($produto->materias as $matItem){
                 $qntd = $matItem->QUANTIDADE;
+                $custo = $matItem->CUSTO;
                 $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
                 $matItem->QUANTIDADE = $qntd;
-                $materias->push($matItem);
-            }
-            foreach($materias as $material){
-                $lucro -= ($material->CUSTO * $material->QUANTIDADE);
+                $matItem->CUSTO = $custo;
+                $lucro -= ($matItem->CUSTO * $matItem->QUANTIDADE);
             }
             return response()->json($lucro);
         }catch(\Exception $e){
@@ -295,23 +290,16 @@ class ProductRepository implements InterfacesProductInterface
     public function descontaQuantidadeMaterial($id, $quantidade){
         try{
             $user = auth()->user();
-            $empresa = $user->empresa;
             $product = Product::FindOrFail($id);
-            $materias = collect(new Materiais());
             foreach($product->materias as $matItem){
                 $qntd = $matItem->QUANTIDADE;
                 $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
                 $matItem->QUANTIDADE = $qntd;
-                $materias->push($matItem);
-            }
-            foreach($materias as $mat){
-                $tmp = Materiais::FindOrFail($mat->ID);
-                $antigoVl = $tmp;
-                $tmp->QUANTIDADE -= ($mat->QUANTIDADE * $quantidade);
-                if($tmp->QUANTIDADE < 0){
+                $matItem->QUANTIDADE -= ($matItem->QUANTIDADE * $quantidade);
+                if($matItem->QUANTIDADE < 0){
                     return false;
                 }else{
-                    $tmp->save();
+                    $matItem->save();
                 }
             }
             return true;

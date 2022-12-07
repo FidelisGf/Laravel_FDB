@@ -111,6 +111,15 @@ class UsuarioRepository implements UsuarioInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
+    public function getPenalidades($id){
+        try{
+            $user = Usuario::FindOrFail($id);
+            return $user->penalidades;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
+
     public function show($id){
         try{
             $valorTotalVendas = 0;

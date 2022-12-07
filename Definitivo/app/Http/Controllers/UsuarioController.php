@@ -48,4 +48,7 @@ class UsuarioController extends Controller
     public function getActiveUsers(UsuarioRepository $usuarioRepository){
         return $usuarioRepository->getActiveUsers();
     }
+    public function getPenalidades($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getPenalidades($id);
+    }
 }

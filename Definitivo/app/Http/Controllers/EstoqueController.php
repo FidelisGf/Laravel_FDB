@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreEstoqueValidator;
 use App\Repositories\EstoqueRepository;
 use Illuminate\Http\Request;
 
@@ -27,7 +28,7 @@ class EstoqueController extends Controller
         return $estoqueRepository->storeProdutoInEstoque($product_id, $quantidade);
     }
 
-    public function addEstoque(Request $request, EstoqueRepository $estoqueRepository){
+    public function addEstoque(StoreEstoqueValidator $request, EstoqueRepository $estoqueRepository){
         return $estoqueRepository->addEstoque($request);
     }
     public function removeEstoque($product_id, $quantidade, EstoqueRepository $estoqueRepository){

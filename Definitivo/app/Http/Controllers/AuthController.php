@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Http\Requests\RegisterAuthValidator;
 use App\Usuario;
 
 use Illuminate\Http\Request;
@@ -24,14 +24,9 @@ class AuthController extends Controller
     {
         $this->middleware('auth:api', ['except' => ['login','register', 'refresh', 'profile', 'logout', 'getAuthenticatedUser']]);
     }
-    public function register(Request $request){
+    public function register(RegisterAuthValidator $request){
         try{
-            $validator = $request->validate([
-                'NAME' => 'required|max:50|min:4',
-                'PASSWORD' => 'required|max:50|min:6',
-                'EMAIL'=> 'required|max:60|min:8|email',
-                'ID_ROLE' => 'required'
-            ]);
+            $validator = $request->validated();
             if($validator){
                 $user = auth()->user();
                 $user = Usuario::create(array_merge(

@@ -6,6 +6,7 @@ use App\Estoque;
 use App\Events\MakeLog;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\EstoqueInterface;
+use App\Http\Requests\StoreEstoqueValidator;
 use App\Product;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -103,21 +104,24 @@ class EstoqueRepository implements EstoqueInterface
             ],400);
         }
     }
-    public function addEstoque(Request $request){
+    public function addEstoque(StoreEstoqueValidator $request){
         try{
-            $product_id = $request->product_id;
-            $quantidade = $request->quantidade;
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
-            $Estoque->QUANTIDADE += $quantidade;
-            $prod = new ProductRepository();
-            $check = $prod->descontaQuantidadeMaterial($product_id, $quantidade);
-            if($check){
-                $Estoque->save();
-                return response()->json(["message" => 'Estoque Adicionado com successo !']);
-            }else{
-                return response()->json(["message" => 'Saldo de Material Insuficiente !'],400);
+            $validator = $request->validated();
+            if($validator){
+                $product_id = $request->product_id;
+                $quantidade = $request->quantidade;
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+                $Estoque->QUANTIDADE += $quantidade;
+                $prod = new ProductRepository();
+                $check = $prod->descontaQuantidadeMaterial($product_id, $quantidade);
+                if($check){
+                    $Estoque->save();
+                    return response()->json(["message" => 'Estoque Adicionado com successo !']);
+                }else{
+                    return response()->json(["message" => 'Saldo de Material Insuficiente !'],400);
+                }
             }
         }catch(\Exception $e){
             return response()->json([

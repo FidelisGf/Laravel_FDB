@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Cliente;
 use App\Events\MakeLog;
 use App\Http\interfaces\ClienteInterface;
+use App\Http\Requests\StoreClientValidator;
 use App\Mail\SendMailUser;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -25,18 +26,12 @@ class ClienteRepository implements ClienteInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-    public function store(Request $request)
+    public function store(StoreClientValidator $request)
     {
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'max:60', 'min:2'],
-                'CPF' => ['required', 'min:11', 'max:11'],
-                'ENDERECO'=> ['required', 'min:8'],
-                'EMAIL'=> ['required', 'min:12'],
-                'TELEFONE' => ['required', 'min:11', 'max:12']
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                 $cliente = new Cliente();
                 $NOME_REAL = "$request->NOME _ $empresa->ID";

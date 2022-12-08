@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Category;
 use App\Events\MakeLog;
 use App\Http\interfaces\CategoryInterface;
+use App\Http\Requests\StoreCategoryValidator;
 use Illuminate\Http\Request;
 
 class CategoryRepository implements CategoryInterface //Precisa de refatoração
@@ -40,21 +41,24 @@ class CategoryRepository implements CategoryInterface //Precisa de refatoração
             );
         }
     }
-    public function store(Request $request)
+    public function store(StoreCategoryValidator $request)
     {
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
             $Category = new Category();
-            $NOME_REAL = "$request->NOME_C _ $empresa->ID";
-            $Category->ID_EMPRESA = $empresa->ID;
-            $Category->NOME_C = $request->NOME_C;
-            $Category->NOME_REAL = $NOME_REAL;
-            if($Category->save()){
-                event(new MakeLog("Categorias", "", "insert", "$Category->NOME_C", "", $Category->ID_CATEGORIA, $empresa->ID, $user->ID));
-                return response()->json(["message" => "Categoria cadastrada com sucesso !"]);
+            $validator = $request->validated();
+            if($validator){
+                $NOME_REAL = "$request->NOME_C _ $empresa->ID";
+                $Category->ID_EMPRESA = $empresa->ID;
+                $Category->NOME_C = $request->NOME_C;
+                $Category->NOME_REAL = $NOME_REAL;
+                if($Category->save()){
+                    event(new MakeLog("Categorias", "", "insert", "$Category->NOME_C", "", $Category->ID_CATEGORIA, $empresa->ID, $user->ID));
+                    return response()->json(["message" => "Categoria cadastrada com sucesso !"]);
+                }
+                event(new MakeLog("Categorias", "", "insert", json_encode($Category), "", $Category->ID, $empresa->ID, $user->ID));
             }
-            event(new MakeLog("Categorias", "", "insert", json_encode($Category), "", $Category->ID, $empresa->ID, $user->ID));
         }catch(\Exception $e){
            return response()->json(
             [

@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Events\MakeLog;
 use App\Http\interfaces\MateriaisInterface;
+use App\Http\Requests\StoreMateriaisValidator;
+use App\Http\Requests\StoreQuantidadeMateriaisValidator;
 use App\Materiais;
 use Illuminate\Http\Request;
 class MateriaisRepository implements MateriaisInterface
@@ -30,16 +32,20 @@ class MateriaisRepository implements MateriaisInterface
             );
         }
     }
-    public function adicionaQuantidadeMaterial(Request $request, $id){
-        $user = auth()->user();
-        $empresa = $user->empresa;
+    public function adicionaQuantidadeMaterial(StoreQuantidadeMateriaisValidator $request, $id){
+
         try{
-            $material = Materiais::FindOrFail($id);
-            $tmp = $material->QUANTIDADE;
-            $material->QUANTIDADE += $request->QUANTIDADE;
-            $material->save();
-            event(new MakeLog("Materiais", "QUANTIDADE", "update", "$material->QUANTIDADE", "$tmp", $material->ID, $empresa->ID, $user->ID));
-            return response()->json(["message" => 'Quantidade Adicionada com sucesso !']);
+            $user = auth()->user();
+            $empresa = $user->empresa;
+            $validate = $request->validated();
+            if($validate){
+                $material = Materiais::FindOrFail($id);
+                $tmp = $material->QUANTIDADE;
+                $material->QUANTIDADE += $request->QUANTIDADE;
+                $material->save();
+                event(new MakeLog("Materiais", "QUANTIDADE", "update", "$material->QUANTIDADE", "$tmp", $material->ID, $empresa->ID, $user->ID));
+                return response()->json(["message" => 'Quantidade Adicionada com sucesso !']);
+            }
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -66,14 +72,11 @@ class MateriaisRepository implements MateriaisInterface
             );
         }
     }
-    public function store(Request $request){
+    public function store(StoreMateriaisValidator $request){
         $user = auth()->user();
         $empresa = $user->empresa;
         try{
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'max:60', 'min:2'],
-                'CUSTO' => ['required']
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                 $NOME_REAL = "$request->NOME _ $empresa->ID";
                 $material = new Materiais();

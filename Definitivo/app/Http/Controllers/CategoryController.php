@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Category;
+use App\Http\Requests\StoreCategoryValidator;
 use App\Http\Resources\CategoryResource;
 use App\Repositories\CategoryRepository;
 use Illuminate\Http\Request;
@@ -30,7 +31,7 @@ class CategoryController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, CategoryRepository $categoryRepository)
+    public function store(StoreCategoryValidator $request, CategoryRepository $categoryRepository)
     {
         return $categoryRepository->store($request);
     }

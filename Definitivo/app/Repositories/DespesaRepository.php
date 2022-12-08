@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Despesa;
 use App\Events\MakeLog;
 use App\Http\interfaces\DespesaInterface;
+use App\Http\Requests\StoreDespesaValidator;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -50,17 +51,12 @@ class DespesaRepository implements DespesaInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-    public function store(Request $request)
+    public function store(StoreDespesaValidator $request)
     {
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $validatedData = $request->validate([
-                'DESC' => ['required', 'max:200', 'min:2'],
-                'CUSTO' => ['required', 'min:0.01'],
-                'ID_TAG' => ['required'],
-                'DATA' => ['required'],
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                 $despesa = new Despesa();
                 $despesa->DESC = $request->DESC;
@@ -128,21 +124,24 @@ class DespesaRepository implements DespesaInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-    public function update(Request $request, $id)
+    public function update(StoreDespesaValidator $request, $id)
     {
         try{
-            $user = auth()->user();
-            $empresa = $user->empresa;
-            $despesa = Despesa::FindOrFail($id);
-            $tmp = $despesa;
-            $despesa->DESC = $request->DESC;
-            $despesa->ID_EMPRESA = $empresa->ID;
-            $despesa->CUSTO = $request->CUSTO;
-            $despesa->DATA = Carbon::parse($request->DATA);
-            $despesa->ID_TAG = $request->ID_TAG;
-            event(new MakeLog("Despesas", "", "update", json_encode($despesa), json_encode($tmp), $despesa->ID, $empresa->ID, $user->ID));
-            $despesa->save();
-            return $despesa;
+            $valitador = $request->validated();
+            if($valitador){
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $despesa = Despesa::FindOrFail($id);
+                $tmp = $despesa;
+                $despesa->DESC = $request->DESC;
+                $despesa->ID_EMPRESA = $empresa->ID;
+                $despesa->CUSTO = $request->CUSTO;
+                $despesa->DATA = Carbon::parse($request->DATA);
+                $despesa->ID_TAG = $request->ID_TAG;
+                event(new MakeLog("Despesas", "", "update", json_encode($despesa), json_encode($tmp), $despesa->ID, $empresa->ID, $user->ID));
+                $despesa->save();
+                return $despesa;
+            }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

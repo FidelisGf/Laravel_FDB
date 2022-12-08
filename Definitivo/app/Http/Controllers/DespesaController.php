@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreDespesaValidator;
 use App\Repositories\DespesaRepository;
 use Illuminate\Http\Request;
 
@@ -26,7 +27,7 @@ class DespesaController extends Controller
     public function sumDespesasMensais(DespesaRepository $despesaRepository){
         return $despesaRepository->sumDespesasMensais();
     }
-    public function store(Request $request, DespesaRepository $despesaRepository)
+    public function store(StoreDespesaValidator $request, DespesaRepository $despesaRepository)
     {
         return $despesaRepository->store($request);
     }
@@ -45,7 +46,7 @@ class DespesaController extends Controller
         //
     }
 
-    public function update(Request $request, $id, DespesaRepository $despesaRepository)
+    public function update(StoreDespesaValidator $request, $id, DespesaRepository $despesaRepository)
     {
         return $despesaRepository->update($request, $id);
     }

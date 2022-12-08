@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreMateriaisValidator;
+use App\Http\Requests\StoreQuantidadeMateriaisValidator;
 use App\Repositories\MateriaisRepository;
 use Illuminate\Http\Request;
 
@@ -11,7 +13,7 @@ class MateriaisController extends Controller
     {
        return $materiaisRepository->index();
     }
-    public function adicionaQuantidadeMaterial(Request $request, $id, MateriaisRepository $materiaisRepository){
+    public function adicionaQuantidadeMaterial(StoreQuantidadeMateriaisValidator $request, $id, MateriaisRepository $materiaisRepository){
         return $materiaisRepository->adicionaQuantidadeMaterial($request, $id);
     }
     public function removeQuantidadeMaterial($materiais, $quantidade, MateriaisRepository $materiaisRepository){
@@ -23,7 +25,7 @@ class MateriaisController extends Controller
         //
     }
 
-    public function store(Request $request, MateriaisRepository $materiaisRepository)
+    public function store(StoreMateriaisValidator $request, MateriaisRepository $materiaisRepository)
     {
         return $materiaisRepository->store($request);
     }

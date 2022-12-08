@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreClientValidator;
 use App\Repositories\ClienteRepository;
 use Illuminate\Http\Request;
 
@@ -22,7 +23,7 @@ class ClienteController extends Controller
     {
 
     }
-    public function store(Request $request, ClienteRepository $clienteRepository)
+    public function store(StoreClientValidator $request, ClienteRepository $clienteRepository)
     {
         return $clienteRepository->store($request);
     }

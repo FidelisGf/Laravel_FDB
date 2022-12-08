@@ -4,6 +4,8 @@ namespace App\Repositories;
 
 use App\Empresa;
 use App\Http\interfaces\UsuarioInterface;
+use App\Http\Requests\RegisterEmployeeValidator;
+use App\Http\Requests\StoreEmpresaValidator;
 use App\Role;
 use App\Usuario;
 use Carbon\Carbon;
@@ -33,16 +35,9 @@ class UsuarioRepository implements UsuarioInterface
             return response()->json(['message' => $e->getMessage()]);
         }
     }
-    public function vinculaUsuarioEmpresa(Request $request){
+    public function vinculaUsuarioEmpresa(StoreEmpresaValidator $request){
         try{
-            $validator = $request->validate([
-                'NOME' => 'required|unique:EMPRESAS|max:50|min:2',
-                'CNPJ' => 'required|min:18|max:18',
-                'EMAIL'=> 'required|unique:EMPRESAS|email|max:120|min:5',
-                'NOME_FANTASIA' => 'required|max:60|min:2',
-                'ENDERECO' => 'required|max:255|min:2',
-                'INC_ESTADUAL' => 'required|unique:EMPRESAS|max:12|min:9',
-            ]);
+            $validator = $request->validated();
             if($validator){
                 $Empresa = Empresa::create($request->all());
                 if($Empresa){
@@ -123,12 +118,13 @@ class UsuarioRepository implements UsuarioInterface
             return response()->json(['message' => $e->getMessage()]);
         }
     }
-    public function update($id, Request $request){
+    public function update($id, RegisterEmployeeValidator $request){
         try{
-
-            $user = Usuario::FindOrFail($id);
-            $user->update($request->all());
-
+            $validator = $request->validated();
+            if($validator){
+                $user = Usuario::FindOrFail($id);
+                $user->update($request->all());
+            }
             return response()->json(['message' => 'Usuario Editado com sucesso !']);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -139,7 +135,7 @@ class UsuarioRepository implements UsuarioInterface
         try{
             $valorTotalVendas = 0;
             $usuario = Usuario::FindOrFail($id);
-            $cargo = $usuario->role->NOME;
+            $cargo = $usuario->role;
             $qntdVendas = $usuario->pedidos->count();
             $valorTotalVendas = floatval( $usuario->pedidos->where('DT_PAGAMENTO', '!=', null)->sum('VALOR_TOTAL'));
             $qntdPenalidades = $usuario->penalidades->count();

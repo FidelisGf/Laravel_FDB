@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StorePenalidadeValidator;
 use App\Repositories\PenalidadeRepository;
 use Illuminate\Http\Request;
 
@@ -33,7 +34,7 @@ class PenalidadeController extends Controller
      * @param  \Illuminate\Http\Request  $request
      * @return \Illuminate\Http\Response
      */
-    public function store(Request $request, PenalidadeRepository $penalidadeRepository)
+    public function store(StorePenalidadeValidator $request, PenalidadeRepository $penalidadeRepository)
     {
         return $penalidadeRepository->store($request);
     }

@@ -7,6 +7,7 @@ use App\Estoque;
 use App\Events\MakeLog;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\ProductInterface as InterfacesProductInterface;
+use App\Http\Requests\StoreProdutoValidator;
 use App\Http\Resources\ProductResource;
 use App\Materiais;
 use App\Product;
@@ -152,21 +153,13 @@ class ProductRepository implements InterfacesProductInterface
             );
         }
     }
-    public function store(Request $request){
+    public function store(StoreProdutoValidator $request){
         $user = auth()->user();
         $empresa = $user->empresa;
         try{
             $helper = new Help();
             $helper->startTransaction();
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'unique:PRODUCTS', 'max:60', 'min:2'],
-                'DESC' => ['required', 'max:120', 'min:4'],
-                'VALOR'=> ['required', 'min:0'],
-                'ID_CATEGORIA' => ['required'],
-                'ID_MEDIDA' => ['required'],
-                'MATERIAIS' => ['required'],
-                'quantidade_inicial' => ['required', 'min:0']
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                 $produto = new Product();
                 $produto->NOME = $request->NOME;
@@ -207,10 +200,7 @@ class ProductRepository implements InterfacesProductInterface
             );
         }
     }
-    public function update(Request $request, $id){
-        $helper = new Help();
-        $user = auth()->user();
-        $empresa = $user->empresa;
+    public function update(StoreProdutoValidator $request, $id){
         try{
             $PRODUCT = Product::FindOrFail($id);
             $tmp = $PRODUCT;

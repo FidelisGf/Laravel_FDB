@@ -4,6 +4,7 @@ namespace App\Repositories;
 
 use App\Events\MakeLog;
 use App\Http\interfaces\MedidasInterface;
+use App\Http\Requests\StoreMedidaValidator;
 use App\Medidas;
 use Illuminate\Http\Request;
 
@@ -27,14 +28,12 @@ class MedidasRepository implements MedidasInterface
             );
         }
     }
-    public function store(Request $request)
+    public function store(StoreMedidaValidator $request)
     {
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'max:100', 'min:1']
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                 $medida = new Medidas();
                 $NOME_REAL = "$request->NOME _ $empresa->ID";

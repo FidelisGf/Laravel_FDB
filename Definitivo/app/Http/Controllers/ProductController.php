@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Http\Requests\StoreProdutoValidator;
 use Illuminate\Http\Request;
 use App\Repositories\ProductRepository;
 
@@ -18,7 +18,7 @@ class ProductController extends Controller
         return $productRepository->findAllProductByCategory($id);
     }
 
-    public function store(Request $request, ProductRepository $productRepository)
+    public function store(StoreProdutoValidator $request, ProductRepository $productRepository)
     {
         return $productRepository->store($request);
     }
@@ -28,7 +28,7 @@ class ProductController extends Controller
        return $productRepository->show($id);
     }
 
-    public function update(Request $request, $id, ProductRepository $productRepository)
+    public function update(StoreProdutoValidator $request, $id, ProductRepository $productRepository)
     {
         return $productRepository->update($request, $id);
     }

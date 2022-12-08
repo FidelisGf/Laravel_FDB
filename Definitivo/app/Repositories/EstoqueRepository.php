@@ -179,6 +179,21 @@ class EstoqueRepository implements EstoqueInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
+    public function restauraEstoque($product_id, $quantidade){
+        try{
+                $user = auth()->user();
+                $empresa = $user->empresa;
+                $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+                $Estoque->QUANTIDADE += $quantidade;
+                $Estoque->save();
+                return response()->json(["message" => 'Estoque Adicionado com successo !']);
+
+        }catch(\Exception $e){
+            return response()->json([
+                "message" => $e->getMessage()
+            ],400);
+        }
+    }
     public function filterByProductWithMostSaidas(Request $request){
         try{
             if($request->filled('pdf')){

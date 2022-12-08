@@ -1,5 +1,7 @@
 <?php
 namespace App\Http\interfaces;
+
+use App\Http\Requests\StoreProdutoValidator;
 use Illuminate\Http\Request;
 
 interface ProductInterface{
@@ -8,8 +10,8 @@ interface ProductInterface{
     public function filterByExpansiveValue(Request $request);
     public function findAllProductByCategory($id);
     public function show($id);
-    public function store(Request $request);
-    public function update(Request $request, $id);
+    public function store(StoreProdutoValidator $request);
+    public function update(StoreProdutoValidator $request, $id);
     public function destroy($id);
     public function findLucroByProduto($id);
     public function search(Request $request);

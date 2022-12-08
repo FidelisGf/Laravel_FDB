@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-
+use App\Http\Requests\StoreMedidaValidator;
 use App\Repositories\MedidasRepository;
 use Illuminate\Http\Request;
 
@@ -19,7 +19,7 @@ class MedidasController extends Controller
         //
     }
 
-    public function store(Request $request, MedidasRepository $medidasRepository)
+    public function store(StoreMedidaValidator $request, MedidasRepository $medidasRepository)
     {
         return $medidasRepository->store($request);
     }

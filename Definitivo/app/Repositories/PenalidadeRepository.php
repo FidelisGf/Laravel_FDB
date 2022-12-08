@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Http\interfaces\PenalidadeInterface;
+use App\Http\Requests\StorePenalidadeValidator;
 use App\Penalidade;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
@@ -14,13 +15,9 @@ class PenalidadeRepository implements PenalidadeInterface
 
     }
 
-    public function store(Request $request){
+    public function store(StorePenalidadeValidator $request){
         try{
-            $validator = $request->validate([
-                'TIPO' => 'required|max:20|min:5',
-                'DESC' => 'required|max:120|min:0',
-                'DATA'=> 'required',
-            ]);
+            $validator = $request->validated();
             if($validator){
                 $penalidade = new Penalidade();
                 $penalidade->DATA = Carbon::parse($request->DATA);

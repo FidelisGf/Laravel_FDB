@@ -9,6 +9,8 @@ use App\Events\VendaGerada;
 use App\FakeProduct;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\PedidoInterface;
+use App\Http\Requests\StoreEstoqueValidator;
+use App\Http\Requests\StorePedidoValidator;
 use App\Http\Resources\FakeProduct as ResourcesFakeProduct;
 use App\Mail\SendMailUser;
 use App\Notifications\EmailNotify;
@@ -71,13 +73,9 @@ class PedidosRepository implements PedidoInterface
             return response()->json(['message' => $e->getMessage()]);
         }
     }
-    public function store(Request $request){
+    public function store(StorePedidoValidator $request){
         try{
-            $validatedData = $request->validate([
-                'METODO_PAGAMENTO' => ['required'],
-                'produtos' => ['required'],
-                'aprovado' => ['required'],
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                     $vlTotal = 0;
                     $estoque = new EstoqueRepository();
@@ -105,7 +103,7 @@ class PedidosRepository implements PedidoInterface
                         $user = auth()->user();
                         FacadesNotification::route('mail', $user->EMAIL)->notify(new EmailNotify($pedido, $FakeProducts));
                     }
-                    return $pedido;
+                    return response()->json(['message' => "Pedido Registrado com sucesso", 'pedido' => $pedido]);
             }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -167,42 +165,52 @@ class PedidosRepository implements PedidoInterface
             return response()->json(['message' => $e->getMessage()]);
         }
     }
-    public function update(Request $request, $id){
-        $user = auth()->user();
+    public function update(StorePedidoValidator $request, $id){
         $helper = new Help();
         try{
-            $estoque = new EstoqueRepository();
-            $pedido = $this->pedido_factory($request, $id);
-            $FakeProducts = collect(new FakeProduct());
-            $valor_total = 0;
-
-            foreach($request->PRODUTOS as $produto){
-                $helper->startTransaction();
-                $FakeProduct = new ResourcesFakeProduct((object) $produto);
-                $request->product_id = $FakeProduct->ID;
-                $request->quantidade = $FakeProduct->QUANTIDADE;
-                $estoque->addEstoque($request);
-                $query = Pedido_Itens::where('ID_PEDIDO', $id)->where('ID_PRODUTO', $FakeProduct->ID)->first();
-                if($query != null){
-                    $query->QUANTIDADE = $FakeProduct->QUANTIDADE;
-                    $query->save();
-                }else{
-                    $itens = new Pedido_Itens();
-                    $itens->ID_PRODUTO = $FakeProduct->ID;
-                    $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
-                    $itens->ID_PEDIDO = $id;
-                    $itens->VALOR = $FakeProduct->VALOR;
-                    $itens->save();
+            $validator = $request->validated();
+            if($validator){
+                $user = auth()->user();
+                $estoque = new EstoqueRepository();
+                $pedido = $this->pedido_factory($request, $id);
+                $FakeProducts = collect(new FakeProduct());
+                $valor_total = 0;
+                foreach($request->produtos as $produto){
+                    $flag = false;
+                    $helper->startTransaction();
+                    $FakeProduct = new ResourcesFakeProduct((object) $produto);
+                    $query = Pedido_Itens::where('ID_PEDIDO', $id)->where('ID_PRODUTO', $FakeProduct->ID)->first();
+                    if($query != null){
+                        $query->QUANTIDADE = $FakeProduct->QUANTIDADE;
+                        $query->save();
+                        if($query->QUANTIDADE <  $FakeProduct->QUANTIDADE){
+                            $FakeProduct->QUANTIDADE = intval($query->QUANTIDADE - $FakeProduct->QUANTIDADE);
+                        }else if($query->QUANTIDADE > $FakeProduct->QUANTIDADE){
+                            $estoque->restauraEstoque($FakeProduct->ID, intval($query->QUANTIDADE - $FakeProduct->QUANTIDADE));
+                        }else{
+                            $flag = true;
+                        }
+                    }else{
+                        $itens = new Pedido_Itens();
+                        $itens->ID_PRODUTO = $FakeProduct->ID;
+                        $itens->QUANTIDADE = $FakeProduct->QUANTIDADE;
+                        $itens->ID_PEDIDO = $id;
+                        $itens->VALOR = $FakeProduct->VALOR;
+                        $itens->save();
+                    }
+                    $pedido->VALOR_TOTAL += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;
+                    if(!$flag){
+                        $estoque->removeEstoque($FakeProduct->ID, $FakeProduct->QUANTIDADE);
+                    }
+                    $FakeProducts->push($FakeProduct);
+                    $helper->commit();
                 }
-                $pedido->VALOR_TOTAL += $FakeProduct->VALOR * $FakeProduct->QUANTIDADE;
-                $estoque->removeEstoque($FakeProduct->ID, $FakeProduct->QUANTIDADE);
-                $FakeProducts->push($FakeProduct);
+                $helper->startTransaction();
+                $pedido->save();
                 $helper->commit();
+                return $pedido;
             }
-            $helper->startTransaction();
-            $pedido->save();
-            $helper->commit();
-            return $pedido;
+
         }catch(\Exception $e){
             $helper->rollbackTransaction();
             return response()->json(['message' => $e->getMessage()],400);

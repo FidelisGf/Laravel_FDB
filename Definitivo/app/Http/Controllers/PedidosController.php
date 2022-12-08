@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Cliente;
+use App\Http\Requests\StorePedidoValidator;
 use App\Mail\SendMailUser;
 use App\Repositories\PedidosRepository;
 use Illuminate\Http\Request;
@@ -27,7 +28,7 @@ class PedidosController extends Controller
     }
 
 
-    public function store(Request $request, PedidosRepository $pedidosRepository)
+    public function store(StorePedidoValidator $request, PedidosRepository $pedidosRepository)
     {
 
         return $pedidosRepository->store($request);
@@ -42,7 +43,7 @@ class PedidosController extends Controller
     public function aprovarPedido($id, PedidosRepository $pedidosRepository){
         return $pedidosRepository->aprovarPedido($id);
     }
-    public function update(Request $request, $id, PedidosRepository $pedidosRepository)
+    public function update(StorePedidoValidator $request, $id, PedidosRepository $pedidosRepository)
     {
         return $pedidosRepository->update($request, $id);
     }

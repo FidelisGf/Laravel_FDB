@@ -17,7 +17,7 @@ class Pedidos extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = ['ID', 'METODO_PAGAMENTO',
-                          'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO', 'ID_CLIENTE'];
+                          'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO', 'ID_CLIENTE', 'ID_USER'];
     public function empresas(){
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
     }
@@ -29,6 +29,9 @@ class Pedidos extends Model
     }
     public function itens(){
         return $this->hasMany(Pedido_Itens::class, 'ID_PEDIDO', 'ID');
+    }
+    public function user(){
+        return $this->belongsTo(Usuario::class, 'ID_USER', 'ID');
     }
     protected $dates = ['DELETED_AT'];
 }

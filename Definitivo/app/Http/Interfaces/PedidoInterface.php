@@ -11,4 +11,5 @@ interface PedidoInterface{
     public function update(Request $request, $id);
     public function pedidosPorPeriodo(Request $request);
     public function destroy($id);
+    public function pedido_factory(Request $request, $id);
 }

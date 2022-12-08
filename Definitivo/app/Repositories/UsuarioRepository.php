@@ -6,8 +6,12 @@ use App\Empresa;
 use App\Http\interfaces\UsuarioInterface;
 use App\Role;
 use App\Usuario;
+use Carbon\Carbon;
+use DateTime;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Stmt\UseUse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 class UsuarioRepository implements UsuarioInterface
@@ -119,6 +123,17 @@ class UsuarioRepository implements UsuarioInterface
             return response()->json(['message' => $e->getMessage()]);
         }
     }
+    public function update($id, Request $request){
+        try{
+
+            $user = Usuario::FindOrFail($id);
+            $user->update($request->all());
+
+            return response()->json(['message' => 'Usuario Editado com sucesso !']);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
 
     public function show($id){
         try{
@@ -135,5 +150,22 @@ class UsuarioRepository implements UsuarioInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
-
+    public function getVendasByUser($id){
+        try{
+            $user = Usuario::FindOrFail($id);
+            return $user->pedidos;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
+    public function getUserMediaVendasByAno($id){
+        $yearStart = date('01-01-Y');
+        $yearStart = Carbon::parse($yearStart);
+        $yearFinal = date('31-12-Y');
+        $yearFinal = Carbon::parse($yearFinal);
+        $mediaVendas = floatval(DB::table('PEDIDOS')->whereBetween('PEDIDOS.DT_PAGAMENTO', [$yearStart, $yearFinal])
+        ->where('PEDIDOS.ID_USER', $id)
+        ->avg('PEDIDOS.VALOR_TOTAL'));
+        return response()->json([$mediaVendas]);
+    }
 }

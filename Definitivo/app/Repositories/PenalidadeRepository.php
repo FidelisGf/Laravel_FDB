@@ -2,11 +2,12 @@
 
 namespace App\Repositories;
 
+use App\Http\interfaces\PenalidadeInterface;
 use App\Penalidade;
 use Carbon\Carbon;
 use Illuminate\Http\Request;
 
-class PenalidadeRepository
+class PenalidadeRepository implements PenalidadeInterface
 {
     public function __construct()
     {

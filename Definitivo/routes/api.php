@@ -86,6 +86,8 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('aprovarPedido/{id}', [PedidosController::class, 'aprovarPedido'])->middleware(FuncMiddleware::class);
     Route::get('/getActiveUsers', [UsuarioController::class, 'getActiveUsers'])->middleware(FuncMiddleware::class);
     Route::get('/getPenalidades/{id}', [UsuarioController::class, 'getPenalidades'])->middleware(FuncMiddleware::class);
+    Route::get('/getVendasByUser/{id}', [UsuarioController::class, 'getVendasByUser'])->middleware(FuncMiddleware::class);
+    Route::get('/getUserMediaVendasByAno/{id}', [UsuarioController::class, 'getUserMediaVendasByAno'])->middleware(FuncMiddleware::class);
     //Resources
 
     Route::resource('materiais', 'MateriaisController');

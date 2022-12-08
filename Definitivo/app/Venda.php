@@ -20,4 +20,5 @@ class Venda extends Model
     public function empresa(){
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
     }
+
 }

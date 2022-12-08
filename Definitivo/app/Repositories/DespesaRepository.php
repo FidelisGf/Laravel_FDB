@@ -100,7 +100,7 @@ class DespesaRepository implements DespesaInterface
             if($request->filled('pdf')){
                 $despesas = DB::table('DESPESAS')
                 ->whereBetween('DATA', [$startData, $endData])
-                ->join('TAGS', 'TAGS.ID', '=', 'DESPESAS.ID_TAG')->select('DESPESAS.ID','DESPESAS.CUSTO', 'DESPESAS.DESC', 'TAGS.NOME_REAL', 'DESPESAS.DATA')->get();
+                ->join('TAGS', 'TAGS.ID', '=', 'DESPESAS.ID_TAG')->select('DESPESAS.ID','DESPESAS.CUSTO','TAGS.NOME_REAL', 'DESPESAS.DATA')->get();
             }else{
                 $despesas = Despesa::whereBetween('DATA', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)
                 ->with(['Tags' => function($query){

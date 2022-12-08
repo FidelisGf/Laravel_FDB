@@ -24,7 +24,9 @@ class UsuarioController extends Controller
     public function show($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->show($id);
     }
-
+    public function update(Request $request, $id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->update($id, $request);
+    }
     public function create()
     {
         //
@@ -50,5 +52,11 @@ class UsuarioController extends Controller
     }
     public function getPenalidades($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->getPenalidades($id);
+    }
+    public function getVendasByUser($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getVendasByUser($id);
+    }
+    public function getUserMediaVendasByAno($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getUserMediaVendasByAno($id);
     }
 }

@@ -2,13 +2,14 @@
 
 namespace App\Repositories;
 
+use App\Http\interfaces\ResetPwInterface;
 use App\Mail\SendMailPw;
 use App\ResetPw;
 use App\Usuario;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
-class ResetPwRepository
+class ResetPwRepository implements ResetPwInterface
 {
     public function __construct()
     {
@@ -43,7 +44,7 @@ class ResetPwRepository
                     return response()->json("Token já utilizado !", 400);
                 }
             }else{
-                return response()->json("Token Invalido", 400);
+                return response()->json("Token Invalido", 404);
             }
 
         }catch(\Exception $e){

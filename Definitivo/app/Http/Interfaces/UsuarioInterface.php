@@ -11,4 +11,6 @@ interface UsuarioInterface{
     public function getEmpresaByUser();
     public function profile();
     public function getActiveUsers();
+    public function getPenalidades($id);
+    public function getVendasByUser($id);
 }

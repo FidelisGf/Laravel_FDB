@@ -24,14 +24,6 @@ class StoreProdutoValidator extends FormRequest
      */
     public function rules()
     {
-        // if($request->has('updatepasswordcheck'))
-        // {
-        //     $rules['oldpassword'] = 'required';
-        //     $rules['newpassword'] = 'required';
-        //     $rules['newpasswordconfirm'] = 'required';
-        // }
-        // $rules['name'] = 'required|min:3';
-        // $rules['email'] = 'required|email';
         if(!Request::has('edit')){
             $rules['MATERIAIS'] = 'required';
             $rules['quantidade_inicial'] = 'required|min:0';
@@ -42,6 +34,5 @@ class StoreProdutoValidator extends FormRequest
         $rules['ID_CATEGORIA'] = 'required';
         $rules['ID_MEDIDA'] = 'required';
         return $rules;
-
     }
 }

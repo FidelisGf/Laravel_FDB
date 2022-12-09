@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreResetPwValidator;
 use App\Mail\SendMailPw;
 use App\Repositories\ResetPwRepository;
 use App\ResetPw;
@@ -11,10 +12,10 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Str;
 class ResetPwController extends Controller
 {
-    public function sendResetPwEmail(Request $request, ResetPwRepository $resetPwRepository){ // criar uma repository para
+    public function sendResetPwEmail(StoreResetPwValidator $request, ResetPwRepository $resetPwRepository){ // criar uma repository para
        return $resetPwRepository->sendResetPwEmail($request);
     }
-    public function resetPassword(Request $request, ResetPwRepository $resetPwRepository){
+    public function resetPassword(StoreResetPwValidator $request, ResetPwRepository $resetPwRepository){
        return $resetPwRepository->resetPassword($request);
     }
 

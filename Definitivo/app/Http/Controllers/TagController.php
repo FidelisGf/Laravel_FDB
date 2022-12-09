@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Requests\StoreTagValidator;
 use App\Repositories\TagRepository;
 use Illuminate\Http\Request;
 
@@ -12,7 +13,7 @@ class TagController extends Controller
     {
         return $tagRepository->index();
     }
-    public function store(Request $request, TagRepository $tagRepository)
+    public function store(StoreTagValidator $request, TagRepository $tagRepository)
     {
        return $tagRepository->store($request);
     }

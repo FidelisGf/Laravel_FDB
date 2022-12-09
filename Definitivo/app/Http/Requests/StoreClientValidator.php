@@ -24,11 +24,11 @@ class StoreClientValidator extends FormRequest
     public function rules()
     {
         return [
-            'NOME' => ['required', 'max:60', 'min:2'],
-            'CPF' => ['required', 'min:11', 'max:11'],
-            'ENDERECO'=> ['required', 'min:8'],
-            'EMAIL'=> ['required', 'min:12'],
-            'TELEFONE' => ['required', 'min:11', 'max:12']
+            'NOME' => 'required|max:60|min:2',
+            'CPF' => 'required|min:11|max:11',
+            'ENDERECO'=> 'required|min:8',
+            'EMAIL'=> 'required|min:12|email',
+            'TELEFONE' => 'required|min:11|max:12'
         ];
     }
 }

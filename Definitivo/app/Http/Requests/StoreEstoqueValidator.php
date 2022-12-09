@@ -29,4 +29,14 @@ class StoreEstoqueValidator extends FormRequest
 
         ];
     }
+    public function messages()
+    {
+        return [
+            'product_id.required' => ' O id do produto é obrigatorio',
+            'quantidade.required' => ' A quantidade a ser adicionada é obrigatoria',
+            'product_id.min' => ' O id minimo é 1',
+            'quantidade.min' => ' A quantidade minima é : 1'
+
+        ];
+    }
 }

@@ -5,6 +5,7 @@ namespace App\Repositories;
 use App\Events\MakeLog;
 use App\Http\Controllers\Help;
 use App\Http\interfaces\TagInterface;
+use App\Http\Requests\StoreTagValidator;
 use App\Tag;
 use Illuminate\Http\Request;
 
@@ -25,14 +26,12 @@ class TagRepository implements TagInterface
             return response()->json(['message' => $e->getMessage()]);
         }
     }
-    public function store(Request $request){
+    public function store(StoreTagValidator $request){
         $helper = new Help();
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $validatedData = $request->validate([
-                'NOME' => ['required', 'max:100', 'min:2']
-            ]);
+            $validatedData = $request->validated();
             if($validatedData){
                 $tag = new Tag();
                 $NOME_REAL = "$request->NOME _ $empresa->ID";

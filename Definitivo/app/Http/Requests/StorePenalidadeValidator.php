@@ -25,8 +25,19 @@ class StorePenalidadeValidator extends FormRequest
     {
         return [
             'TIPO' => 'required|max:20|min:5',
-            'DESC' => 'required|max:120|min:0',
+            'DESC' => 'required|max:120|min:4',
             'DATA'=> 'required|date',
+        ];
+    }
+    public function messages()
+    {
+        return [
+            'TIPO.required' => ' O tipo da penalidade é obrigatorio',
+            'TIPO.min' => ' O tipo deve ter no minimo 5 caracteres',
+            'DESC.min' => ' A descrição minima deve ter 4 caracteres',
+            'DESC.max' => ' A descrição máxima deve ser de 120 caracteres',
+            'DATA.date' => ' Não é uma data válida',
+            'DATA.required' => ' É necessário informar a data',
         ];
     }
 }

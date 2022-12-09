@@ -29,4 +29,14 @@ class StorePedidoValidator extends FormRequest
             'aprovado' => 'required'
         ];
     }
+    public function messages()
+    {
+        return [
+            'METODO_PAGAMENTO.required' => ' O metodo de pagamento é obrigatorio',
+            'produtos.required' => ' Os produtos no pedido são obrigatorios',
+            'aprovado.required' => ' A situação do pedido é obrigatoria',
+
+
+        ];
+    }
 }

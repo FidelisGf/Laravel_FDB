@@ -27,4 +27,11 @@ class StoreQuantidadeMateriaisValidator extends FormRequest
             'QUANTIDADE' => 'required|min:1',
         ];
     }
+    public function messages()
+    {
+        return [
+            'QUANTIDADE.required' => ' A quantidade não foi inserida',
+            'QUANTIDADE.min' => 'A quantidade minima necessária é : 1'
+        ];
+    }
 }

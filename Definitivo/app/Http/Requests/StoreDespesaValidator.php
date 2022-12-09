@@ -27,7 +27,7 @@ class StoreDespesaValidator extends FormRequest
             'DESC' => 'required|max:300|min:3',
             'CUSTO' => 'required|min:0',
             'ID_TAG'=> 'required|min:1',
-            'DATA' => 'required'
+            'DATA' => 'required|date'
         ];
     }
 }

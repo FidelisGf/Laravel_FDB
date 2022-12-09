@@ -27,4 +27,12 @@ class StoreCategoryValidator extends FormRequest
             'NOME_C' => 'required|max:50|min:4',
         ];
     }
+    public function messages()
+    {
+        return [
+            'NOME_C.required' => ' O nome é obrigatorio',
+            'NOME_C.min' => ' O nome deve ter no mínimo 4 caracteres',
+            'NOME_C.max' => ' O nome deve ter no máximo 50 caracteres',
+        ];
+    }
 }

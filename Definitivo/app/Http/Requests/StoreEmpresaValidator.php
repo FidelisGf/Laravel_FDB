@@ -55,6 +55,7 @@ class StoreEmpresaValidator extends FormRequest
             'ENDERECO.min' => ' O endereço deve ter no minimo 2 caracteres',
             'ENDERECO.max' => ' O endereco deve ter no maximo 255 caracteres',
             'INC_ESTADUAL.required' => ' A inscrição estadual é obrigatoria',
+            'INC_ESTADUAL.unique' => ' ',
             'INC_ESTADUAL.min' => 'A inscrição estadual deve ter minímo 9 caracteres',
             'INC_ESTADUAL.max' => 'A inscrição estadual deve ter no máximo 12 caracteres'
         ];

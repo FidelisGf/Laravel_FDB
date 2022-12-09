@@ -30,4 +30,18 @@ class RegisterEmployeeValidator extends FormRequest
             'ID_ROLE' => 'required'
         ];
     }
+    public function messages()
+    {
+        return [
+            'NAME.required' => ' O nome é obrigatorio',
+            'NAME.min' => ' O nome deve ter no mínimo 4 caracteres',
+            'NAME.max' => ' O nome deve ter no máximo 50 caracteres',
+            'CPF.required' => ' O cpf é obrigatorio',
+            'EMAIL.required' => ' O email é obrigatorio',
+            'EMAIL.min' => ' O email deve ter no mínimo 8 caracteres',
+            'EMAIL.max' => ' O email deve ter no máximo 60 caracteres',
+            'EMAIL.email' => ' O email não está em um formato válido',
+            'ID_ROLE.required' => ' O cargo é obrigatorio'
+        ];
+    }
 }

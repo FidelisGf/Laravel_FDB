@@ -39,6 +39,9 @@ class UsuarioController extends Controller
     public function getHistoricoSalarioUser($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->getHistoricoSalarioUser($id);
     }
+    public function getFolhaSalarioUsers(UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getFolhaSalarioUsers();
+    }
     public function vinculaUsuarioEmpresa(StoreEmpresaValidator $request, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->vinculaUsuarioEmpresa($request);
     }

@@ -155,25 +155,33 @@ class UsuarioRepository implements UsuarioInterface
         }
     }
     public function getUserMediaVendasByAno($id){
-        $yearStart = date('01-01-Y');
-        $yearStart = Carbon::parse($yearStart);
-        $yearFinal = date('31-12-Y');
-        $yearFinal = Carbon::parse($yearFinal);
-        $mediaVendas = floatval(DB::table('PEDIDOS')->whereBetween('PEDIDOS.DT_PAGAMENTO', [$yearStart, $yearFinal])
-        ->where('PEDIDOS.ID_USER', $id)
-        ->avg('PEDIDOS.VALOR_TOTAL'));
-        return response()->json([$mediaVendas]);
+        try{
+            $yearStart = date('01-01-Y');
+            $yearStart = Carbon::parse($yearStart);
+            $yearFinal = date('31-12-Y');
+            $yearFinal = Carbon::parse($yearFinal);
+            $mediaVendas = floatval(DB::table('PEDIDOS')->whereBetween('PEDIDOS.DT_PAGAMENTO', [$yearStart, $yearFinal])
+            ->where('PEDIDOS.ID_USER', $id)
+            ->avg('PEDIDOS.VALOR_TOTAL'));
+            return response()->json([$mediaVendas]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
     }
     public function getUserTotalVendasByMes($id){
-        $monthStart = date('01-M-Y');
-        $monthStart = Carbon::parse($monthStart);
-        $monthFinal = date('30-M-Y');
-        $monthFinal = Carbon::parse($monthFinal);
-        $totalVendasMes = floatval(DB::table('PEDIDOS')
-        ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
-        ->where('PEDIDOS.ID_USER', $id)
-        ->sum('PEDIDOS.VALOR_TOTAL'));
-        return response()->json([$totalVendasMes]);
+        try{
+            $monthStart = date('01-M-Y');
+            $monthStart = Carbon::parse($monthStart);
+            $monthFinal = date('30-M-Y');
+            $monthFinal = Carbon::parse($monthFinal);
+            $totalVendasMes = floatval(DB::table('PEDIDOS')
+            ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
+            ->where('PEDIDOS.ID_USER', $id)
+            ->sum('PEDIDOS.VALOR_TOTAL'));
+            return response()->json([$totalVendasMes]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
     }
     public function getHistoricoSalarioUser($id){
         try{
@@ -188,7 +196,35 @@ class UsuarioRepository implements UsuarioInterface
             }
             return response()->json([$salariosArray]);
         }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
+    public function getFolhaSalarioUsers(){
+        try{
+            $monthStart = date('01-M-Y');
+            $monthStart = Carbon::parse($monthStart);
+            $monthFinal = date('31-M-Y');
+            $monthFinal = Carbon::parse($monthFinal);
+            $empresa = auth()->user()->empresa;
+            $salarios = DB::table('USERS')
+            ->where('USERS.EMPRESA_ID', $empresa->ID)
+            ->Join('PENALIDADES', function($join) {
+                $join->on('USERS.ID', '=', 'PENALIDADES.ID_USER');
+            })
+            ->whereBetween('PENALIDADES.DATA', [$monthStart, $monthFinal])
+            ->select(DB::raw('
+                USERS.ID as id,
+                USERS.NAME as NOME,
+                USERS.CPF as CPF,
+                USERS.SALARIO as SALARIO_BASE,
+                sum(PENALIDADES.DESCONTO) as DespesaTotal,
+                (USERS.SALARIO - sum(PENALIDADES.DESCONTO)) as Final
+            '))
+            ->groupBy(DB::raw('NOME, USERS.ID, SALARIO_BASE, CPF'))
+            ->get();
+            return $salarios;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
 }

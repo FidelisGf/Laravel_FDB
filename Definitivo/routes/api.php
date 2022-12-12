@@ -90,6 +90,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/getUserMediaVendasByAno/{id}', [UsuarioController::class, 'getUserMediaVendasByAno'])->middleware(FuncMiddleware::class);
     Route::get('/getUserTotalVendasByMes/{id}', [UsuarioController::class, 'getUserTotalVendasByMes'])->middleware(FuncMiddleware::class);
     Route::get('/getHistoricoSalarioUser/{id}', [UsuarioController::class, 'getHistoricoSalarioUser'])->middleware(FuncMiddleware::class);
+    Route::get('/getFolhaSalarioUsers', [UsuarioController::class, 'getFolhaSalarioUsers']);
     Route::get('/getDescontoMensalByUser/{id}', [PenalidadeController::class, 'getDescontoMensalByUser'])->middleware(FuncMiddleware::class);
 
     //Resources

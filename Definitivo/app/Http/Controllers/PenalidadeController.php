@@ -41,6 +41,10 @@ class PenalidadeController extends Controller
     public function getDescontoMensalByUser($id, PenalidadeRepository $penalidadeRepository){
         return $penalidadeRepository->getDescontoMensalByUser($id);
     }
+    public function destroy($id, PenalidadeRepository $penalidadeRepository)
+    {
+        return $penalidadeRepository->destroy($id);
+    }
 
     /**
      * Display the specified resource.
@@ -76,14 +80,4 @@ class PenalidadeController extends Controller
         //
     }
 
-    /**
-     * Remove the specified resource from storage.
-     *
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
-     */
-    public function destroy($id)
-    {
-        //
-    }
 }

@@ -32,6 +32,7 @@ class UsuarioController extends Controller
     {
         //
     }
+
     public function getUserTotalVendasByMes($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->getUserTotalVendasByMes($id);
     }

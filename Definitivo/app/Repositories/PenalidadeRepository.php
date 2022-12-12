@@ -45,4 +45,13 @@ class PenalidadeRepository implements PenalidadeInterface
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
+    public function destroy($id){
+        try{
+            $penalidade = Penalidade::FindOrFail($id);
+            $penalidade->delete();
+            return response()->json(['message' => "Penalidade Excluida com sucesso !"]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
 }

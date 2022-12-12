@@ -11,7 +11,7 @@ class Penalidade extends Model
     protected $generator = 'GEN_PENALIDADES_ID';
     protected $keyType = 'integer';
     public $timestamps = false;
-    protected $fillable = ['ID', 'TIPO', 'ID_USER', 'DATA', 'DESC'];
+    protected $fillable = ['ID', 'TIPO', 'ID_USER', 'DATA', 'DESC', 'DESCONTO'];
     public function user(){
         return $this->belongsToMany(Usuario::class, 'ID', 'ID');
     }

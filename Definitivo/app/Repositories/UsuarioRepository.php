@@ -139,7 +139,7 @@ class UsuarioRepository implements UsuarioInterface
             $qntdVendas = $usuario->pedidos->count();
             $valorTotalVendas = floatval( $usuario->pedidos->where('DT_PAGAMENTO', '!=', null)->sum('VALOR_TOTAL'));
             $qntdPenalidades = $usuario->penalidades->count();
-            $usuario = $usuario->only('ID', 'NAME', 'EMAIL', 'CPF', 'CREATED_AT', 'UPDATED_AT', 'ID_ROLE');
+            $usuario = $usuario->only('ID', 'NAME', 'EMAIL', 'CPF', 'CREATED_AT', 'UPDATED_AT', 'SALARIO', 'ID_ROLE');
             return response()->json(['usuario' => $usuario, 'qntdVendas' => $qntdVendas, 'qntdPenalidades'
             =>$qntdPenalidades, 'totalVendido' => $valorTotalVendas, 'cargo' => $cargo],200);
         }catch(\Exception $e){
@@ -163,5 +163,32 @@ class UsuarioRepository implements UsuarioInterface
         ->where('PEDIDOS.ID_USER', $id)
         ->avg('PEDIDOS.VALOR_TOTAL'));
         return response()->json([$mediaVendas]);
+    }
+    public function getUserTotalVendasByMes($id){
+        $monthStart = date('01-M-Y');
+        $monthStart = Carbon::parse($monthStart);
+        $monthFinal = date('30-M-Y');
+        $monthFinal = Carbon::parse($monthFinal);
+        $totalVendasMes = floatval(DB::table('PEDIDOS')
+        ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
+        ->where('PEDIDOS.ID_USER', $id)
+        ->sum('PEDIDOS.VALOR_TOTAL'));
+        return response()->json([$totalVendasMes]);
+    }
+    public function getHistoricoSalarioUser($id){
+        try{
+            $salarios = DB::table('SALARIOS_CHANGES')
+            ->where('ID_USER', $id)
+            ->orderBy('SALARIO', 'asc')
+            ->select('SALARIO')
+            ->get();
+            $salariosArray = [];
+            foreach($salarios as $s){
+                $salariosArray[] = floatval($s->SALARIO);
+            }
+            return response()->json([$salariosArray]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
     }
 }

@@ -16,7 +16,7 @@ class Usuario extends Authenticatable implements JWTSubject
     const CREATED_AT = 'CREATED_AT';
     const UPDATED_AT = 'UPDATED_AT';
     const DELETED_AT = 'DELETED_AT';
-    protected $fillable = ['NAME', 'EMAIL', 'PASSWORD', 'EMPRESA_ID', 'ID_ROLE', 'CPF'];
+    protected $fillable = ['NAME', 'EMAIL', 'PASSWORD', 'EMPRESA_ID', 'ID_ROLE', 'CPF', 'SALARIO'];
     protected $rememberTokenName = 'REMEMBER_TOKEN';
     protected $hidden = ['PASSWORD', 'REMEMBER_TOKEN'];
     protected $primaryKey = 'ID';

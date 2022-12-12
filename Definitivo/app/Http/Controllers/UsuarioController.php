@@ -32,7 +32,12 @@ class UsuarioController extends Controller
     {
         //
     }
-
+    public function getUserTotalVendasByMes($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getUserTotalVendasByMes($id);
+    }
+    public function getHistoricoSalarioUser($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getHistoricoSalarioUser($id);
+    }
     public function vinculaUsuarioEmpresa(StoreEmpresaValidator $request, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->vinculaUsuarioEmpresa($request);
     }

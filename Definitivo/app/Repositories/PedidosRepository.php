@@ -43,6 +43,7 @@ class PedidosRepository implements PedidoInterface
         $pedido->ID_EMPRESA = $empresa->ID;
         $pedido->VALOR_TOTAL = 0;
         $pedido->APROVADO = "$request->aprovado";
+
         if($request->filled('ID_CLIENTE')){
             $pedido->ID_CLIENTE = $request->ID_CLIENTE;
         }

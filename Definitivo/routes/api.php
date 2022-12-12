@@ -9,6 +9,7 @@ use App\Http\Controllers\EstoqueController;
 use App\Http\Controllers\MateriaisController;
 use App\Http\Controllers\MedidasController;
 use App\Http\Controllers\PedidosController;
+use App\Http\Controllers\PenalidadeController;
 use App\Http\Controllers\ProductController;
 use App\Http\Controllers\ResetPwController;
 use App\Http\Controllers\TagController;
@@ -70,7 +71,6 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::put('adicionaQuantidadeMaterial/{id}', [MateriaisController::class, 'adicionaQuantidadeMaterial']);
     Route::get('getVendasByDate', [VendaRepository::class, 'getVendasByTipoPagamento']);
 
-
     //Ações que Admin's e gerentes podem executar no sistema
 
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'])->middleware(FuncMiddleware::class);
@@ -88,6 +88,10 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/getPenalidades/{id}', [UsuarioController::class, 'getPenalidades'])->middleware(FuncMiddleware::class);
     Route::get('/getVendasByUser/{id}', [UsuarioController::class, 'getVendasByUser'])->middleware(FuncMiddleware::class);
     Route::get('/getUserMediaVendasByAno/{id}', [UsuarioController::class, 'getUserMediaVendasByAno'])->middleware(FuncMiddleware::class);
+    Route::get('/getUserTotalVendasByMes/{id}', [UsuarioController::class, 'getUserTotalVendasByMes'])->middleware(FuncMiddleware::class);
+    Route::get('/getHistoricoSalarioUser/{id}', [UsuarioController::class, 'getHistoricoSalarioUser'])->middleware(FuncMiddleware::class);
+    Route::get('/getDescontoMensalByUser/{id}', [PenalidadeController::class, 'getDescontoMensalByUser'])->middleware(FuncMiddleware::class);
+
     //Resources
 
     Route::resource('materiais', 'MateriaisController');

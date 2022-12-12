@@ -24,11 +24,25 @@ class PenalidadeRepository implements PenalidadeInterface
                 $penalidade->TIPO = $request->TIPO;
                 $penalidade->DESC = $request->DESC;
                 $penalidade->ID_USER = $request->ID_USER;
+                $penalidade->DESCONTO = $request->DESCONTO;
                 $penalidade->save();
                 return response()->json(['message' => 'Penalidade registrada com sucesso !']);
             }
         }catch(\Exception $e){
-            return response()->json(['message' => $e->getMessage()]);
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+    }
+    public function getDescontoMensalByUser($id){
+        try{
+            $monthStart = date('01-M-Y');
+            $monthStart = Carbon::parse($monthStart);
+            $monthFinal = date('30-M-Y');
+            $monthFinal = Carbon::parse($monthFinal);
+            $totalDesconto  = floatval(Penalidade::where('ID_USER', $id)
+            ->whereBetween('DATA', [$monthStart, $monthFinal])->sum('DESCONTO'));
+            return response()->json([$totalDesconto]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
         }
     }
 }

@@ -38,6 +38,9 @@ class PenalidadeController extends Controller
     {
         return $penalidadeRepository->store($request);
     }
+    public function getDescontoMensalByUser($id, PenalidadeRepository $penalidadeRepository){
+        return $penalidadeRepository->getDescontoMensalByUser($id);
+    }
 
     /**
      * Display the specified resource.

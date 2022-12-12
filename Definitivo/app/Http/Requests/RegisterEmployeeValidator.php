@@ -15,7 +15,6 @@ class RegisterEmployeeValidator extends FormRequest
     {
         return true;
     }
-
     /**
      * Get the validation rules that apply to the request.
      *
@@ -27,7 +26,8 @@ class RegisterEmployeeValidator extends FormRequest
             'NAME' => 'required|max:50|min:4',
             'CPF' => 'required',
             'EMAIL'=> 'required|max:60|min:8|email',
-            'ID_ROLE' => 'required'
+            'ID_ROLE' => 'required',
+            'SALARIO' => 'required',
         ];
     }
     public function messages()
@@ -41,7 +41,8 @@ class RegisterEmployeeValidator extends FormRequest
             'EMAIL.min' => ' O email deve ter no mínimo 8 caracteres',
             'EMAIL.max' => ' O email deve ter no máximo 60 caracteres',
             'EMAIL.email' => ' O email não está em um formato válido',
-            'ID_ROLE.required' => ' O cargo é obrigatorio'
+            'ID_ROLE.required' => ' O cargo é obrigatorio',
+            'SALARIO.required' => 'O salario é obrigatorio',
         ];
     }
 }

@@ -207,24 +207,30 @@ class UsuarioRepository implements UsuarioInterface
             $monthFinal = Carbon::parse($monthFinal);
             $empresa = auth()->user()->empresa;
             $salarios = DB::table('USERS')
-            ->where('USERS.EMPRESA_ID', $empresa->ID)
-            ->Join('PENALIDADES', function($join) {
-                $join->on('USERS.ID', '=', 'PENALIDADES.ID_USER');
-            })
-            ->whereBetween('PENALIDADES.DATA', [$monthStart, $monthFinal])
-            ->select(DB::raw('
+            ->selectRaw('
                 USERS.ID as id,
                 USERS.NAME as NOME,
                 USERS.CPF as CPF,
-                USERS.SALARIO as SALARIO_BASE,
                 sum(PENALIDADES.DESCONTO) as DespesaTotal,
-                (USERS.SALARIO - sum(PENALIDADES.DESCONTO)) as Final
-            '))
-            ->groupBy(DB::raw('NOME, USERS.ID, SALARIO_BASE, CPF'))
+                USERS.SALARIO as SALARIO_BASE,
+                (USERS.SALARIO - sum(PENALIDADES.DESCONTO)) as Final,
+                USERS.EMPRESA_ID
+            ')
+            ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
+            ->where('USERS.EMPRESA_ID', $empresa->ID)
+            ->where('USERS.ID_ROLE', '!=', 1)
+            ->groupByRaw('1, 2, 3, 5, 7')
             ->get();
+            foreach($salarios as $s){
+                if($s->FINAL == null){
+                    $s->DESPESATOTAL = floatval(0);
+                    $s->FINAL = $s->SALARIO_BASE;
+                }
+            }
             return $salarios;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
     }
+
 }

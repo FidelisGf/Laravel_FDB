@@ -116,14 +116,30 @@ class VendaRepository implements VendaInterface
             QUANTIDADE_MATERIA, PRODUCTS.NOME, PEDIDOS_ITENS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as
             QUANTIDADE_PRODUTO,PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))
             ->distinct(DB::raw("ID_VENDA"))->get();
+
+            $gastosFuncionarios = DB::table('USERS')
+            ->where('EMPRESA_ID', $empresa->ID)
+            ->join('CONFIG_FOLHA', 'CONFIG_FOLHA.ID_EMPRESA', '=', 'USERS.EMPRESA_ID')
+            ->selectRaw('sum(USERS.SALARIO) as TotalSalario,
+            extract (DAY from CONFIG_FOLHA.DT_SALARIO) as dia')->groupByRaw('dia')->get();
+            $diff = $startData->diffInMonths($endData);
+            $diffDia = intval($endData->format("d")) - intval($startData->format("d")) ;
+            $totalGastosSalarios = 0;
+            if($diff > 0){
+               $totalGastosSalarios = $gastosFuncionarios[0]->TOTALSALARIO * ($diff - 1);
+                if($diffDia >= intval($gastosFuncionarios[0]->DIA)){
+                    $totalGastosSalarios += $gastosFuncionarios[0]->TOTALSALARIO;
+                }
+            }
             foreach($vendas as $v){
                 $vlTotal_vendas += $v->VALOR_TOTAL;
                 $vlReal += (($v->VALOR_PRODUTO - ( $v->CUSTO_MATERIAL * $v->QUANTIDADE_MATERIA))
                 * $v->QUANTIDADE_PRODUTO);
             }
-            $saldoFinal = $vlReal - $vlGastosDespesas;
+            $saldoFinal = ($vlReal - $vlGastosDespesas - $totalGastosSalarios);
             return response()->json(["Total" => $vlTotal_vendas, "Lucro_Vendas"
-            => $vlReal, "Despesas" => $vlGastosDespesas, "Saldo_Final" => $saldoFinal]);
+            => $vlReal, "Despesas" => $vlGastosDespesas,
+            "Saldo_Final" => $saldoFinal, "Funcionarios" => $totalGastosSalarios]);
         }catch(\Exception $e){
             return response()->json([
                 'message' => $e->getMessage()

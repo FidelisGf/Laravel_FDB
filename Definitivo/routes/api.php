@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\ConfigFolhaController;
 use App\Http\Controllers\DespesaController;
 use App\Http\Controllers\EmpresaController;
 use App\Http\Controllers\EstoqueController;
@@ -76,7 +77,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'])->middleware(FuncMiddleware::class);
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'])->middleware(FuncMiddleware::class);
     Route::get('/getVendasPorDia', [VendaController::class, 'getVendasPorDia'])->middleware(FuncMiddleware::class);
-    Route::get("getLucroAndGastos", [VendaController::class, 'getLucroAndGastos'])->middleware(FuncMiddleware::class);
+    Route::get("getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
     Route::get('/getTotalVendasUltimosTresMeses', [VendaController::class, 'getTotalVendasInTheLastThreeMonths'])->middleware(FuncMiddleware::class);
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque'])->middleware(FuncMiddleware::class);
     Route::get('/pedidos/{id}', [PedidosController::class, 'show'])->middleware(FuncMiddleware::class);
@@ -90,8 +91,10 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/getUserMediaVendasByAno/{id}', [UsuarioController::class, 'getUserMediaVendasByAno'])->middleware(FuncMiddleware::class);
     Route::get('/getUserTotalVendasByMes/{id}', [UsuarioController::class, 'getUserTotalVendasByMes'])->middleware(FuncMiddleware::class);
     Route::get('/getHistoricoSalarioUser/{id}', [UsuarioController::class, 'getHistoricoSalarioUser'])->middleware(FuncMiddleware::class);
-    Route::get('/getFolhaSalarioUsers', [UsuarioController::class, 'getFolhaSalarioUsers']);
+    Route::get('/getFolhaSalarioUsers', [UsuarioController::class, 'getFolhaSalarioUsers'])->middleware(FuncMiddleware::class);;
     Route::get('/getDescontoMensalByUser/{id}', [PenalidadeController::class, 'getDescontoMensalByUser'])->middleware(FuncMiddleware::class);
+    Route::post('/setAjustes', [ConfigFolhaController::class, 'setAjustes'])->middleware(FuncMiddleware::class);
+    Route::get('/showAjuste', [ConfigFolhaController::class , 'showAjuste'])->middleware(FuncMiddleware::class);
 
     //Resources
 

@@ -3,9 +3,12 @@
 namespace App\Repositories;
 
 use App\Empresa;
+use App\Historico_Penalidade;
 use App\Http\interfaces\UsuarioInterface;
 use App\Http\Requests\RegisterEmployeeValidator;
 use App\Http\Requests\StoreEmpresaValidator;
+use App\Pagamento_Salario;
+use App\Penalidade;
 use App\Role;
 use App\Usuario;
 use Carbon\Carbon;
@@ -13,6 +16,7 @@ use DateTime;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
+use PhpParser\Node\Expr\FuncCall;
 use PhpParser\Node\Stmt\UseUse;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
@@ -231,6 +235,72 @@ class UsuarioRepository implements UsuarioInterface
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
+    }
+    public function makeWagePayment(Request $request){
+        try{
+            $empresa = auth()->user()->empresa;
+            $salarios = DB::table('USERS')
+            ->selectRaw('
+                USERS.ID as id,
+                USERS.NAME as NOME,
+                USERS.CPF as CPF,
+                sum(PENALIDADES.DESCONTO) as DespesaTotal,
+                USERS.SALARIO as SALARIO_BASE,
+                (USERS.SALARIO - sum(PENALIDADES.DESCONTO)) as Final,
+                USERS.EMPRESA_ID
+            ')
+            ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
+            ->where('USERS.EMPRESA_ID', $empresa->ID)
+            ->where('USERS.ID_ROLE', '!=', 1)
+            ->groupByRaw('1, 2, 3, 5, 7')
+            ->get();
+            $totalPago = 0;
+            foreach($salarios as $s){
+                if($s->FINAL == null){
+                    $s->DESPESATOTAL = floatval(0);
+                    $s->FINAL = $s->SALARIO_BASE;
+                }
+                $totalPago += $s->FINAL;
+                $penalidades = Penalidade::where('ID_USER', $s->ID)->get();
+                if($penalidades != null){
+                    foreach($penalidades as $p){
+                        $historico = Historico_Penalidade::where('ID_PENALIDADE', $p->ID)->first();
+                        if( $historico != null && $historico->VALOR_ATUAL <= 0){
+                            $p->delete();
+                        }else{
+                            if($historico === null){
+                                $historico = new Historico_Penalidade();
+                                $historico->VALOR_ORIGINAL = $p->DESCONTO;
+                                $historico->ID_PENALIDADE = $p->ID;
+                            }
+                            if($request->TIPO == "ADIANTAMENTO"){
+                                $p->DESCONTO -= ($historico->VALOR_ORIGINAL * 40) / 100;
+                                $p->save();
+
+                            }else{
+                                $p->DESCONTO -= ($historico->VALOR_ORIGINAL * 60) / 100;
+                                $p->save();
+
+                            }
+                            $historico->VALOR_ATUAL = $p->DESCONTO;
+                            $historico->DT_PAGAMENTO = now();
+                            $historico->save();
+                        }
+
+                    }
+                }
+            }
+            $pagamentoSalario = new Pagamento_Salario();
+            $pagamentoSalario->VALOR_PAGO = $totalPago;
+            $pagamentoSalario->TIPO = $request->TIPO;
+            $pagamentoSalario->ID_EMPRESA = $empresa->ID;
+            $pagamentoSalario->DATA = now()->format('Y-m-d H:i');
+            $pagamentoSalario->save();
+            return $salarios;
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()],400);
+        }
+
     }
 
 }

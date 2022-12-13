@@ -94,6 +94,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/getFolhaSalarioUsers', [UsuarioController::class, 'getFolhaSalarioUsers'])->middleware(FuncMiddleware::class);;
     Route::get('/getDescontoMensalByUser/{id}', [PenalidadeController::class, 'getDescontoMensalByUser'])->middleware(FuncMiddleware::class);
     Route::post('/setAjustes', [ConfigFolhaController::class, 'setAjustes'])->middleware(FuncMiddleware::class);
+    Route::post('/makeWagePayment', [UsuarioController::class, 'makeWagePayment']);
     Route::get('/showAjuste', [ConfigFolhaController::class , 'showAjuste'])->middleware(FuncMiddleware::class);
 
     //Resources

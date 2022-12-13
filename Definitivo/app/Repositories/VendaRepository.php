@@ -111,7 +111,8 @@ class VendaRepository implements VendaInterface
              join('PRODUCTS', 'PRODUCTS.ID', '=', 'PEDIDOS_ITENS.ID_PRODUTO')->
             join('PRODUTOS_MATERIAS', 'PRODUTOS_MATERIAS.ID_PRODUTO', '=', 'PRODUCTS.ID')->
             join('MATERIAIS' , 'MATERIAIS.ID', '=', 'PRODUTOS_MATERIAS.ID_MATERIA')->
-            select(DB::raw ("VENDAS.ID as ID_VENDA, MATERIAIS.ID as ID_MATERIAL, MATERIAIS.CUSTO as CUSTO_MATERIAL,
+            select(DB::raw ("VENDAS.ID as ID_VENDA, MATERIAIS.ID as ID_MATERIAL,
+            MATERIAIS.CUSTO as CUSTO_MATERIAL,
             PRODUTOS_MATERIAS.QUANTIDADE as
             QUANTIDADE_MATERIA, PRODUCTS.NOME, PEDIDOS_ITENS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as
             QUANTIDADE_PRODUTO,PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))
@@ -121,15 +122,28 @@ class VendaRepository implements VendaInterface
             ->where('EMPRESA_ID', $empresa->ID)
             ->join('CONFIG_FOLHA', 'CONFIG_FOLHA.ID_EMPRESA', '=', 'USERS.EMPRESA_ID')
             ->selectRaw('sum(USERS.SALARIO) as TotalSalario,
-            extract (DAY from CONFIG_FOLHA.DT_SALARIO) as dia')->groupByRaw('dia')->get();
+            extract (DAY from CONFIG_FOLHA.DT_SALARIO) as dia,
+            extract (DAY from CONFIG_FOLHA.DT_ADIANTAMENTO) as dia_adiantamento')
+            ->groupByRaw('dia, dia_adiantamento')
+            ->get();
             $diff = $startData->diffInMonths($endData);
             $diffDia = intval($endData->format("d")) - intval($startData->format("d")) ;
             $totalGastosSalarios = 0;
             if($diff > 0){
                $totalGastosSalarios = $gastosFuncionarios[0]->TOTALSALARIO * ($diff - 1);
-                if($diffDia >= intval($gastosFuncionarios[0]->DIA)){
-                    $totalGastosSalarios += $gastosFuncionarios[0]->TOTALSALARIO;
-                }
+            }
+            if($diffDia >= intval($gastosFuncionarios[0]->DIA) ||
+                intval($startData->format("d")) >= intval($gastosFuncionarios[0]->DIA
+                )){
+                    $totalGastosSalarios += ($gastosFuncionarios[0]->TOTALSALARIO * 60) / 100;
+                    if($gastosFuncionarios[0]->DIA_ADIANTAMENTO === null){
+                        $totalGastosSalarios += (($gastosFuncionarios[0]->TOTALSALARIO * 40 ) / 100);
+                    }else if(intval($startData->format("d"))
+                        >= intval($gastosFuncionarios[0]->DIA_ADIANTAMENTO)
+                        || intval($endData->format("d"))
+                        >= intval($gastosFuncionarios[0]->DIA_ADIANTAMENTO)){
+                        $totalGastosSalarios += (($gastosFuncionarios[0]->TOTALSALARIO * 40 ) / 100);
+                    }
             }
             foreach($vendas as $v){
                 $vlTotal_vendas += $v->VALOR_TOTAL;

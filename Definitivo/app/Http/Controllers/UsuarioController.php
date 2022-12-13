@@ -32,7 +32,9 @@ class UsuarioController extends Controller
     {
         //
     }
-
+    public function makeWagePayment(Request $request, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->makeWagePayment($request);
+    }
     public function getUserTotalVendasByMes($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->getUserTotalVendasByMes($id);
     }

@@ -117,34 +117,10 @@ class VendaRepository implements VendaInterface
             QUANTIDADE_MATERIA, PRODUCTS.NOME, PEDIDOS_ITENS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as
             QUANTIDADE_PRODUTO,PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))
             ->distinct(DB::raw("ID_VENDA"))->get();
-
-            $gastosFuncionarios = DB::table('USERS')
-            ->where('EMPRESA_ID', $empresa->ID)
-            ->join('CONFIG_FOLHA', 'CONFIG_FOLHA.ID_EMPRESA', '=', 'USERS.EMPRESA_ID')
-            ->selectRaw('sum(USERS.SALARIO) as TotalSalario,
-            extract (DAY from CONFIG_FOLHA.DT_SALARIO) as dia,
-            extract (DAY from CONFIG_FOLHA.DT_ADIANTAMENTO) as dia_adiantamento')
-            ->groupByRaw('dia, dia_adiantamento')
-            ->get();
-            $diff = $startData->diffInMonths($endData);
-            $diffDia = intval($endData->format("d")) - intval($startData->format("d")) ;
-            $totalGastosSalarios = 0;
-            if($diff > 0){
-               $totalGastosSalarios = $gastosFuncionarios[0]->TOTALSALARIO * ($diff - 1);
-            }
-            if($diffDia >= intval($gastosFuncionarios[0]->DIA) ||
-                intval($startData->format("d")) >= intval($gastosFuncionarios[0]->DIA
-                )){
-                    $totalGastosSalarios += ($gastosFuncionarios[0]->TOTALSALARIO * 60) / 100;
-                    if($gastosFuncionarios[0]->DIA_ADIANTAMENTO === null){
-                        $totalGastosSalarios += (($gastosFuncionarios[0]->TOTALSALARIO * 40 ) / 100);
-                    }else if(intval($startData->format("d"))
-                        >= intval($gastosFuncionarios[0]->DIA_ADIANTAMENTO)
-                        || intval($endData->format("d"))
-                        >= intval($gastosFuncionarios[0]->DIA_ADIANTAMENTO)){
-                        $totalGastosSalarios += (($gastosFuncionarios[0]->TOTALSALARIO * 40 ) / 100);
-                    }
-            }
+            $totalGastosSalarios = floatval(DB::table('PAGAMENTOS_SALARIOS')
+            ->whereBetween('PAGAMENTOS_SALARIOS.DATA', [$startData, $endData])
+            ->where('PAGAMENTOS_SALARIOS.ID_EMPRESA', '=', $empresa->ID)
+            ->sum('PAGAMENTOS_SALARIOS.VALOR_PAGO'));
             foreach($vendas as $v){
                 $vlTotal_vendas += $v->VALOR_TOTAL;
                 $vlReal += (($v->VALOR_PRODUTO - ( $v->CUSTO_MATERIAL * $v->QUANTIDADE_MATERIA))

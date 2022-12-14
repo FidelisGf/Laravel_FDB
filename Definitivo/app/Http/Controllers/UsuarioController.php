@@ -32,6 +32,9 @@ class UsuarioController extends Controller
     {
         //
     }
+    public function checkIfWageWasPayed(Request $request, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->checkIfWageWasPayed($request);
+    }
     public function makeWagePayment(Request $request, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->makeWagePayment($request);
     }
@@ -41,8 +44,8 @@ class UsuarioController extends Controller
     public function getHistoricoSalarioUser($id, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->getHistoricoSalarioUser($id);
     }
-    public function getFolhaSalarioUsers(UsuarioRepository $usuarioRepository){
-        return $usuarioRepository->getFolhaSalarioUsers();
+    public function getFolhaSalarioUsers(Request $request, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getFolhaSalarioUsers($request);
     }
     public function vinculaUsuarioEmpresa(StoreEmpresaValidator $request, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->vinculaUsuarioEmpresa($request);

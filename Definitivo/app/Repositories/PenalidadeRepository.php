@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Historico_Penalidade;
 use App\Http\interfaces\PenalidadeInterface;
 use App\Http\Requests\StorePenalidadeValidator;
 use App\Penalidade;
@@ -13,6 +14,14 @@ class PenalidadeRepository implements PenalidadeInterface
     public function __construct()
     {
 
+    }
+    public function historyFactory(Penalidade $p){
+        $historico = new Historico_Penalidade();
+        $historico->VALOR_ORIGINAL = $p->DESCONTO;
+        $historico->ID_PENALIDADE = $p->ID;
+        $historico->VALOR_ATUAL = $p->DESCONTO;
+        $historico->DT_PAGAMENTO = now();
+        $historico->save();
     }
 
     public function store(StorePenalidadeValidator $request){
@@ -26,6 +35,7 @@ class PenalidadeRepository implements PenalidadeInterface
                 $penalidade->ID_USER = $request->ID_USER;
                 $penalidade->DESCONTO = $request->DESCONTO;
                 $penalidade->save();
+                $this->historyFactory($penalidade);
                 return response()->json(['message' => 'Penalidade registrada com sucesso !']);
             }
         }catch(\Exception $e){

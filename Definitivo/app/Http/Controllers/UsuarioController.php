@@ -35,6 +35,9 @@ class UsuarioController extends Controller
     public function checkIfWageWasPayed(Request $request, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->checkIfWageWasPayed($request);
     }
+    public function getCompleteHistoryPenalidades($id, UsuarioRepository $usuarioRepository){
+        return $usuarioRepository->getCompleteHistoryPenalidades($id);
+    }
     public function makeWagePayment(Request $request, UsuarioRepository $usuarioRepository){
         return $usuarioRepository->makeWagePayment($request);
     }

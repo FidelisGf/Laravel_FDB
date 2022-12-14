@@ -116,8 +116,40 @@ class UsuarioRepository implements UsuarioInterface
     }
     public function getPenalidades($id){
         try{
+            $monthStart = date('01-M-Y');
+            $monthStart = Carbon::parse($monthStart);
+            $monthFinal = date('31-M-Y');
+            $monthFinal = Carbon::parse($monthFinal);
             $user = Usuario::FindOrFail($id);
-            return $user->penalidades;
+            return $user->penalidades->whereBetween('DATA', [$monthStart, $monthFinal]);
+        }catch(\Exception $e){
+            return response()->json(['message' => $e->getMessage()]);
+        }
+    }
+    public function getCompleteHistoryPenalidades($id){
+        try{
+            $valor = 0;
+
+            $user = Usuario::FindOrFail($id);
+            $penaliades = $user->penalidades()
+            ->withTrashed()->get();
+            foreach($penaliades as $p){
+                $historico = Historico_Penalidade::where('ID_PENALIDADE', $p->ID)->first();
+                $p->ORIGINAL = $historico->VALOR_ORIGINAL;
+                $valor += $p->ORIGINAL;
+            }
+            $quantidade = $user->penalidades()
+            ->withTrashed()
+            ->count();
+
+
+            $valorDevido = floatval( $user->penalidades
+            ->sum('DESCONTO'));
+
+            return response()->json(['penalidades' => $penaliades,
+            'quantidade' => $quantidade, 'valorTotal' => $valor,
+            'valorDevido' => $valorDevido]);
+
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }
@@ -137,13 +169,27 @@ class UsuarioRepository implements UsuarioInterface
 
     public function show($id){
         try{
+            $monthStart = date('01-M-Y');
+            //$monthStart = Carbon::parse($monthStart);
+            $monthFinal = date('31-M-Y');
+            //$monthFinal = Carbon::parse($monthFinal);
             $valorTotalVendas = 0;
             $usuario = Usuario::FindOrFail($id);
             $cargo = $usuario->role;
-            $qntdVendas = $usuario->pedidos->count();
-            $valorTotalVendas = floatval( $usuario->pedidos->where('DT_PAGAMENTO', '!=', null)->sum('VALOR_TOTAL'));
-            $qntdPenalidades = $usuario->penalidades->count();
-            $usuario = $usuario->only('ID', 'NAME', 'EMAIL', 'CPF', 'CREATED_AT', 'UPDATED_AT', 'SALARIO', 'ID_ROLE');
+
+            $qntdVendas = $usuario->pedidos
+            ->count();
+
+            $valorTotalVendas = floatval( $usuario->pedidos
+            ->where('DT_PAGAMENTO', '!=', null)
+            ->sum('VALOR_TOTAL'));
+
+            $qntdPenalidades = Penalidade::where('ID_USER', '=',  $id)
+            ->whereBetween('DATA', [$monthStart, $monthFinal])
+            ->count();
+            $usuario = $usuario->only('ID', 'NAME', 'EMAIL', 'CPF',
+            'CREATED_AT', 'UPDATED_AT', 'SALARIO', 'ID_ROLE');
+
             return response()->json(['usuario' => $usuario, 'qntdVendas' => $qntdVendas, 'qntdPenalidades'
             =>$qntdPenalidades, 'totalVendido' => $valorTotalVendas, 'cargo' => $cargo],200);
         }catch(\Exception $e){

@@ -97,7 +97,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/makeWagePayment', [UsuarioController::class, 'makeWagePayment'])->middleware(FuncMiddleware::class);
     Route::get('/showAjuste', [ConfigFolhaController::class , 'showAjuste'])->middleware(FuncMiddleware::class);
     Route::post('/checkIfWageWasPayed', [UsuarioController::class, 'checkIfWageWasPayed'])->middleware(FuncMiddleware::class);
-
+    Route::get('/getCompleteHistoryPenalidades/{id}', [UsuarioController::class, 'getCompleteHistoryPenalidades'])->middleware(FuncMiddleware::class);
     //Resources
 
     Route::resource('materiais', 'MateriaisController');
@@ -106,6 +106,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('tags', 'TagController');
     Route::resource('clientes', 'ClienteController');
     Route::resource('vendas', 'VendaController')->middleware(FuncMiddleware::class);
+    Route::resource('pagamentos', 'Pagamento_SalarioController')->middleware(FuncMiddleware::class);
     Route::resource('products', 'ProductController')->except(['destroy']);
     Route::resource('pedidos', 'PedidosController')->except(['show', 'update']);
     Route::resource('empresas', 'EmpresaController');

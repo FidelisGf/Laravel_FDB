@@ -138,7 +138,10 @@ class DespesaRepository implements DespesaInterface
                 $despesa->CUSTO = $request->CUSTO;
                 $despesa->DATA = Carbon::parse($request->DATA);
                 $despesa->ID_TAG = $request->ID_TAG;
-                event(new MakeLog("Despesas", "", "update", json_encode($despesa), json_encode($tmp), $despesa->ID, $empresa->ID, $user->ID));
+
+                event(new MakeLog("Despesas", "", "update",
+                json_encode($despesa), json_encode($tmp), $despesa->ID, $empresa->ID, $user->ID));
+
                 $despesa->save();
                 return $despesa;
             }

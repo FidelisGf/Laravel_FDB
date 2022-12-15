@@ -22,7 +22,8 @@ class AuthController extends Controller
      */
     public function __construct()
     {
-        $this->middleware('auth:api', ['except' => ['login','register', 'refresh', 'profile', 'logout', 'getAuthenticatedUser']]);
+        $this->middleware('auth:api', ['except' => ['login','register',
+        'refresh', 'profile', 'logout', 'getAuthenticatedUser']]);
     }
     public function register(RegisterAuthValidator $request){
         try{
@@ -40,7 +41,8 @@ class AuthController extends Controller
                         $user->save();
                     }
                 }
-                return response()->json(["message" => 'Usuario registrado com sucesso !',"Usuario" => $user], 201);
+                return response()->json(["message" =>
+                'Usuario registrado com sucesso !',"Usuario" => $user], 201);
             }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -54,7 +56,10 @@ class AuthController extends Controller
     public function login(Request $request)
     {
         try{
-            $Usuario = Usuario::where('NAME', $request->NAME)->first();
+
+            $Usuario = Usuario::where('NAME', $request->NAME)
+            ->first();
+
             if($Usuario){
                 if(Hash::check($request->PASSWORD, $Usuario->PASSWORD )){
                     if ($token = auth()->guard('api')->login($Usuario)) {
@@ -82,7 +87,10 @@ class AuthController extends Controller
                     return response()->json('token_invalid', 401);
                 }
                 catch (TokenExpiredException $e) {
-                    $token = auth()->guard('api')->refresh();
+
+                    $token = auth()->guard('api')
+                    ->refresh();
+
                     return response()->json($token, 401);
                 }
         }
@@ -112,7 +120,10 @@ class AuthController extends Controller
         return response()->json([
             'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => auth()->guard('api')->factory()->getTTL() * 120
+            'expires_in' => auth()
+            ->guard('api')
+            ->factory()
+            ->getTTL() * 120
         ]);
     }
 

@@ -67,7 +67,10 @@ class PedidosRepository implements PedidoInterface
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $Pedidos = Pedidos::where('ID_EMPRESA', $empresa->ID)->paginate(6);
+
+                $Pedidos = Pedidos::where('ID_EMPRESA', $empresa->ID)
+                ->paginate(6);
+
                 return $Pedidos;
             }
         }catch(\Exception $e){
@@ -102,9 +105,11 @@ class PedidosRepository implements PedidoInterface
                     }
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
                         $user = auth()->user();
-                        FacadesNotification::route('mail', $user->EMAIL)->notify(new EmailNotify($pedido, $FakeProducts));
+                        FacadesNotification::route('mail', $user->EMAIL)
+                        ->notify(new EmailNotify($pedido, $FakeProducts));
                     }
-                    return response()->json(['message' => "Pedido Registrado com sucesso", 'pedido' => $pedido]);
+                    return response()->json(['message' => "Pedido Registrado com sucesso",
+                    'pedido' => $pedido]);
             }
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -112,7 +117,9 @@ class PedidosRepository implements PedidoInterface
     }
     public function checkQuantidadeProduto(Request $request){
         try{
-            $prod = Estoque::where('PRODUCT_ID', $request->ID)->firstOrFail();
+            $prod = Estoque::where('PRODUCT_ID', $request->ID)
+            ->firstOrFail();
+
             if($prod->QUANTIDADE <= $request->QUANTIDADE){
                 return response()->json(false,400);
             }else{
@@ -130,7 +137,8 @@ class PedidosRepository implements PedidoInterface
             foreach($prod as $p){
                 $qntd = $p->QUANTIDADE;
                 $valor = $p->VALOR;
-                $p = Product::where('ID', $p->ID_PRODUTO)->with(['medida' => function($query){
+                $p = Product::where('ID', $p->ID_PRODUTO)
+                ->with(['medida' => function($query){
                     $query->select('ID', 'NOME');
                 }])->firstOrFail();
                 $p->MEDIDA = $p->medida->NOME;
@@ -180,14 +188,21 @@ class PedidosRepository implements PedidoInterface
                     $flag = false;
                     $helper->startTransaction();
                     $FakeProduct = new ResourcesFakeProduct((object) $produto);
-                    $query = Pedido_Itens::where('ID_PEDIDO', $id)->where('ID_PRODUTO', $FakeProduct->ID)->first();
+                    $query = Pedido_Itens::where('ID_PEDIDO', $id)
+                    ->where('ID_PRODUTO', $FakeProduct->ID)
+                    ->first();
                     if($query != null){
                         $query->QUANTIDADE = $FakeProduct->QUANTIDADE;
                         $query->save();
                         if($query->QUANTIDADE <  $FakeProduct->QUANTIDADE){
+
                             $FakeProduct->QUANTIDADE = intval($query->QUANTIDADE - $FakeProduct->QUANTIDADE);
+
                         }else if($query->QUANTIDADE > $FakeProduct->QUANTIDADE){
-                            $estoque->restauraEstoque($FakeProduct->ID, intval($query->QUANTIDADE - $FakeProduct->QUANTIDADE));
+
+                            $estoque->restauraEstoque($FakeProduct->ID,
+                            intval($query->QUANTIDADE - $FakeProduct->QUANTIDADE));
+
                         }else{
                             $flag = true;
                         }
@@ -224,8 +239,12 @@ class PedidosRepository implements PedidoInterface
                 $empresa = $user->empresa;
                 $startData = Carbon::parse($request->start);
                 $endData = Carbon::parse($request->end);
-                $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->
-                select('ID', 'METODO_PAGAMENTO', 'VALOR_TOTAL', 'APROVADO', 'CREATED_AT')->get();
+
+                $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])
+                ->where('ID_EMPRESA', $empresa->ID)
+                ->select('ID', 'METODO_PAGAMENTO', 'VALOR_TOTAL', 'APROVADO', 'CREATED_AT')
+                ->get();
+
                 foreach($Pedidos as $p){
                     $p->APROVADO = $p->APROVADO == "T" ? "PAGO" : "PENDENTE";
                 }
@@ -236,7 +255,11 @@ class PedidosRepository implements PedidoInterface
                 $startData = Carbon::parse($request->start);
                 $endData = Carbon::parse($request->end);
                 $tmp = null;
-                $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])->where('ID_EMPRESA', $empresa->ID)->paginate(6);
+
+                $Pedidos = Pedidos::whereBetween('CREATED_AT', [$startData, $endData])
+                ->where('ID_EMPRESA', $empresa->ID)
+                ->paginate(6);
+
                 return $Pedidos;
             }
         }catch(\Exception $e){

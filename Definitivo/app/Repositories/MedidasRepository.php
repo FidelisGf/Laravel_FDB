@@ -19,7 +19,10 @@ class MedidasRepository implements MedidasInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            return Medidas::where('ID_EMPRESA', $empresa->ID)->paginate(20);
+
+            return Medidas::where('ID_EMPRESA', $empresa->ID)
+            ->paginate(20);
+
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -41,7 +44,10 @@ class MedidasRepository implements MedidasInterface
                 $medida->ID_EMPRESA = $empresa->ID;
                 $medida->NOME_REAL = $NOME_REAL;
                 $medida->save();
-                event(new MakeLog("Produto/Medidas", "", "insert", json_encode($medida), "", $medida->ID, $empresa->ID, $user->ID));
+
+                event(new MakeLog("Produto/Medidas", "", "insert",
+                json_encode($medida), "", $medida->ID, $empresa->ID, $user->ID));
+
                 return response()->json(["message" => "Medida cadastrada com sucesso !"]);
             }
         }catch(\Exception $e){

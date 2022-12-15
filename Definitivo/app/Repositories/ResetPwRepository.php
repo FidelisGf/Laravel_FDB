@@ -24,6 +24,7 @@ class ResetPwRepository implements ResetPwInterface
             $ResetPw->CODIGO = $token;
             $ResetPw->EMAIL = $email;
             $ResetPw->save();
+
             Mail::to($email)->send(new SendMailPw($token));
             return response()->json(['message' => 'Email enviado com sucesso !']);
         }catch(\Exception $e){
@@ -35,8 +36,12 @@ class ResetPwRepository implements ResetPwInterface
             $newPw = bcrypt($request->PW);
             $ResetPw = null;
             if($ResetPw = ResetPw::where('CODIGO', $request->token)->first()){
+
                 if($ResetPw->DT_USO == null){
-                    $user = Usuario::where('EMAIL', $ResetPw->EMAIL)->first();
+
+                    $user = Usuario::where('EMAIL', $ResetPw->EMAIL)
+                    ->first();
+
                     $user->PASSWORD = $newPw;
                     $user->save();
                     $ResetPw->DT_USO = now()->format('Y-m-d H:i');

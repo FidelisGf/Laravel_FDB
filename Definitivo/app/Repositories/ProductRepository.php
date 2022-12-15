@@ -36,10 +36,17 @@ class ProductRepository implements InterfacesProductInterface
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
-                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
-                    'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-                )->orderBy('ID', 'desc')->paginate(20);
+
+                $PRODUCTS = DB::table('EMPRESAS')
+                ->where('EMPRESAS.ID', $empresa->ID)
+                ->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
+                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+                ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+                ->select('CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',
+                'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE')
+                ->orderBy('ID', 'desc')
+                ->paginate(20);
+
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -56,11 +63,18 @@ class ProductRepository implements InterfacesProductInterface
             if($request->filled('pdf')){
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
-                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->
-                join('MEDIDAS', 'MEDIDAS.ID', '=', 'PRODUCTS.ID_MEDIDA')->select(
-                   'PRODUCTS.ID', 'PRODUCTS.NOME', 'CATEGORIAS.NOME_C', 'MEDIDAS.NOME_REAL',  'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-                )->orderBy('PRODUCTS.VALOR', 'asc')->get();
+
+                $PRODUCTS = DB::table('EMPRESAS')
+                ->where('EMPRESAS.ID', $empresa->ID)
+                ->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+                ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+                ->join('MEDIDAS', 'MEDIDAS.ID', '=', 'PRODUCTS.ID_MEDIDA')
+                ->select('PRODUCTS.ID', 'PRODUCTS.NOME', 'CATEGORIAS.NOME_C',
+                'MEDIDAS.NOME_REAL',  'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE')
+                ->orderBy('PRODUCTS.VALOR', 'asc')
+                ->get();
+
                 return $PRODUCTS;
             }else{
                 $user = auth()->user();
@@ -85,20 +99,31 @@ class ProductRepository implements InterfacesProductInterface
             if($request->filled('pdf')){
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
-                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->
-                join('MEDIDAS', 'MEDIDAS.ID', '=', 'PRODUCTS.ID_MEDIDA')->select(
-                   'PRODUCTS.ID', 'PRODUCTS.NOME', 'CATEGORIAS.NOME_C', 'MEDIDAS.NOME_REAL',  'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-                )->orderBy('PRODUCTS.VALOR', 'desc')->get();
+
+                $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)
+                ->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+                ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+                ->join('MEDIDAS', 'MEDIDAS.ID', '=', 'PRODUCTS.ID_MEDIDA')
+                ->select('PRODUCTS.ID', 'PRODUCTS.NOME', 'CATEGORIAS.NOME_C',
+                'MEDIDAS.NOME_REAL',  'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE')
+                ->orderBy('PRODUCTS.VALOR', 'desc')
+                ->get();
+
                 return $PRODUCTS;
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = Empresa::FindOrFail($empresa->ID)->product()->with([
+
+                $PRODUCTS = Empresa::FindOrFail($empresa->ID)
+                ->product()
+                ->with([
                     'category' => function($query){
                         $query->select('ID_CATEGORIA', 'NOME_C');
                     }
-                ])->orderBy('PRODUCTS.VALOR', 'desc')->paginate(20);
+                ])->orderBy('PRODUCTS.VALOR', 'desc')
+                ->paginate(20);
+
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -113,10 +138,16 @@ class ProductRepository implements InterfacesProductInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
-            join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')->select(
-                'CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE'
-            )->where('CATEGORIAS.ID_CATEGORIA', $id)->paginate(20);
+
+            $PRODUCTS = DB::table('EMPRESAS')->where('EMPRESAS.ID', $empresa->ID)
+            ->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')
+            ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+            ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+            ->select('CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',  'PRODUCTS.ID',
+            'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE')
+            ->where('CATEGORIAS.ID_CATEGORIA', $id)
+            ->paginate(20);
+
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(
@@ -130,12 +161,15 @@ class ProductRepository implements InterfacesProductInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $PRODUCTS = Product::where('ID', $id)->with(['category' => function($query){
+
+            $PRODUCTS = Product::where('ID', $id)
+            ->with(['category' => function($query){
                 $query->select('ID_CATEGORIA', 'NOME_C');
                 }
             ])->with(['medida' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
+
             $materias = collect(new Materiais());
             foreach($PRODUCTS->materias as $matItem){
                 $qntd = $matItem->QUANTIDADE;
@@ -222,10 +256,16 @@ class ProductRepository implements InterfacesProductInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $estoque = Estoque::where('EMPRESA_ID', $user->empresa->ID)->where('PRODUCT_ID', $id);
+
+            $estoque = Estoque::where('EMPRESA_ID', $user->empresa->ID)
+            ->where('PRODUCT_ID', $id);
+
             $estoque->delete();
             $PRODUCT = Product::where('ID',$id)->first();
-            event(new MakeLog("Produtos", "", "delete", "", json_encode($PRODUCT), $PRODUCT->ID, $empresa->ID, $user->ID));
+
+            event(new MakeLog("Produtos", "", "delete", "",
+            json_encode($PRODUCT), $PRODUCT->ID, $empresa->ID, $user->ID));
+
             $PRODUCT->delete();
             return response()->json(
                 [
@@ -244,16 +284,19 @@ class ProductRepository implements InterfacesProductInterface
         try{
             $user = auth()->user();
             $produto = Product::FindOrFail($id);
-            $lucro = $produto->VALOR;
+            $lucro = $produto->VALOR; // 30000
+            $lucroPrct = 0;
             foreach($produto->materias as $matItem){
-                $qntd = $matItem->QUANTIDADE;
-                $custo = $matItem->CUSTO;
+                $qntd = $matItem->QUANTIDADE; //1
+                $custo = $matItem->CUSTO; //5
                 $matItem = Materiais::FindOrFail($matItem->ID_MATERIA);
                 $matItem->QUANTIDADE = $qntd;
                 $matItem->CUSTO = $custo;
+                $lucroPrct += ($matItem->CUSTO * $matItem->QUANTIDADE);
                 $lucro -= ($matItem->CUSTO * $matItem->QUANTIDADE);
             }
-            return response()->json($lucro);
+            $lucroPrct = ($produto->VALOR * $lucroPrct) / 100;
+            return response()->json(['lucro' => $lucro, 'porcentagem' => $lucroPrct]);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -266,8 +309,11 @@ class ProductRepository implements InterfacesProductInterface
         try{
             $search = $request->search;
             $search = ucwords($search);
-            $PRODUCTS = Product::query()->where('NOME', 'LIKE', '%'. $search.'%')
-                                ->orWhere('DESC', 'LIKE', '%'.$search.'%')->paginate(20);
+            $PRODUCTS = Product::query()
+            ->where('NOME', 'LIKE', '%'. $search.'%')
+            ->orWhere('DESC', 'LIKE', '%'.$search.'%')
+            ->paginate(20);
+
             return ProductResource::collection($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
@@ -301,8 +347,13 @@ class ProductRepository implements InterfacesProductInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            return DB::table('PRODUCTS')->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
-            ->where('CATEGORIAS.ID_EMPRESA', '=', $empresa->ID)->where('PRODUCTS.DELETED_AT', '=', null)->count();
+
+            return DB::table('PRODUCTS')
+            ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+            ->where('CATEGORIAS.ID_EMPRESA', '=', $empresa->ID)
+            ->where('PRODUCTS.DELETED_AT', '=', null)
+            ->count();
+
         }catch(\Exception $e){
             return response()->json(
                 [

@@ -77,13 +77,15 @@ class VendaRepository implements VendaInterface
                 $vendas = $vendas->get();
                 foreach($vendas as $venda){
                     $vlTotal_vendas += $venda->VALOR_TOTAL;
-                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d / m / Y :  H:i');
+                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)
+                    ->format('d / m / Y :  H:i');
                 }
             return response()->json(["dados" => $vendas, "vlTotal" => $vlTotal_vendas]);
             }else{
                 $vendas = $vendas->paginate(8);
                 foreach($vendas as $venda){
-                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)->format('d m Y H:i');
+                    $venda->DT_PAGAMENTO = Carbon::parse($venda->DT_PAGAMENTO)
+                    ->format('d m Y H:i');
                 }
                 return $vendas;
             }
@@ -100,7 +102,10 @@ class VendaRepository implements VendaInterface
             $endData = Carbon::parse($request->end);
             $user = auth()->user();
             $empresa = $user->empresa;
-            $vlGastosDespesas = Despesa::where('ID_EMPRESA', $empresa->ID)->whereBetween('DATA', [$startData, $endData])->sum('CUSTO');
+
+            $vlGastosDespesas = Despesa::where('ID_EMPRESA', $empresa->ID)
+            ->whereBetween('DATA', [$startData, $endData])->sum('CUSTO');
+
             $vlTotal_vendas = 0;
             $vlReal = 0;
             $vendas = DB::table('VENDAS')->join('PEDIDOS', function ($joins) use($empresa){
@@ -114,8 +119,8 @@ class VendaRepository implements VendaInterface
             select(DB::raw ("VENDAS.ID as ID_VENDA, MATERIAIS.ID as ID_MATERIAL,
             MATERIAIS.CUSTO as CUSTO_MATERIAL,
             PRODUTOS_MATERIAS.QUANTIDADE as
-            QUANTIDADE_MATERIA, PRODUCTS.NOME, PEDIDOS_ITENS.VALOR as VALOR_PRODUTO, PEDIDOS_ITENS.QUANTIDADE as
-            QUANTIDADE_PRODUTO,PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))
+            QUANTIDADE_MATERIA, PRODUCTS.NOME, PEDIDOS_ITENS.VALOR as VALOR_PRODUTO,
+            PEDIDOS_ITENS.QUANTIDADE as QUANTIDADE_PRODUTO,PEDIDOS.ID as ID_PEDIDO, VENDAS.VALOR_TOTAL"))
             ->distinct(DB::raw("ID_VENDA"))->get();
             $totalGastosSalarios = floatval(DB::table('PAGAMENTOS_SALARIOS')
             ->whereBetween('PAGAMENTOS_SALARIOS.DATA', [$startData, $endData])
@@ -126,7 +131,7 @@ class VendaRepository implements VendaInterface
                 $vlReal += (($v->VALOR_PRODUTO - ( $v->CUSTO_MATERIAL * $v->QUANTIDADE_MATERIA))
                 * $v->QUANTIDADE_PRODUTO);
             }
-            $saldoFinal = ($vlReal - $vlGastosDespesas - $totalGastosSalarios);
+            $saldoFinal = ($vlReal - ($vlGastosDespesas + $totalGastosSalarios));
             return response()->json(["Total" => $vlTotal_vendas, "Lucro_Vendas"
             => $vlReal, "Despesas" => $vlGastosDespesas,
             "Saldo_Final" => $saldoFinal, "Funcionarios" => $totalGastosSalarios]);

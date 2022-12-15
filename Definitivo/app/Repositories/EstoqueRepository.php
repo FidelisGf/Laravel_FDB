@@ -38,11 +38,14 @@ class EstoqueRepository implements EstoqueInterface
             }
             $user = auth()->user();
             $empresa = $user->empresa;
-            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
+
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+            ->with([
                 'product' => function($query){
                     $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
             ])->paginate(6);
+
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(['message' => $e],400);
@@ -52,11 +55,15 @@ class EstoqueRepository implements EstoqueInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->with([
+
+            $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+            ->with([
                 'product' => function($query){
                     $query->select('ID', 'NOME', 'VALOR', 'DESC');
                 }
-            ])->where('QUANTIDADE', '>', 0)->paginate(6);
+            ])->where('QUANTIDADE', '>', 0)
+            ->paginate(6);
+
             return $PRODUCTS;
         }catch(\Exception $e){
             return response()->json(['message'=>$e->getMessage()],400);
@@ -67,19 +74,25 @@ class EstoqueRepository implements EstoqueInterface
             if($request->filled('pdf')){
                 $user = auth()->user();
                 $empresa = $user->empresa;
+
                 $PRODUCTS = DB::table("ESTOQUES")->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
                 ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->select('PRODUCTS.ID',
                 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
-                ->orderBy('ESTOQUES.QUANTIDADE', 'desc')->get();
+                ->orderBy('ESTOQUES.QUANTIDADE', 'desc')
+                ->get();
+
                 return $PRODUCTS;
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')->with([
+
+                $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'desc')
+                ->with([
                     'product' => function($query){
                         $query->select('ID', 'NOME', 'VALOR', 'DESC');
                     }
                 ])->paginate(5);
+
                 return $PRODUCTS;
             }
         }catch(\Exception $e){
@@ -96,7 +109,8 @@ class EstoqueRepository implements EstoqueInterface
             $Estoque->EMPRESA_ID = $empresa->ID;
             $Estoque->QUANTIDADE = $quantidade;
             if($Estoque->save()){
-                return response()->json(['message' => 'Produto criado e adicionado ao estoque da empresa'],200);
+                return response()->json(['message' =>
+                'Produto criado e adicionado ao estoque da empresa'],200);
             }
         }catch(\Exception $e){
             return response()->json([
@@ -112,7 +126,11 @@ class EstoqueRepository implements EstoqueInterface
                 $quantidade = $request->quantidade;
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+
+                $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+                ->where('PRODUCT_ID', '=', $product_id)
+                ->first();
+
                 $Estoque->QUANTIDADE += $quantidade;
                 $prod = new ProductRepository();
                 $check = $prod->descontaQuantidadeMaterial($product_id, $quantidade);
@@ -133,12 +151,19 @@ class EstoqueRepository implements EstoqueInterface
         try{
             $user = auth()->user();
             $empresa = $user->empresa;
-            $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+
+            $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+            ->where('PRODUCT_ID', '=', $product_id)
+            ->first();
+
             $tmp = $Estoque;
             $Estoque->QUANTIDADE -= $quantidade;
             $Estoque->SAIDAS += $quantidade;
             $Estoque->save();
-            event(new MakeLog("Estoque/Quantidade", "QUANTIDADE", "update", json_encode($Estoque), json_encode($tmp), $Estoque->ID, $empresa->ID, $user->ID));
+
+            event(new MakeLog("Estoque/Quantidade", "QUANTIDADE", "update",
+            json_encode($Estoque), json_encode($tmp), $Estoque->ID, $empresa->ID, $user->ID));
+
             return response()->json(['Produto atual no estoque' => $Estoque]);
         }catch(\Exception $e){
             return response()->json([
@@ -151,19 +176,28 @@ class EstoqueRepository implements EstoqueInterface
             if($request->filled('pdf')){
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = DB::table("ESTOQUES")->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
-                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->select('PRODUCTS.ID',
-                'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
-                ->orderBy('ESTOQUES.QUANTIDADE', 'asc')->get();
+
+                $PRODUCTS = DB::table("ESTOQUES")
+                ->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+                ->select('PRODUCTS.ID','PRODUCTS.NOME', 'PRODUCTS.VALOR',
+                'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
+                ->orderBy('ESTOQUES.QUANTIDADE', 'asc')
+                ->get();
+
                 return $PRODUCTS;
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->orderBy('QUANTIDADE', 'asc')->with([
+
+                $PRODUCTS = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+                ->orderBy('QUANTIDADE', 'asc')
+                ->with([
                     'product' => function($query){
                         $query->select('ID', 'NOME', 'VALOR', 'DESC');
                     }
                 ])->paginate(5);
+
                 return $PRODUCTS;
             }
 
@@ -173,7 +207,10 @@ class EstoqueRepository implements EstoqueInterface
     }
     public function getQuantidadeProduct($id){
         try{
-            $estoque = Estoque::where('PRODUCT_ID', $id)->firstOrFail();
+
+            $estoque = Estoque::where('PRODUCT_ID', $id)
+            ->firstOrFail();
+
             return $estoque->QUANTIDADE;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -183,7 +220,11 @@ class EstoqueRepository implements EstoqueInterface
         try{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->where('PRODUCT_ID', '=', $product_id)->first();
+
+                $Estoque = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+                ->where('PRODUCT_ID', '=', $product_id)
+                ->first();
+
                 $Estoque->QUANTIDADE += $quantidade;
                 $Estoque->save();
                 return response()->json(["message" => 'Estoque Adicionado com successo !']);
@@ -199,20 +240,29 @@ class EstoqueRepository implements EstoqueInterface
             if($request->filled('pdf')){
                 $user = auth()->user();
                 $empresa = $user->empresa;
+
                 $PRODUCTS = DB::table("ESTOQUES")->where('ESTOQUES.EMPRESA_ID', '=', $empresa->ID)
-                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')->select('PRODUCTS.ID',
-                'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')->where('ESTOQUES.SAIDAS', '!=', null)
-                ->orderBy('ESTOQUES.SAIDAS', 'desc')->get();
+                ->join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+                ->select('PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR',
+                'ESTOQUES.QUANTIDADE', 'ESTOQUES.SAIDAS')
+                ->where('ESTOQUES.SAIDAS', '!=', null)
+                ->orderBy('ESTOQUES.SAIDAS', 'desc')
+                ->get();
+
                 return $PRODUCTS;
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
-                $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)->whereNotNull('SAIDAS')->
-                orderBy('SAIDAS', 'desc')->with([
+
+                $produtos = Estoque::where('EMPRESA_ID', '=', $empresa->ID)
+                ->whereNotNull('SAIDAS')->
+                orderBy('SAIDAS', 'desc')
+                ->with([
                     'product' => function($query){
                         $query->select('ID', 'NOME', 'VALOR', 'DESC');
                     }
                 ])->paginate(6);
+
                 return $produtos;
             }
         }catch(\Exception $e){

@@ -99,7 +99,10 @@ class UsuarioRepository implements UsuarioInterface
     public function getActiveUsers(){
         try{
             $empresa = auth()->user()->empresa->ID;
-            $actives = Usuario::where('EMPRESA_ID', $empresa)->count();
+
+            $actives = Usuario::where('EMPRESA_ID', $empresa)
+            ->count();
+
             return $actives;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
@@ -121,7 +124,10 @@ class UsuarioRepository implements UsuarioInterface
             $monthFinal = date('31-M-Y');
             $monthFinal = Carbon::parse($monthFinal);
             $user = Usuario::FindOrFail($id);
-            return $user->penalidades->whereBetween('DATA', [$monthStart, $monthFinal]);
+
+            return $user->penalidades
+            ->whereBetween('DATA', [$monthStart, $monthFinal]);
+
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }
@@ -210,7 +216,8 @@ class UsuarioRepository implements UsuarioInterface
             $yearStart = Carbon::parse($yearStart);
             $yearFinal = date('31-12-Y');
             $yearFinal = Carbon::parse($yearFinal);
-            $mediaVendas = floatval(DB::table('PEDIDOS')->whereBetween('PEDIDOS.DT_PAGAMENTO', [$yearStart, $yearFinal])
+            $mediaVendas = floatval(DB::table('PEDIDOS')
+            ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$yearStart, $yearFinal])
             ->where('PEDIDOS.ID_USER', $id)
             ->avg('PEDIDOS.VALOR_TOTAL'));
             return response()->json([$mediaVendas]);
@@ -237,8 +244,8 @@ class UsuarioRepository implements UsuarioInterface
         try{
             $salarios = DB::table('SALARIOS_CHANGES')
             ->where('ID_USER', $id)
-            ->orderBy('SALARIO', 'asc')
-            ->select('SALARIO')
+            ->select('SALARIOS_CHANGES.SALARIO')
+            ->orderBy('SALARIOS_CHANGES.CREATED_AT', 'ASC')
             ->get();
             $salariosArray = [];
             foreach($salarios as $s){
@@ -269,12 +276,13 @@ class UsuarioRepository implements UsuarioInterface
                 USERS.EMPRESA_ID
             ')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
-            ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE' , '=', 'PENALIDADES.ID')
+            ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE'
+            , '=', 'PENALIDADES.ID')
             ->where('USERS.EMPRESA_ID', $empresa->ID)
             ->where('USERS.ID_ROLE', '!=', 1)
             ->groupByRaw('1, 2, 3, 5, 8')
             ->get();
-            foreach($salarios as $s){
+            foreach($salarios as $s){ // FLAG -> determinar se a empresa recebe só salario, ou recebe adiantamento tambem
                 if($request->FILTRO == "Salario" && $request->FLAG == false){
                     if($s->COMPARATIVO == $s->DESPESATOTAL){
                         $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
@@ -382,7 +390,8 @@ class UsuarioRepository implements UsuarioInterface
             $empresa = auth()->user()->empresa;
             $dtAtual = now()->format("m");
             $salariosPagos = Pagamento_Salario::where('ID_EMPRESA', $empresa->ID)
-            ->where('TIPO', $request->TIPO)->selectRaw('extract (MONTH from PAGAMENTOS_SALARIOS.DATA) as mes_pagamento')
+            ->where('TIPO', $request->TIPO)
+            ->selectRaw('extract (MONTH from PAGAMENTOS_SALARIOS.DATA) as mes_pagamento')
             ->get();
             foreach($salariosPagos as $s){
                if($s->MES_PAGAMENTO == $dtAtual){

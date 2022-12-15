@@ -32,7 +32,8 @@ class CategoryRepository implements CategoryInterface //Precisa de refatoração
     }
     public function findCategoryWithProductsIn(){
         try{
-            return Category::whereHas('product')->paginate(15);
+            return Category::whereHas('product')
+            ->paginate(15);
         }catch(\Exception $e){
             return response()->json(
                 [
@@ -54,10 +55,14 @@ class CategoryRepository implements CategoryInterface //Precisa de refatoração
                 $Category->NOME_C = $request->NOME_C;
                 $Category->NOME_REAL = $NOME_REAL;
                 if($Category->save()){
-                    event(new MakeLog("Categorias", "", "insert", "$Category->NOME_C", "", $Category->ID_CATEGORIA, $empresa->ID, $user->ID));
+
+                    event(new MakeLog("Categorias", "", "insert",
+                    "$Category->NOME_C", "", $Category->ID_CATEGORIA, $empresa->ID, $user->ID));
+
                     return response()->json(["message" => "Categoria cadastrada com sucesso !"]);
                 }
-                event(new MakeLog("Categorias", "", "insert", json_encode($Category), "", $Category->ID, $empresa->ID, $user->ID));
+                event(new MakeLog("Categorias", "", "insert", json_encode($Category), "",
+                $Category->ID, $empresa->ID, $user->ID));
             }
         }catch(\Exception $e){
            return response()->json(

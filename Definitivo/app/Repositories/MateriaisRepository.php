@@ -21,8 +21,11 @@ class MateriaisRepository implements MateriaisInterface
         $user = auth()->user();
         $empresa = $user->empresa;
         try{
+
             $materiais = Materiais::where('ID_EMPRESA', $empresa->ID)
-            ->where('QUANTIDADE', '>', 0)->paginate(7);
+            ->where('QUANTIDADE', '>', 0)
+            ->paginate(7);
+
             return $materiais;
         }catch(\Exception $e){
             return response()->json(
@@ -43,7 +46,10 @@ class MateriaisRepository implements MateriaisInterface
                 $tmp = $material->QUANTIDADE;
                 $material->QUANTIDADE += $request->QUANTIDADE;
                 $material->save();
-                event(new MakeLog("Materiais", "QUANTIDADE", "update", "$material->QUANTIDADE", "$tmp", $material->ID, $empresa->ID, $user->ID));
+
+                event(new MakeLog("Materiais", "QUANTIDADE", "update",
+                "$material->QUANTIDADE", "$tmp", $material->ID, $empresa->ID, $user->ID));
+
                 return response()->json(["message" => 'Quantidade Adicionada com sucesso !']);
             }
         }catch(\Exception $e){
@@ -86,7 +92,10 @@ class MateriaisRepository implements MateriaisInterface
                 $material->NOME_REAL = $NOME_REAL;
                 $material->QUANTIDADE = $request->QUANTIDADE;
                 if($material->save()) {
-                    event(new MakeLog("Materiais", "", "insert", "$material->NOME", "", $material->ID, $empresa->ID, $user->ID));
+
+                    event(new MakeLog("Materiais", "", "insert", "$material->NOME", "",
+                     $material->ID, $empresa->ID, $user->ID));
+
                     return $material;
                 };
 

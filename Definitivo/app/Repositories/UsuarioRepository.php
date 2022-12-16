@@ -266,18 +266,19 @@ class UsuarioRepository implements UsuarioInterface
             $empresa = auth()->user()->empresa;
             $vlTotal = 0;
             $salarios = DB::table('USERS')
+            ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
             ->selectRaw('
                 USERS.ID as id,
                 USERS.NAME as NOME,
                 USERS.CPF as CPF,
                 sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as DespesaTotal,
                 USERS.SALARIO as SALARIO_BASE,
-                ((USERS.SALARIO + sum(PEDIDOS.COMISSAO)) - sum(HISTORICO_PENALIDADES.VALOR_ATUAL)) as Final,
+                sum(PEDIDOS.COMISSAO) + USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as Final,
                 sum(HISTORICO_PENALIDADES.VALOR_ORIGINAL) as Comparativo,
-                USERS.EMPRESA_ID,
-                sum(PEDIDOS.COMISSAO) as comissao
+                USERS.EMPRESA_ID
+
+
             ')
-            ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
             ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE'
             , '=', 'PENALIDADES.ID')
@@ -286,52 +287,52 @@ class UsuarioRepository implements UsuarioInterface
             ->groupByRaw('1, 2, 3, 5, 8')
             ->get();
 
-            foreach($salarios as $s){ // FLAG -> determinar se a empresa recebe só salario, ou recebe adiantamento tambem
-                // $comissao = DB::table('PEDIDOS')
-                // ->where('ID_USER', $s->ID)
-                // ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
-                // ->get();
-                // foreach($comissao as $c){
-                //     if($c->COMISSAO != null){
-                //         $s->SALARIO_BASE += $c->COMISSAO;
-                //     }
-                // }
-                if($request->FILTRO == "Salario" && $request->FLAG == false){
-                    if($s->COMPARATIVO == $s->DESPESATOTAL){
-                        $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
-                        $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
-                    }
-                    $s->FINAL =  ($s->FINAL * 60)/100;
-                    $vlTotal += $s->FINAL;
-                    $s->FINAL = number_format($s->FINAL, 2, ',', '.');
-                }else if($request->FILTRO == "Adiantamento" && $request->FLAG == false){
-                    if($s->COMPARATIVO == $s->DESPESATOTAL){
-                        $s->DESPESATOTAL = ($s->DESPESATOTAL * 40) / 100;
-                        $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
+            // foreach($salarios as $s){ // FLAG -> determinar se a empresa recebe só salario, ou recebe adiantamento tambem
+            //     // $comissao = DB::table('PEDIDOS')
+            //     // ->where('ID_USER', $s->ID)
+            //     // ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
+            //     // ->get();
+            //     // foreach($comissao as $c){
+            //     //     if($c->COMISSAO != null){
+            //     //         $s->SALARIO_BASE += $c->COMISSAO;
+            //     //     }
+            //     // }
+            //     if($request->FILTRO == "Salario" && $request->FLAG == false){
+            //         if($s->COMPARATIVO == $s->DESPESATOTAL){
+            //             $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
+            //             $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
+            //         }
+            //         $s->FINAL =  ($s->FINAL * 60)/100;
+            //         $vlTotal += $s->FINAL;
+            //         $s->FINAL = number_format($s->FINAL, 2, ',', '.');
+            //     }else if($request->FILTRO == "Adiantamento" && $request->FLAG == false){
+            //         if($s->COMPARATIVO == $s->DESPESATOTAL){
+            //             $s->DESPESATOTAL = ($s->DESPESATOTAL * 40) / 100;
+            //             $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
 
-                    }
-                    $s->FINAL =  ($s->FINAL * 40)/100;
+            //         }
+            //         $s->FINAL =  ($s->FINAL * 40)/100;
 
-                    $vlTotal += $s->FINAL;
-                    $s->FINAL = number_format($s->FINAL, 2, ',', '.');
-                }
-                if($request->FLAG == true){
-                    $vlTotal += $s->FINAL;
-                }
-                if($s->FINAL == null || intval($s->FINAL) <= 0 ){
-                    $s->DESPESATOTAL = number_format(0, 2, ',', '.');
-                    $s->FINAL = $s->SALARIO_BASE;
-                    if($request->FILTRO == "Adiantamento" && $request->FLAG == false){
-                        $s->FINAL =  ($s->FINAL * 40)/100;
-                    }else if ($request->FILTRO == "Salario" && $request->FLAG == false){
-                        $s->FINAL =  ($s->FINAL * 60)/100;
-                    }
-                    $vlTotal += $s->FINAL;
-                    $s->FINAL = number_format($s->FINAL, 2, ',', '.');
-                }else{
-                    $s->DESPESATOTAL = number_format($s->DESPESATOTAL, 2, ',', '.');
-                }
-            }
+            //         $vlTotal += $s->FINAL;
+            //         $s->FINAL = number_format($s->FINAL, 2, ',', '.');
+            //     }
+            //     if($request->FLAG == true){
+            //         $vlTotal += $s->FINAL;
+            //     }
+            //     if($s->FINAL == null || intval($s->FINAL) <= 0 ){
+            //         $s->DESPESATOTAL = number_format(0, 2, ',', '.');
+            //         $s->FINAL = $s->SALARIO_BASE;
+            //         if($request->FILTRO == "Adiantamento" && $request->FLAG == false){
+            //             $s->FINAL =  ($s->FINAL * 40)/100;
+            //         }else if ($request->FILTRO == "Salario" && $request->FLAG == false){
+            //             $s->FINAL =  ($s->FINAL * 60)/100;
+            //         }
+            //         $vlTotal += $s->FINAL;
+            //         $s->FINAL = number_format($s->FINAL, 2, ',', '.');
+            //     }else{
+            //         $s->DESPESATOTAL = number_format($s->DESPESATOTAL, 2, ',', '.');
+            //     }
+            // }
             return response()->json(['data' => $salarios, 'vlTotal' => $vlTotal]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);

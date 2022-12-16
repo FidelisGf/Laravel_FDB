@@ -3,6 +3,7 @@
 namespace App\Repositories;
 
 use App\Cliente;
+use App\Config_General;
 use App\Estoque;
 use App\Events\MakeLog;
 use App\Events\VendaGerada;
@@ -98,6 +99,12 @@ class PedidosRepository implements PedidoInterface
                         $FakeProducts->push($FakeProduct);
                     }
                     $pedido->VALOR_TOTAL = $vlTotal;
+                    $comissao = Config_General::where('NOME', '=', 'Comissao')->first();
+                    if($comissao != null && $pedido->APROVADO == 'T' && $comissao->ESTADO == 1){
+                        $pedido->COMISSAO = ($pedido->VALOR_TOTAL * floatval($comissao->PARAMETRO) / 100);
+                    }else{
+                        $comissao = false;
+                    }
                     $pedido->save();
                     foreach($ItensPedido as $item){
                         $item->ID_PEDIDO = $pedido->ID;
@@ -105,6 +112,7 @@ class PedidosRepository implements PedidoInterface
                     }
                     if($pedido->APROVADO == 'T' && $request->filled('ID_CLIENTE')){
                         $user = auth()->user();
+
                         FacadesNotification::route('mail', $user->EMAIL)
                         ->notify(new EmailNotify($pedido, $FakeProducts));
                     }

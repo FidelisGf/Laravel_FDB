@@ -2,6 +2,7 @@
 
 namespace App\Repositories;
 
+use App\Config_General;
 use App\Empresa;
 use App\Historico_Penalidade;
 use App\Http\interfaces\UsuarioInterface;
@@ -258,7 +259,7 @@ class UsuarioRepository implements UsuarioInterface
     }
     public function getFolhaSalarioUsers(Request $request){
         try{
-            $monthStart = date('01-M-Y');
+            $monthStart = date('16-M-Y');
             $monthStart = Carbon::parse($monthStart);
             $monthFinal = date('31-M-Y');
             $monthFinal = Carbon::parse($monthFinal);
@@ -271,10 +272,12 @@ class UsuarioRepository implements UsuarioInterface
                 USERS.CPF as CPF,
                 sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as DespesaTotal,
                 USERS.SALARIO as SALARIO_BASE,
-                (USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL)) as Final,
+                ((USERS.SALARIO + sum(PEDIDOS.COMISSAO)) - sum(HISTORICO_PENALIDADES.VALOR_ATUAL)) as Final,
                 sum(HISTORICO_PENALIDADES.VALOR_ORIGINAL) as Comparativo,
-                USERS.EMPRESA_ID
+                USERS.EMPRESA_ID,
+                sum(PEDIDOS.COMISSAO) as comissao
             ')
+            ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
             ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE'
             , '=', 'PENALIDADES.ID')
@@ -282,7 +285,17 @@ class UsuarioRepository implements UsuarioInterface
             ->where('USERS.ID_ROLE', '!=', 1)
             ->groupByRaw('1, 2, 3, 5, 8')
             ->get();
+
             foreach($salarios as $s){ // FLAG -> determinar se a empresa recebe só salario, ou recebe adiantamento tambem
+                // $comissao = DB::table('PEDIDOS')
+                // ->where('ID_USER', $s->ID)
+                // ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
+                // ->get();
+                // foreach($comissao as $c){
+                //     if($c->COMISSAO != null){
+                //         $s->SALARIO_BASE += $c->COMISSAO;
+                //     }
+                // }
                 if($request->FILTRO == "Salario" && $request->FLAG == false){
                     if($s->COMPARATIVO == $s->DESPESATOTAL){
                         $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
@@ -295,8 +308,10 @@ class UsuarioRepository implements UsuarioInterface
                     if($s->COMPARATIVO == $s->DESPESATOTAL){
                         $s->DESPESATOTAL = ($s->DESPESATOTAL * 40) / 100;
                         $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
+
                     }
                     $s->FINAL =  ($s->FINAL * 40)/100;
+
                     $vlTotal += $s->FINAL;
                     $s->FINAL = number_format($s->FINAL, 2, ',', '.');
                 }

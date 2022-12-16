@@ -17,7 +17,7 @@ class Pedidos extends Model
     protected $keyType = 'integer';
     public $timestamps = true;
     protected $fillable = ['ID', 'METODO_PAGAMENTO',
-                          'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO', 'ID_CLIENTE', 'ID_USER'];
+                          'ID_EMPRESA', 'VALOR_TOTAL', 'APROVADO', 'DT_PAGAMENTO', 'ID_CLIENTE', 'ID_USER', 'COMISSAO'];
     public function empresas(){
         return $this->belongsTo(Empresa::class, 'ID_EMPRESA', 'ID');
     }

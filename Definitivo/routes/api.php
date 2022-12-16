@@ -3,6 +3,7 @@
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\CategoryController;
 use App\Http\Controllers\ClienteController;
+use App\Http\Controllers\Config_GeneralController;
 use App\Http\Controllers\ConfigFolhaController;
 use App\Http\Controllers\DespesaController;
 use App\Http\Controllers\EmpresaController;
@@ -74,10 +75,12 @@ Route::group(['middleware' => ['jwt.verify']], function() {
 
     //Ações que Admin's e gerentes podem executar no sistema
 
+    Route::post('/setConfig', [Config_GeneralController::class, 'setConfig'])->middleware(FuncMiddleware::class);
+    Route::post('/getConfig', [Config_GeneralController::class, 'getConfig'])->middleware(FuncMiddleware::class);
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'])->middleware(FuncMiddleware::class);
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'])->middleware(FuncMiddleware::class);
     Route::get('/getVendasPorDia', [VendaController::class, 'getVendasPorDia'])->middleware(FuncMiddleware::class);
-    Route::get("getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
+    Route::get("/getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
     Route::get('/getTotalVendasUltimosTresMeses', [VendaController::class, 'getTotalVendasInTheLastThreeMonths'])->middleware(FuncMiddleware::class);
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque'])->middleware(FuncMiddleware::class);
     Route::get('/pedidos/{id}', [PedidosController::class, 'show'])->middleware(FuncMiddleware::class);
@@ -98,6 +101,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/showAjuste', [ConfigFolhaController::class , 'showAjuste'])->middleware(FuncMiddleware::class);
     Route::post('/checkIfWageWasPayed', [UsuarioController::class, 'checkIfWageWasPayed'])->middleware(FuncMiddleware::class);
     Route::get('/getCompleteHistoryPenalidades/{id}', [UsuarioController::class, 'getCompleteHistoryPenalidades'])->middleware(FuncMiddleware::class);
+
     //Resources
 
     Route::resource('materiais', 'MateriaisController');

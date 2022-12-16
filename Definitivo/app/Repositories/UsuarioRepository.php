@@ -330,12 +330,14 @@ class UsuarioRepository implements UsuarioInterface
                 USERS.ID as id,
                 USERS.NAME as NOME,
                 USERS.CPF as CPF,
-                sum(PENALIDADES.DESCONTO) as DespesaTotal,
+                sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as DespesaTotal,
                 USERS.SALARIO as SALARIO_BASE,
-                (USERS.SALARIO - sum(PENALIDADES.DESCONTO)) as Final,
+                (USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL)) as Final,
                 USERS.EMPRESA_ID
             ')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
+            ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE'
+            , '=', 'PENALIDADES.ID')
             ->where('USERS.EMPRESA_ID', $empresa->ID)
             ->where('USERS.ID_ROLE', '!=', 1)
             ->groupByRaw('1, 2, 3, 5, 7')
@@ -345,6 +347,11 @@ class UsuarioRepository implements UsuarioInterface
                 if($s->FINAL == null){
                     $s->DESPESATOTAL = floatval(0);
                     $s->FINAL = $s->SALARIO_BASE;
+                }
+                if($request->TIPO == "Salario"){
+                    $s->FINAL = ($s->FINAL * 60) / 100;
+                }else{
+                    $s->FINAL = ($s->FINAL * 40) / 100;
                 }
                 $totalPago += $s->FINAL;
                 $penalidades = Penalidade::where('ID_USER', $s->ID)->get();

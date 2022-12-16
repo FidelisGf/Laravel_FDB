@@ -30,7 +30,7 @@ class ConfigFolhaRepository
                 $config->DT_ADIANTAMENTO = null;
             }
             $config->save();
-            return response()->json(['message' => 'Ajustes lançados com sucesso !']);
+            return response()->json(['message' => 'Configurações de Folha realizadas com sucesso']);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()]);
         }

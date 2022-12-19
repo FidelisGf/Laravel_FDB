@@ -331,13 +331,14 @@ class UsuarioRepository implements UsuarioInterface
         try{
             $empresa = auth()->user()->empresa;
             $salarios = DB::table('USERS')
+            ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
             ->selectRaw('
                 USERS.ID as id,
                 USERS.NAME as NOME,
                 USERS.CPF as CPF,
                 sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as DespesaTotal,
                 USERS.SALARIO as SALARIO_BASE,
-                (USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL)) as Final,
+                (sum(PEDIDOS.COMISSAO) / 4) + USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as Final,
                 USERS.EMPRESA_ID
             ')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')

@@ -295,7 +295,7 @@ class ProductRepository implements InterfacesProductInterface
                 $lucroPrct += ($matItem->CUSTO * $matItem->QUANTIDADE);
                 $lucro -= ($matItem->CUSTO * $matItem->QUANTIDADE);
             }
-            $lucroPrct = ($produto->VALOR * $lucroPrct) / 100;
+            $lucroPrct = (($produto->VALOR - ($custo)) / $produto->VALOR) * 100;
             return response()->json(['lucro' => $lucro, 'porcentagem' => $lucroPrct]);
         }catch(\Exception $e){
             return response()->json(

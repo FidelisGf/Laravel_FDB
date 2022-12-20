@@ -169,7 +169,8 @@ class ProductRepository implements InterfacesProductInterface
             ])->with(['medida' => function($query){
                 $query->select('ID', 'NOME');
             }])->firstOrFail();
-
+            // $image = base64_decode($PRODUCTS->IMAGE);
+            // $PRODUCTS->IMAGE = $image = file_get_contents($image);
             $materias = collect(new Materiais());
             foreach($PRODUCTS->materias as $matItem){
                 $qntd = $matItem->QUANTIDADE;
@@ -196,13 +197,24 @@ class ProductRepository implements InterfacesProductInterface
             $validatedData = $request->validated();
             if($validatedData){
                 $produto = new Product();
+                // if(empty($request->file('file')->getRealPath())){
+                //     return response()->json(['message' => 'Imagem inválida !'],400);
+                // }
+                // $path = $request->file('file')->getRealPath();
+                // $image = file_get_contents($path);
+                // $bs64 = base64_encode($image);
+                // $produto->IMAGE = $bs64;
                 $produto->NOME = $request->NOME;
                 $produto->DESC = $request->DESC;
                 $produto->VALOR = $request->VALOR;
                 $produto->ID_CATEGORIA = $request->ID_CATEGORIA;
                 $produto->ID_MEDIDA = $request->ID_MEDIDA;
+                $image = base64_encode(file_get_contents($request->file('IMAGE')->path()));
+                $produto->IMAGE = $image;
                 $produto->save();
                 $materias = collect(new Materiais());
+
+                $request->MATERIAIS = json_decode($request->MATERIAIS);
                 foreach($request->MATERIAIS as $material){
                     $produto_material = new Produtos_Materias();
                     $materia = (object) $material;
@@ -221,7 +233,7 @@ class ProductRepository implements InterfacesProductInterface
                     $estoque->storeProdutoInEstoque($produto->ID, $quantidade);
                     $helper->commit();
                     return response()->json(
-                        $produto
+                        $image
                     );
                 }
             }

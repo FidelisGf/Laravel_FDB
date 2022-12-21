@@ -36,6 +36,8 @@ class AuthController extends Controller
                 ));
                 if(auth()->user()){
                     if(auth()->user()->role->LEVEL == 10){
+                        $image = base64_encode(file_get_contents($request->file('IMAGE')->path()));
+                        $user->IMAGE = $image;
                         $user->EMPRESA_ID = auth()->user()->empresa->ID;
                         $user->SALARIO = $request->SALARIO;
                         $user->save();

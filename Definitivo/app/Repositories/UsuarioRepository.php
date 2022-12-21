@@ -182,6 +182,7 @@ class UsuarioRepository implements UsuarioInterface
             //$monthFinal = Carbon::parse($monthFinal);
             $valorTotalVendas = 0;
             $usuario = Usuario::FindOrFail($id);
+
             $cargo = $usuario->role;
 
             $qntdVendas = $usuario->pedidos
@@ -195,7 +196,7 @@ class UsuarioRepository implements UsuarioInterface
             ->whereBetween('DATA', [$monthStart, $monthFinal])
             ->count();
             $usuario = $usuario->only('ID', 'NAME', 'EMAIL', 'CPF',
-            'CREATED_AT', 'UPDATED_AT', 'SALARIO', 'ID_ROLE');
+            'CREATED_AT', 'UPDATED_AT', 'SALARIO', 'ID_ROLE', 'IMAGE');
 
             return response()->json(['usuario' => $usuario, 'qntdVendas' => $qntdVendas, 'qntdPenalidades'
             =>$qntdPenalidades, 'totalVendido' => $valorTotalVendas, 'cargo' => $cargo],200);

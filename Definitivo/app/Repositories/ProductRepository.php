@@ -197,13 +197,6 @@ class ProductRepository implements InterfacesProductInterface
             $validatedData = $request->validated();
             if($validatedData){
                 $produto = new Product();
-                // if(empty($request->file('file')->getRealPath())){
-                //     return response()->json(['message' => 'Imagem inválida !'],400);
-                // }
-                // $path = $request->file('file')->getRealPath();
-                // $image = file_get_contents($path);
-                // $bs64 = base64_encode($image);
-                // $produto->IMAGE = $bs64;
                 $produto->NOME = $request->NOME;
                 $produto->DESC = $request->DESC;
                 $produto->VALOR = $request->VALOR;

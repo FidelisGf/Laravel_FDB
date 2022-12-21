@@ -267,8 +267,10 @@ class UsuarioRepository implements UsuarioInterface
             $empresa = auth()->user()->empresa;
             $vlTotal = 0;
             $salarios = DB::table('USERS')
-            ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
-
+            ->leftJoin('PEDIDOS', function($join){
+                $join->on('PEDIDOS.ID_USER', '=', 'USERS.ID')
+                ->where('PEDIDOS.PG_COMISSAO', '=', null);
+             })
             ->selectRaw('
                 USERS.ID as id,
                 USERS.NAME as NOME,
@@ -323,6 +325,10 @@ class UsuarioRepository implements UsuarioInterface
     }
     public function makeWagePayment(Request $request){
         try{
+            $monthStart = date('16-M-Y');
+            $monthStart = Carbon::parse($monthStart);
+            $monthFinal = date('31-M-Y');
+            $monthFinal = Carbon::parse($monthFinal);
             $empresa = auth()->user()->empresa;
             $salarios = DB::table('USERS')
             ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
@@ -370,7 +376,6 @@ class UsuarioRepository implements UsuarioInterface
                     $s->FINAL -= $s->DESPESATOTAL;
                     $s->FINAL += $s->COMISSAO_TOTAL;
                     $totalPago += $s->FINAL;
-
                 }
                 $penalidades = Penalidade::where('ID_USER', $s->ID)->get();
                     if(!empty($penalidades)){
@@ -399,6 +404,12 @@ class UsuarioRepository implements UsuarioInterface
                     }
                 }
             }
+            DB::table('PEDIDOS')
+            ->whereBetween('PEDIDOS.DT_PAGAMENTO', [$monthStart, $monthFinal])
+            ->where('PEDIDOS.PG_COMISSAO', '=', null)
+            ->update(["PEDIDOS.PG_COMISSAO" => now()->format('Y-m-d H:i')]);
+
+
             $pagamentoSalario = new Pagamento_Salario();
             $pagamentoSalario->VALOR_PAGO = $totalPago;
             $pagamentoSalario->TIPO = $request->TIPO;

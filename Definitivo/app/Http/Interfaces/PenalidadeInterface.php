@@ -6,4 +6,6 @@ use Illuminate\Http\Request;
 
 interface PenalidadeInterface{
     public function store(StorePenalidadeValidator $request);
+    public function getDescontoMensalByUser($id);
+    public function destroy($id);
 }

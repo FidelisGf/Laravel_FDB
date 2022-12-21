@@ -268,60 +268,53 @@ class UsuarioRepository implements UsuarioInterface
             $vlTotal = 0;
             $salarios = DB::table('USERS')
             ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
+
             ->selectRaw('
                 USERS.ID as id,
                 USERS.NAME as NOME,
                 USERS.CPF as CPF,
                 sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as DespesaTotal,
                 USERS.SALARIO as SALARIO_BASE,
-                (sum(PEDIDOS.COMISSAO) / 4) + USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as Final,
+                USERS.SALARIO as Final,
                 sum(HISTORICO_PENALIDADES.VALOR_ORIGINAL) as Comparativo,
+                sum(PEDIDOS.COMISSAO) as COMISSAO_TOTAL,
                 USERS.EMPRESA_ID
             ')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
-            ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE'
-            , '=', 'PENALIDADES.ID')
+            ->leftJoin('HISTORICO_PENALIDADES', function($join){
+                $join->on('PENALIDADES.ID', '=', 'HISTORICO_PENALIDADES.ID_PENALIDADE')
+                ->where('HISTORICO_PENALIDADES.VALOR_ATUAL', '>', '0');
+             })
             ->where('USERS.EMPRESA_ID', $empresa->ID)
             ->where('USERS.ID_ROLE', '!=', 1)
-            ->groupByRaw('1, 2, 3, 5, 8')
+            ->groupByRaw('1, 2, 3, 5, 9')
             ->get();
-
-            foreach($salarios as $s){ // FLAG -> determinar se a empresa recebe só salario, ou recebe adiantamento tambem
-                if($request->FILTRO == "Salario" && $request->FLAG == false){
-                    if($s->COMPARATIVO == $s->DESPESATOTAL){
-                        $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
-                        $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
-                    }
-                    $s->FINAL =  ($s->FINAL * 60)/100;
-                    $vlTotal += $s->FINAL;
-                    $s->FINAL = number_format($s->FINAL, 2, ',', '.');
-                }else if($request->FILTRO == "Adiantamento" && $request->FLAG == false){
-                    if($s->COMPARATIVO == $s->DESPESATOTAL){
-                        $s->DESPESATOTAL = ($s->DESPESATOTAL * 40) / 100;
-                        $s->FINAL = ($s->FINAL + $s->COMPARATIVO) - $s->DESPESATOTAL;
-
-                    }
-                    $s->FINAL =  ($s->FINAL * 40)/100;
-
-                    $vlTotal += $s->FINAL;
-                    $s->FINAL = number_format($s->FINAL, 2, ',', '.');
+            foreach($salarios as $s){
+                if($s->DESPESATOTAL == null){
+                    $s->DESPESATOTAL = 0;
                 }
                 if($request->FLAG == true){
+                    $s->FINAL -= $s->DESPESATOTAL;
+                    $s->FINAL += $s->COMISSAO_TOTAL;
                     $vlTotal += $s->FINAL;
+                }else if($request->FLAG == false){
+                        if($request->FILTRO == "Salario"){
+                            $s->FINAL = ($s->FINAL * 60) / 100;
+                            if($s->COMPARATIVO == $s->DESPESATOTAL){
+                                $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
+                            }
+                        }else{
+                            $s->FINAL = ($s->FINAL * 40) / 100;
+                            if($s->COMPARATIVO == $s->DESPESATOTAL){
+                                $s->DESPESATOTAL = ($s->DESPESATOTAL * 40) / 100;
+                            }
+                        }
+                        $s->FINAL -= $s->DESPESATOTAL;
+                        $s->FINAL += $s->COMISSAO_TOTAL;
+                        $vlTotal += $s->FINAL;
                 }
-                if($s->FINAL == null || intval($s->FINAL) <= 0 ){
-                    $s->DESPESATOTAL = number_format(0, 2, ',', '.');
-                    $s->FINAL = $s->SALARIO_BASE;
-                    if($request->FILTRO == "Adiantamento" && $request->FLAG == false){
-                        $s->FINAL =  ($s->FINAL * 40)/100;
-                    }else if ($request->FILTRO == "Salario" && $request->FLAG == false){
-                        $s->FINAL =  ($s->FINAL * 60)/100;
-                    }
-                    $vlTotal += $s->FINAL;
-                    $s->FINAL = number_format($s->FINAL, 2, ',', '.');
-                }else{
-                    $s->DESPESATOTAL = number_format($s->DESPESATOTAL, 2, ',', '.');
-                }
+                $s->FINAL = number_format($s->FINAL, 2, ',', '.');
+                $s->DESPESATOTAL = number_format($s->DESPESATOTAL, 2, ',', '.');
             }
             return response()->json(['data' => $salarios, 'vlTotal' => $vlTotal]);
         }catch(\Exception $e){
@@ -339,49 +332,69 @@ class UsuarioRepository implements UsuarioInterface
                 USERS.CPF as CPF,
                 sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as DespesaTotal,
                 USERS.SALARIO as SALARIO_BASE,
-                (sum(PEDIDOS.COMISSAO) / 4) + USERS.SALARIO - sum(HISTORICO_PENALIDADES.VALOR_ATUAL) as Final,
+                USERS.SALARIO as Final,
+                sum(HISTORICO_PENALIDADES.VALOR_ORIGINAL) as Comparativo,
+                sum(PEDIDOS.COMISSAO) as COMISSAO_TOTAL,
                 USERS.EMPRESA_ID
             ')
             ->leftJoin('PENALIDADES', 'USERS.ID', '=', 'PENALIDADES.ID_USER')
-            ->leftJoin('HISTORICO_PENALIDADES', 'HISTORICO_PENALIDADES.ID_PENALIDADE'
-            , '=', 'PENALIDADES.ID')
+            ->leftJoin('HISTORICO_PENALIDADES', function($join){
+                $join->on('PENALIDADES.ID', '=', 'HISTORICO_PENALIDADES.ID_PENALIDADE')
+                ->where('HISTORICO_PENALIDADES.VALOR_ATUAL', '>', '0');
+             })
             ->where('USERS.EMPRESA_ID', $empresa->ID)
             ->where('USERS.ID_ROLE', '!=', 1)
-            ->groupByRaw('1, 2, 3, 5, 7')
+            ->groupByRaw('1, 2, 3, 5, 9')
             ->get();
             $totalPago = 0;
             foreach($salarios as $s){
-                if($s->FINAL == null){
-                    $s->DESPESATOTAL = floatval(0);
-                    $s->FINAL = $s->SALARIO_BASE;
+                if($s->DESPESATOTAL == null){
+                    $s->DESPESATOTAL = 0;
                 }
-                if($request->TIPO == "Salario"){
-                    $s->FINAL = ($s->FINAL * 60) / 100;
+                if($request->FLAG == true){
+                    $s->FINAL -= $s->DESPESATOTAL;
+                    $s->FINAL += $s->COMISSAO_TOTAL;
+                    $totalPago += $s->FINAL;
                 }else{
-                    $s->FINAL = ($s->FINAL * 40) / 100;
+                    if($request->TIPO == "Salario"){
+                        if($s->COMPARATIVO == $s->DESPESATOTAL){
+                            $s->DESPESATOTAL = ($s->DESPESATOTAL * 60) / 100;
+                        }
+                        $s->FINAL = ($s->FINAL * 60) / 100;
+                    }else{
+                        if($s->COMPARATIVO == $s->DESPESATOTAL){
+                            $s->DESPESATOTAL = ($s->DESPESATOTAL * 40) / 100;
+                        }
+                        $s->FINAL = ($s->FINAL * 40) / 100;
+                    }
+                    $s->FINAL -= $s->DESPESATOTAL;
+                    $s->FINAL += $s->COMISSAO_TOTAL;
+                    $totalPago += $s->FINAL;
+
                 }
-                $totalPago += $s->FINAL;
                 $penalidades = Penalidade::where('ID_USER', $s->ID)->get();
-                if($penalidades != null){
-                    foreach($penalidades as $p){
-                        $historico = Historico_Penalidade::where('ID_PENALIDADE', $p->ID)->first();
-                        if($historico->VALOR_ATUAL <= 0){
-                            $p->delete();
-                        }else{
-                            if($request->TIPO == "Adiantamento"){
-                                $p->DESCONTO -= ($historico->VALOR_ORIGINAL * 40) / 100;
-                                $p->save();
+                    if(!empty($penalidades)){
+                        foreach($penalidades as $p){
+                            $historico = Historico_Penalidade::where('ID_PENALIDADE', $p->ID)->first();
+                            if($historico->VALOR_ATUAL <= 0){
+                                $p->delete();
                             }else{
-                                if($request->FLAG == true){ // true significa que não é pagamento adiantamento, então é descontado inteiro
-                                    $p->DESCONTO -= $historico->VALOR_ORIGINAL;
+                                if($request->TIPO == "Adiantamento"){
+                                    $p->DESCONTO -= ($historico->VALOR_ORIGINAL * 40) / 100;
+                                    $p->save();
                                 }else{
-                                    $p->DESCONTO -= ($historico->VALOR_ORIGINAL * 60) / 100;
+                                    if($request->FLAG == true){
+                                        // true significa que não é pagamento adiantamento,
+                                        //então é descontado inteiro
+                                        $p->DESCONTO -= $historico->VALOR_ORIGINAL;
+                                    }else{
+                                        $p->DESCONTO -= ($historico->VALOR_ORIGINAL * 60) / 100;
+                                    }
+                                    $p->save();
                                 }
-                                $p->save();
-                            }
-                            $historico->VALOR_ATUAL = $p->DESCONTO;
-                            $historico->DT_PAGAMENTO = now();
-                            $historico->save();
+                                $historico->VALOR_ATUAL = $p->DESCONTO;
+                                $historico->DT_PAGAMENTO = now();
+                                $historico->save();
                         }
                     }
                 }
@@ -392,7 +405,8 @@ class UsuarioRepository implements UsuarioInterface
             $pagamentoSalario->ID_EMPRESA = $empresa->ID;
             $pagamentoSalario->DATA = now()->format('Y-m-d H:i');
             $pagamentoSalario->save();
-            return response()->json(['message' => 'Pagamento Registrado com sucesso !']);
+            return response()->json(['message' => 'Pagamento Registrado com sucesso !',
+            'data' => $salarios, 'totalPago' => $totalPago]);
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }

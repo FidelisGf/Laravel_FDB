@@ -15,4 +15,11 @@ interface UsuarioInterface{
     public function getActiveUsers();
     public function getPenalidades($id);
     public function getVendasByUser($id);
+    public function getUserMediaVendasByAno($id);
+    public function getUserTotalVendasByMes($id);
+    public function getHistoricoSalarioUser($id);
+    public function getFolhaSalarioUsers(Request $request);
+    public function makeWagePayment(Request $request);
+    public function checkIfWageWasPayed(Request $request);
+
 }

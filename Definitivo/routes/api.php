@@ -80,7 +80,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::post('/vincularUserEmpresa', [UsuarioController::class, 'vinculaUsuarioEmpresa'])->middleware(FuncMiddleware::class);
     Route::get('/empresaPorUsuario', [UsuarioController::class, 'getEmpresaByUser'])->middleware(FuncMiddleware::class);
     Route::get('/getVendasPorDia', [VendaController::class, 'getVendasPorDia'])->middleware(FuncMiddleware::class);
-    Route::get("/getLucroAndGastos", [VendaController::class, 'getLucroAndGastos']);
+    Route::get("/getLucroAndGastos", [VendaController::class, 'getLucroAndGastos'])->middleware(FuncMiddleware::class);
     Route::get('/getTotalVendasUltimosTresMeses', [VendaController::class, 'getTotalVendasInTheLastThreeMonths'])->middleware(FuncMiddleware::class);
     Route::post('/addEstoque', [EstoqueController::class, 'addEstoque'])->middleware(FuncMiddleware::class);
     Route::get('/pedidos/{id}', [PedidosController::class, 'show'])->middleware(FuncMiddleware::class);
@@ -101,7 +101,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::get('/showAjuste', [ConfigFolhaController::class , 'showAjuste'])->middleware(FuncMiddleware::class);
     Route::post('/checkIfWageWasPayed', [UsuarioController::class, 'checkIfWageWasPayed'])->middleware(FuncMiddleware::class);
     Route::get('/getCompleteHistoryPenalidades/{id}', [UsuarioController::class, 'getCompleteHistoryPenalidades'])->middleware(FuncMiddleware::class);
-
+    Route::get('/usuarios/{id}', [UsuarioController::class, 'show']);
     //Resources
 
     Route::resource('materiais', 'MateriaisController');
@@ -116,7 +116,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('empresas', 'EmpresaController');
     Route::resource('categorys', 'CategoryController');
     Route::resource('estoques', 'EstoqueController');
-    Route::resource('usuarios', 'UsuarioController')->middleware(FuncMiddleware::class);
+    Route::resource('usuarios', 'UsuarioController')->except(['show'])->middleware(FuncMiddleware::class);
     Route::resource('penalidades', 'PenalidadeController')->middleware(FuncMiddleware::class);
 });
 

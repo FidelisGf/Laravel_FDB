@@ -92,7 +92,7 @@ class UsuarioRepository implements UsuarioInterface
     public function profile(){
         try{
             $user = auth()->user();
-            return response()->json(['level' => $user->role->LEVEL, 'cargo' => $user->role->NOME]) ;
+            return response()->json(['level' => $user->role->LEVEL, 'cargo' => $user->role->NOME, 'id' => $user->ID]) ;
         }catch(\Exception $e){
             return response()->json(['message' => $e->getMessage()],400);
         }
@@ -331,7 +331,10 @@ class UsuarioRepository implements UsuarioInterface
             $monthFinal = Carbon::parse($monthFinal);
             $empresa = auth()->user()->empresa;
             $salarios = DB::table('USERS')
-            ->leftJoin('PEDIDOS', 'PEDIDOS.ID_USER', '=', 'USERS.ID')
+            ->leftJoin('PEDIDOS', function($join){
+                $join->on('PEDIDOS.ID_USER', '=', 'USERS.ID')
+                ->where('PEDIDOS.PG_COMISSAO', '=', null);
+             })
             ->selectRaw('
                 USERS.ID as id,
                 USERS.NAME as NOME,

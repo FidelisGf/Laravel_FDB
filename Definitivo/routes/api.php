@@ -109,6 +109,7 @@ Route::group(['middleware' => ['jwt.verify']], function() {
     Route::resource('despesas', 'DespesaController');
     Route::resource('tags', 'TagController');
     Route::resource('clientes', 'ClienteController');
+    Route::resource('cores', 'CorController');
     Route::resource('vendas', 'VendaController')->middleware(FuncMiddleware::class);
     Route::resource('pagamentos', 'Pagamento_SalarioController')->middleware(FuncMiddleware::class);
     Route::resource('products', 'ProductController')->except(['destroy']);

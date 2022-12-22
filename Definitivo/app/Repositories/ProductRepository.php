@@ -36,18 +36,21 @@ class ProductRepository implements InterfacesProductInterface
             }else{
                 $user = auth()->user();
                 $empresa = $user->empresa;
+                if($request->filled('search')){
+                    return $this->search($request);
+                }else{
+                    $PRODUCTS = DB::table('EMPRESAS')
+                    ->where('EMPRESAS.ID', $empresa->ID)
+                    ->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
+                    join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
+                    ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
+                    ->select('CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',
+                    'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE')
+                    ->orderBy('ID', 'desc')
+                    ->paginate(20);
+                    return $PRODUCTS;
+                }
 
-                $PRODUCTS = DB::table('EMPRESAS')
-                ->where('EMPRESAS.ID', $empresa->ID)
-                ->join('ESTOQUES', 'ESTOQUES.EMPRESA_ID', '=', 'EMPRESAS.ID')->
-                join('PRODUCTS', 'PRODUCTS.ID', '=', 'ESTOQUES.PRODUCT_ID')
-                ->join('CATEGORIAS', 'CATEGORIAS.ID_CATEGORIA', '=', 'PRODUCTS.ID_CATEGORIA')
-                ->select('CATEGORIAS.ID_CATEGORIA', 'CATEGORIAS.NOME_C',
-                'PRODUCTS.ID', 'PRODUCTS.NOME', 'PRODUCTS.VALOR', 'ESTOQUES.QUANTIDADE')
-                ->orderBy('ID', 'desc')
-                ->paginate(20);
-
-                return $PRODUCTS;
             }
         }catch(\Exception $e){
             return response()->json(
@@ -313,14 +316,15 @@ class ProductRepository implements InterfacesProductInterface
     }
     public function search(Request $request){
         try{
+
             $search = $request->search;
             $search = ucwords($search);
-            $PRODUCTS = Product::query()
-            ->where('NOME', 'LIKE', '%'. $search.'%')
-            ->orWhere('DESC', 'LIKE', '%'.$search.'%')
-            ->paginate(20);
+            $result = Product::where('NOME', '=', $search)->first();
+            if($result === null || empty($result)){
+                $result = Product::where('NOME', 'LIKE', '%'. $search.'%')->paginate(20);
+            }
+            return $result;
 
-            return ProductResource::collection($PRODUCTS);
         }catch(\Exception $e){
             return response()->json(
                 [

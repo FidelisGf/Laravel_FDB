@@ -185,6 +185,16 @@ class ProductRepository implements InterfacesProductInterface
                 $matItem->VALOR = $valor;
                 $materias->push($matItem);
             }
+            $coresEscolhidas = DB::table('CORES_PRODUTOS')
+            ->where('CORES_PRODUTOS.ID_PRODUTO', '=', $PRODUCTS->ID)
+            ->get();
+            $cores = collect(new Cor());
+            foreach($coresEscolhidas as $c){
+                $c = Cor::FindOrFail($c->ID_COR);
+
+                $cores->push($c);
+            }
+            $PRODUCTS->CORES = $cores;
             $PRODUCTS->MATERIAS = $materias;
             return response()->json($PRODUCTS);
         }catch(\Exception $e){

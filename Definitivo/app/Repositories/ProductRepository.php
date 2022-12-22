@@ -2,6 +2,8 @@
 
 namespace App\Repositories;
 
+use App\Cor;
+use App\Cor_Produtos;
 use App\Empresa;
 use App\Estoque;
 use App\Events\MakeLog;
@@ -205,9 +207,16 @@ class ProductRepository implements InterfacesProductInterface
                 $produto->VALOR = $request->VALOR;
                 $produto->ID_CATEGORIA = $request->ID_CATEGORIA;
                 $produto->ID_MEDIDA = $request->ID_MEDIDA;
+                $cores = json_decode($request->CORES);
                 $image = base64_encode(file_get_contents($request->file('IMAGE')->path()));
                 $produto->IMAGE = $image;
                 $produto->save();
+                foreach($cores as $c){
+                    $cor = new Cor_Produtos();
+                    $cor->ID_COR = $c->ID;
+                    $cor->ID_PRODUTO = $produto->ID;
+                    $cor->save();
+                }
                 $materias = collect(new Materiais());
 
                 $request->MATERIAIS = json_decode($request->MATERIAIS);

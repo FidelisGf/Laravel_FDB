@@ -1,0 +1,16 @@
+[2022-12-23 15:59:35] local.ERROR: Uncaught Symfony\Component\Finder\Exception\DirectoryNotFoundException: The "C:\Users\Megabit\Documents\Laravel_FDB\Definitivo\resources\views" directory does not exist. in C:\Users\Megabit\Documents\Laravel_FDB\vendor\symfony\finder\Finder.php:592
+Stack trace:
+#0 C:\Users\Megabit\Documents\Laravel_FDB\vendor\laravel\framework\src\Illuminate\Filesystem\Filesystem.php(444): Symfony\Component\Finder\Finder->in('C:\\Users\\Megabi...')
+#1 Command line code(1): Illuminate\Filesystem\Filesystem->files('C:\\Users\\Megabi...')
+#2 Command line code(1): getViews('C:\\Users\\Megabi...', Object(Illuminate\Filesystem\Filesystem))
+#3 {main}
+  thrown {"exception":"[object] (Symfony\\Component\\ErrorHandler\\Error\\FatalError(code: 0): Uncaught Symfony\\Component\\Finder\\Exception\\DirectoryNotFoundException: The \"C:\\Users\\Megabit\\Documents\\Laravel_FDB\\Definitivo\\resources\\views\" directory does not exist. in C:\\Users\\Megabit\\Documents\\Laravel_FDB\\vendor\\symfony\\finder\\Finder.php:592
+Stack trace:
+#0 C:\\Users\\Megabit\\Documents\\Laravel_FDB\\vendor\\laravel\\framework\\src\\Illuminate\\Filesystem\\Filesystem.php(444): Symfony\\Component\\Finder\\Finder->in('C:\\\\Users\\\\Megabi...')
+#1 Command line code(1): Illuminate\\Filesystem\\Filesystem->files('C:\\\\Users\\\\Megabi...')
+#2 Command line code(1): getViews('C:\\\\Users\\\\Megabi...', Object(Illuminate\\Filesystem\\Filesystem))
+#3 {main}
+  thrown at C:\\Users\\Megabit\\Documents\\Laravel_FDB\\vendor\\symfony\\finder\\Finder.php:592)
+[stacktrace]
+#0 {main}
+"} 

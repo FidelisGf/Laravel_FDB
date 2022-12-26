@@ -4,7 +4,7 @@ runtime_config :
   document_root: public
   enable_stackdriver_integration: true
 
-skip_files:
+skip_files:it
   - .env
 
 env_variables:
